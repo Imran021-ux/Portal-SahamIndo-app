@@ -1060,6 +1060,31 @@ export default function EmitenDashboardView({
     return stock;
   }, [stocks, selectedTicker, emitenLiveStock]);
 
+  // Real-time price flashing state & reference tracker
+  const [priceFlash, setPriceFlash] = useState<"up" | "down" | null>(null);
+  const prevPriceValueRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!activeStock?.currentPrice) return;
+    const prevVal = prevPriceValueRef.current;
+    const currentPrice = activeStock.currentPrice;
+
+    if (prevVal > 0 && prevVal !== currentPrice) {
+      if (currentPrice > prevVal) {
+        setPriceFlash("up");
+      } else if (currentPrice < prevVal) {
+        setPriceFlash("down");
+      }
+      const timeoutId = setTimeout(() => {
+        setPriceFlash(null);
+      }, 700);
+      prevPriceValueRef.current = currentPrice;
+      return () => clearTimeout(timeoutId);
+    } else {
+      prevPriceValueRef.current = currentPrice;
+    }
+  }, [activeStock?.currentPrice]);
+
   // states for Gemini-powered 3-day short-term price & sentiment forecast
   const [forecastData, setForecastData] = useState<any>(null);
   const [forecastLoading, setForecastLoading] = useState<boolean>(false);
@@ -2069,9 +2094,29 @@ export default function EmitenDashboardView({
             {/* Harga & 52W */}
             <div className="flex flex-col items-start sm:items-end md:items-end text-left sm:text-right">
               <div className="flex items-center gap-2.5 pb-1 flex-wrap">
-                <span className={`text-4xl font-extrabold font-mono ${activeStock.change >= 0 ? "text-emerald-400 text-[#22c55e]" : "text-rose-450 text-[#ef4444]"}`}>
+                <motion.span
+                  key={activeStock.currentPrice}
+                  animate={{
+                    color: priceFlash === "up" 
+                      ? "#4ade80" 
+                      : priceFlash === "down" 
+                      ? "#f87171" 
+                      : (activeStock.change >= 0 ? "#22c55e" : "#ef4444"),
+                    scale: priceFlash ? [1, 1.05, 1] : 1,
+                    textShadow: priceFlash === "up"
+                      ? "0 0 15px rgba(74,222,128,0.7)"
+                      : priceFlash === "down"
+                      ? "0 0 15px rgba(248,113,113,0.7)"
+                      : "0 0 0px rgba(0,0,0,0)"
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    ease: "easeOut"
+                  }}
+                  className="text-4xl font-extrabold font-mono inline-block origin-right select-none cursor-default"
+                >
                   {formatIDR(activeStock.currentPrice)}
-                </span>
+                </motion.span>
                 <span className={`text-sm font-black ${activeStock.change >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
                   {activeStock.change >= 0 ? "▲" : "▼"} {activeStock.change >= 0 ? "+" : ""}{activeStock.changePercent.toFixed(2)}%
                 </span>
