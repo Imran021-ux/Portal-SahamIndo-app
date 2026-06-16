@@ -1,0 +1,5792 @@
+[
+  {
+    "ticker": "BBCA",
+    "company_name": "Bank Central Asia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BBRI",
+    "company_name": "Bank Rakyat Indonesia (Persero) Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BMRI",
+    "company_name": "Bank Mandiri (Persero) Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BBNI",
+    "company_name": "Bank Negara Indonesia (Persero) Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TLKM",
+    "company_name": "Telkom Indonesia (Persero) Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GOTO",
+    "company_name": "GoTo Gojek Tokopedia Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ASII",
+    "company_name": "Astra International Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UNVR",
+    "company_name": "Unilever Indonesia Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADRO",
+    "company_name": "Adaro Energy Indonesia Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ANTM",
+    "company_name": "Aneka Tambang Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BUMI",
+    "company_name": "Bumi Resources Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KLBF",
+    "company_name": "Kalbe Farma Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ICBP",
+    "company_name": "Indofood CBP Sukses Makmur Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGAS",
+    "company_name": "Perusahaan Gas Negara Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTBA",
+    "company_name": "Bukit Asam Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BRIS",
+    "company_name": "Bank Syariah Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BRPT",
+    "company_name": "Barito Pacific Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AMRT",
+    "company_name": "Sumber Alfaria Trijaya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BREN",
+    "company_name": "Barito Renewables Energy Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CUAN",
+    "company_name": "Petrindo Jaya Kreasi Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PANI",
+    "company_name": "Pantai Indah Kapuk Dua Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TPIA",
+    "company_name": "Chandra Asri Pacific Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BYAN",
+    "company_name": "Bayan Resources Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AMMN",
+    "company_name": "Amman Mineral Internasional Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADMR",
+    "company_name": "Adaro Minerals Indonesia Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INCO",
+    "company_name": "Vale Indonesia Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HRUM",
+    "company_name": "Harum Energy Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MBMA",
+    "company_name": "Merdeka Battery Materials Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BRMS",
+    "company_name": "Bumi Resources Minerals Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DSSA",
+    "company_name": "Dian Swastatika Sentosa Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SMGR",
+    "company_name": "Semen Indonesia (Persero) Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INTP",
+    "company_name": "Indocement Tunggal Prakarsa Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INDF",
+    "company_name": "Indofood Sukses Makmur Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MYOR",
+    "company_name": "Mayora Indah Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SIDO",
+    "company_name": "Industri Jamu dan Farmasi Sido Muncul Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ACES",
+    "company_name": "Aspirasi Hidup Indonesia Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MAPI",
+    "company_name": "Mitra Adiperkasa Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MAPA",
+    "company_name": "MAP Aktif Adiperkasa Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ERAA",
+    "company_name": "Erajaya Swasembada Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CPIN",
+    "company_name": "Charoen Pokphand Indonesia Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JPFA",
+    "company_name": "Japfa Comfeed Indonesia Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DEWA",
+    "company_name": "Darma Henwa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MEDC",
+    "company_name": "Medco Energi Internasional Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ENRG",
+    "company_name": "Energi Mega Persada Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGEO",
+    "company_name": "Pertamina Geothermal Energy Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KEEN",
+    "company_name": "Kencana Energi Lestari Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADHI",
+    "company_name": "Adhi Karya (Persero) Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WIKA",
+    "company_name": "Wijaya Karya (Persero) Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTPP",
+    "company_name": "PP (Persero) Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WTON",
+    "company_name": "Wijaya Karya Beton Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JSMR",
+    "company_name": "Jasa Marga (Persero) Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OASA",
+    "company_name": "Maharaksa Biru Energi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MIDI",
+    "company_name": "Midi Utama Indonesia Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ALTO",
+    "company_name": "Tri Banyan Tirta Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADES",
+    "company_name": "Akasha Wira International Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MLBI",
+    "company_name": "Multi Bintang Indonesia Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SILO",
+    "company_name": "Siloam International Hospitals Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MIKA",
+    "company_name": "Mitra Keluarga Karyasehat Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HEAL",
+    "company_name": "Medikaloka Hermina Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SAME",
+    "company_name": "Sarana Meditama Metropolitan Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PRIM",
+    "company_name": "Royal Prima Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BULL",
+    "company_name": "Buana Lintas Lautan Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ELSA",
+    "company_name": "Elnusa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WINS",
+    "company_name": "Wintermar Offshore Marine Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SMDR",
+    "company_name": "Samudera Indonesia Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TMAS",
+    "company_name": "Temas Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ASSA",
+    "company_name": "Adi Sarana Armada Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BIRD",
+    "company_name": "Blue Bird Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BLUE",
+    "company_name": "Berkah Beton Sadaya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TAXI",
+    "company_name": "Express Transindo Utama Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "COAL",
+    "company_name": "Black Diamond Resources Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BESS",
+    "company_name": "Batulicin Nusantara Maritim Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TCPI",
+    "company_name": "Transcoal Pacific Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ESSA",
+    "company_name": "Essa Industri Indonesia Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AKRA",
+    "company_name": "AKR Corporindo Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGUN",
+    "company_name": "Pradiksi Gunatama Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTRO",
+    "company_name": "Petrosea Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MBAP",
+    "company_name": "Mitrabara Adiperdana Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ITMG",
+    "company_name": "Indo Tambangraya Megah Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KKGI",
+    "company_name": "Resource Alam Indonesia Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INDY",
+    "company_name": "Indika Energy Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DOID",
+    "company_name": "Delta Dunia Makmur Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TOBA",
+    "company_name": "TBS Energi Utama Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ABMM",
+    "company_name": "ABM Investama Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTIS",
+    "company_name": "Indo Straits Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ARTO",
+    "company_name": "Bank Jago Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BBTN",
+    "company_name": "Bank Tabungan Negara (Persero) Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BDMN",
+    "company_name": "Bank Danamon Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PNBN",
+    "company_name": "Bank Pan Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BJBR",
+    "company_name": "Bank Pembangunan Daerah Jawa Barat dan Banten Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BJTM",
+    "company_name": "Bank Pembangunan Daerah Jawa Timur Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MEGA",
+    "company_name": "Bank Mega Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BANK",
+    "company_name": "Bank Aladin Syariah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AGRO",
+    "company_name": "Bank Raya Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MAYA",
+    "company_name": "Bank Mayapada Internasional Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BABP",
+    "company_name": "Bank MNC Internasional Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BBYB",
+    "company_name": "Bank Neo Commerce Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BCIC",
+    "company_name": "Bank JTrust Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DNAR",
+    "company_name": "Bank Oke Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NOBU",
+    "company_name": "Bank Nationalnobu Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INPC",
+    "company_name": "Bank Artha Graha Internasional Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BACA",
+    "company_name": "Bank Capital Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BCIP",
+    "company_name": "Bumi Citra Permai Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BVIC",
+    "company_name": "Bank Victoria International Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MCOR",
+    "company_name": "Bank China Construction Bank Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AMAR",
+    "company_name": "Bank Amar Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BBKP",
+    "company_name": "Bank KB Bukopin Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BSIM",
+    "company_name": "Bank Sinarmas Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BSWD",
+    "company_name": "Bank of India Indonesia Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BNGA",
+    "company_name": "Bank CIMB Niaga Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BNLI",
+    "company_name": "Bank Permata Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PNBS",
+    "company_name": "Bank Panin Dubai Syariah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BTPS",
+    "company_name": "Bank BTPN Syariah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WMPG",
+    "company_name": "Wira Global Solusindo Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WOOD",
+    "company_name": "Integra Indocabinet Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GTRA",
+    "company_name": "Grahaprima Suksesmandiri Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MEJA",
+    "company_name": "Meja Nusantara Indonesia Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AALI",
+    "company_name": "Astra Agro Lestari Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BSDE",
+    "company_name": "Bumi Serpong Damai Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CTRA",
+    "company_name": "Ciputra Development Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EMTK",
+    "company_name": "Elang Mahkota Teknologi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EXCL",
+    "company_name": "XL Axiata Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GIAA",
+    "company_name": "Garuda Indonesia (Persero) Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INKP",
+    "company_name": "Indah Kiat Pulp & Paper Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ISAT",
+    "company_name": "Indosat Ooredoo Hutchison Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KPIG",
+    "company_name": "MNC Land Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LPKR",
+    "company_name": "Lippo Karawaci Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LPPF",
+    "company_name": "Matahari Department Store Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MDKA",
+    "company_name": "Merdeka Copper Gold Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PWON",
+    "company_name": "Pakuwon Jati Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SGER",
+    "company_name": "Sumber Global Energy Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SMRA",
+    "company_name": "Summarecon Agung Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TINS",
+    "company_name": "Timah Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TKIM",
+    "company_name": "Pabrik Kertas Tjiwi Kimia Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UNTR",
+    "company_name": "United Tractors Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WIFI",
+    "company_name": "Solusi Sinergi Digital Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NSXJ",
+    "company_name": "Atma Makmur Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "USHK",
+    "company_name": "Elnusa Inti Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VFXZ",
+    "company_name": "Prima National Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RNRT",
+    "company_name": "Indah Sistem Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AXGQ",
+    "company_name": "Citra Satria Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LFAS",
+    "company_name": "Cahaya Otoparts Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "BPKC",
+    "company_name": "Amanah Otoparts Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KMIX",
+    "company_name": "Paramount Otoparts Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RNBT",
+    "company_name": "Bina Radio Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GAPZ",
+    "company_name": "Nusa Petroleum Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OGSL",
+    "company_name": "Adi Beton Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HTEZ",
+    "company_name": "Telkom Sari Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EMXT",
+    "company_name": "Adhi Kreasi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VRFK",
+    "company_name": "Duta Petroleum Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "INHC",
+    "company_name": "Dwipa Logistik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GNIO",
+    "company_name": "Jaya Resources Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZHTF",
+    "company_name": "Dirgantara Wahana Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UCHO",
+    "company_name": "Abisatya Megah Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YZBG",
+    "company_name": "Wira Coal Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HAZQ",
+    "company_name": "Kencana Prima Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AHYZ",
+    "company_name": "Eka Megah Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZHRW",
+    "company_name": "United Barang Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "MYWW",
+    "company_name": "Avia Investama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XNAC",
+    "company_name": "Harum Sejahtera Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UQEB",
+    "company_name": "Paramount Investama Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OKSA",
+    "company_name": "Sinar Niaga Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BFVP",
+    "company_name": "Gajah Sinergi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WZYT",
+    "company_name": "Multi Sukses Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PBOJ",
+    "company_name": "Adi Pulp Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DMHA",
+    "company_name": "Jasa Megah Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OLGC",
+    "company_name": "Agung Pratama Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JBVA",
+    "company_name": "Asha Pacific Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WYZZ",
+    "company_name": "Dwipa Makmur Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MQWP",
+    "company_name": "Sentosa Makmur Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DLEH",
+    "company_name": "Asuransi Sentosa Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ITXK",
+    "company_name": "Astra Wahana Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LNIL",
+    "company_name": "Pelita Coal Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YBLI",
+    "company_name": "Vale Megah Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XXGL",
+    "company_name": "Pelita Wijaya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CNPY",
+    "company_name": "Pelita Resources Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HKDY",
+    "company_name": "Cahaya Prima Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TSIV",
+    "company_name": "Tiga Tunggal Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VYGK",
+    "company_name": "Anugerah Perkasa Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BMCC",
+    "company_name": "Merdeka Raya Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TDEU",
+    "company_name": "Amara Medika Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WXAG",
+    "company_name": "Gudang Pacific Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZXQW",
+    "company_name": "Cahaya Logistik Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DHMJ",
+    "company_name": "Kertajaya Karya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GEVH",
+    "company_name": "Jaya Barang Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XPML",
+    "company_name": "Perdana Marine Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AMTR",
+    "company_name": "Sido Indah Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SFVU",
+    "company_name": "Pratama Tractors Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CQWO",
+    "company_name": "Melati Agro Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CQDN",
+    "company_name": "Eka Investama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JFKI",
+    "company_name": "Kertajaya Satria Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RTPZ",
+    "company_name": "Perkasa Sentosa Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "COCX",
+    "company_name": "Raya Farma Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HWOX",
+    "company_name": "Telkom Teknik Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QDOS",
+    "company_name": "Wijaya Teknik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KQSB",
+    "company_name": "Ikhtiar Dunia Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PQIX",
+    "company_name": "Amanah Tambang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XZLZ",
+    "company_name": "Vale Sekuritas Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "THMH",
+    "company_name": "Andalan Petroleum Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WAJX",
+    "company_name": "Nusa Dunia Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RQNS",
+    "company_name": "Agung Jaya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SKJX",
+    "company_name": "Lippo Land Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TTCU",
+    "company_name": "Arta Tambang Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WAAD",
+    "company_name": "Multi Sumatera Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VKZX",
+    "company_name": "Wijaya Inti Tbk.",
+    "sector": "Barang Baku",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "DMVN",
+    "company_name": "Jagad Wana Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WNTF",
+    "company_name": "Victoria Coal Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UNOZ",
+    "company_name": "Sumber Makmur Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NDCE",
+    "company_name": "Mulia Teknologi Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TCFC",
+    "company_name": "Samudra Steel Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HSKQ",
+    "company_name": "Hermina Resources Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GRIJ",
+    "company_name": "Asuransi Investama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YHLA",
+    "company_name": "Dirgantara Energi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JMNU",
+    "company_name": "Aneka Dunia Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EYJX",
+    "company_name": "Inti Radio Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EJCJ",
+    "company_name": "Ciputra Tech Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UTSP",
+    "company_name": "Timah Perkasa Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZWPJ",
+    "company_name": "Eka Media Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FXZY",
+    "company_name": "Jaya Renewables Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LYBQ",
+    "company_name": "Merdeka Logistik Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZBDY",
+    "company_name": "United Surya Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QNOL",
+    "company_name": "Fajar Utama Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JHQX",
+    "company_name": "Pakuwon Surya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZGBW",
+    "company_name": "Bumi Barang Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AESO",
+    "company_name": "Perdana Tunggal Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZXTE",
+    "company_name": "Mitra Sari Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WPDS",
+    "company_name": "Intiga Mineral Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RJLY",
+    "company_name": "Paramount Pulp Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DSXB",
+    "company_name": "Unilever National Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QGIY",
+    "company_name": "Eka Resources Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LOVT",
+    "company_name": "Intan Persada Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XNIM",
+    "company_name": "Cipta Agro Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BGKC",
+    "company_name": "Semen Karya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QFMQ",
+    "company_name": "Semen Sentosa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RNQN",
+    "company_name": "Telkom Steel Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CDNP",
+    "company_name": "Dirgantara Sejahtera Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GNTX",
+    "company_name": "Lippo Beton Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MYLK",
+    "company_name": "Kertajaya Megah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZVKL",
+    "company_name": "Mesta Investama Tbk.",
+    "sector": "Energi",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "TCHW",
+    "company_name": "Amanah Renewables Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SELG",
+    "company_name": "Indosat Investama Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DBTW",
+    "company_name": "Reksa Kreasi Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UZXM",
+    "company_name": "Kertajaya Pangan Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VPLH",
+    "company_name": "Elang Teknologi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PCWA",
+    "company_name": "Indo Perkasa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ANPF",
+    "company_name": "Tunggal Industri Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "COUO",
+    "company_name": "Prima Teknologi Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YKBD",
+    "company_name": "Nusa Surya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "PGGW",
+    "company_name": "Bintang Media Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XMVY",
+    "company_name": "Gajah National Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FALK",
+    "company_name": "Wisma Otoparts Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FECA",
+    "company_name": "Duta Energi Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HOHH",
+    "company_name": "Bintang Cemerlang Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BVXM",
+    "company_name": "Sido Satria Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BJGW",
+    "company_name": "Delapan Indah Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VNXM",
+    "company_name": "Mesta Tech Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XNKZ",
+    "company_name": "Sido Beton Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KSHX",
+    "company_name": "Focus Teknik Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZDGV",
+    "company_name": "Focus Chemical Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TLXN",
+    "company_name": "Arta Tractors Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PVAI",
+    "company_name": "Indofood Logistik Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VMXH",
+    "company_name": "Avia Marine Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WXDP",
+    "company_name": "Sinergi Industri Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGVI",
+    "company_name": "Bumi Pratama Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BKKG",
+    "company_name": "Tri Surya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YIKN",
+    "company_name": "Asuransi Medika Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YGRJ",
+    "company_name": "Gajah Medika Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HXLZ",
+    "company_name": "Cipta Investama Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MUWH",
+    "company_name": "Barito Energi Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HIAZ",
+    "company_name": "Abisatya Sukses Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PJQW",
+    "company_name": "Alam Petroleum Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IHHL",
+    "company_name": "Panin Wahana Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AKHC",
+    "company_name": "Sari Resources Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HWJE",
+    "company_name": "Inti Industri Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VFWJ",
+    "company_name": "Ikhtiar Offshore Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FEKJ",
+    "company_name": "Nusa Kreasi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RELB",
+    "company_name": "Dirgantara Sentosa Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LYFC",
+    "company_name": "Java Pulp Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EADG",
+    "company_name": "Melati Perkasa Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UBGF",
+    "company_name": "Energi Chemical Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UOYS",
+    "company_name": "Wijaya Chemical Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RZVG",
+    "company_name": "Paramount Teknik Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GHVE",
+    "company_name": "Pratama Offshore Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CVHM",
+    "company_name": "Guna Tambang Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EQSC",
+    "company_name": "Guna Tunggal Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QQVR",
+    "company_name": "Jasa Marine Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XMXM",
+    "company_name": "Atma Lestari Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IRXH",
+    "company_name": "Duta Paper Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YHSD",
+    "company_name": "Barito Investama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MFXY",
+    "company_name": "Mitra Tech Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TRGF",
+    "company_name": "Apex Energi Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HKSZ",
+    "company_name": "Mesta Tech Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OEUD",
+    "company_name": "Unilever Mineral Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QHXG",
+    "company_name": "Eka Wahana Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KPLB",
+    "company_name": "Dwipa Logistik Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GUAO",
+    "company_name": "Pratama Dunia Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WSDN",
+    "company_name": "Adi Utama Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NRZF",
+    "company_name": "Astra Karya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BNKB",
+    "company_name": "Harapan Agro Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AZGW",
+    "company_name": "Atma Steel Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HWDC",
+    "company_name": "Solusi Chemical Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VVPX",
+    "company_name": "Jaya Sistem Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TKAY",
+    "company_name": "Indika Industri Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XYVY",
+    "company_name": "Eka Sinergi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SUUO",
+    "company_name": "Bakrie Persada Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HTIK",
+    "company_name": "Semen Niaga Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CXDY",
+    "company_name": "Perdana Petroleum Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GQFF",
+    "company_name": "Harapan Tech Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MEOF",
+    "company_name": "Maju Pacific Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AJLD",
+    "company_name": "Dirgantara Mandiri Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EUYU",
+    "company_name": "Gelora Tunggal Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PJGS",
+    "company_name": "Sari Chemical Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LRBV",
+    "company_name": "Wisma Mineral Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YDMQ",
+    "company_name": "Pelita Baku Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GEJD",
+    "company_name": "Kalbe National Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UDRV",
+    "company_name": "Sumber Mineral Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BCOF",
+    "company_name": "Graha Radio Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KPZN",
+    "company_name": "Intan Agro Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PQMA",
+    "company_name": "Global Sumatera Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GHQB",
+    "company_name": "Lippo Media Tbk.",
+    "sector": "Finansial",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "GYRL",
+    "company_name": "Darma Steel Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZKAG",
+    "company_name": "Semen Indah Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KCQV",
+    "company_name": "Atma Sistem Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BJJN",
+    "company_name": "Kertajaya Otoparts Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UFWD",
+    "company_name": "Samudra Makmur Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HXRB",
+    "company_name": "Gelora Barang Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BVUX",
+    "company_name": "Elang Sejahtera Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "APTD",
+    "company_name": "Guna Karya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VKMP",
+    "company_name": "Bintang Digital Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RXME",
+    "company_name": "Hermina Paper Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EKDJ",
+    "company_name": "Anugerah Karya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VYOT",
+    "company_name": "Pratama Petroleum Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AQPT",
+    "company_name": "Gajah Farma Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UMPN",
+    "company_name": "Eka Cemerlang Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ABFN",
+    "company_name": "Kencana Offshore Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BDVP",
+    "company_name": "Andalan Barang Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OCFE",
+    "company_name": "Harum Energi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WHGO",
+    "company_name": "Candi Pulp Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LDKV",
+    "company_name": "Delapan Satria Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YYON",
+    "company_name": "Timah Raya Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IROZ",
+    "company_name": "Berkah Renewables Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RVBT",
+    "company_name": "Abisatya Pangan Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WZTA",
+    "company_name": "Dirgantara Sumatera Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VDWR",
+    "company_name": "Sido Megah Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UXPS",
+    "company_name": "Aspirasi Utama Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VVIL",
+    "company_name": "Cahaya Solusindo Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ONBE",
+    "company_name": "Perdana Digital Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TUHW",
+    "company_name": "Gesta Logistik Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MYIL",
+    "company_name": "Energi Lestari Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RODY",
+    "company_name": "Gajah Mandiri Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KVER",
+    "company_name": "Putra Kreasi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IGFP",
+    "company_name": "Asha Wahana Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GXGU",
+    "company_name": "Gesta Pangan Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JTUB",
+    "company_name": "Cipta Sentosa Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZUAN",
+    "company_name": "Bangun Pangan Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NUZL",
+    "company_name": "Abisatya Lestari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WWKV",
+    "company_name": "Paramount Tech Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DXIY",
+    "company_name": "Dian Niaga Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MYHM",
+    "company_name": "Surya Energi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FGDK",
+    "company_name": "Harapan Agro Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YRNE",
+    "company_name": "Atma Perkasa Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VQHI",
+    "company_name": "Vale Sejahtera Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OUWG",
+    "company_name": "Prima Energi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HYRB",
+    "company_name": "Elnusa Renewables Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JWHV",
+    "company_name": "Amara Offshore Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AIHS",
+    "company_name": "Aspirasi Barang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BNCQ",
+    "company_name": "Mahaka Farma Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PEDG",
+    "company_name": "Guna Indah Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OUJC",
+    "company_name": "Tunggal Tunggal Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KQRM",
+    "company_name": "Karya Industri Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JRVD",
+    "company_name": "Erajaya Tractors Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MKCE",
+    "company_name": "Victoria Radio Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VZXY",
+    "company_name": "Hermina Radio Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XRYF",
+    "company_name": "Reksa Wahana Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FHFD",
+    "company_name": "Prima Mandiri Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YZVF",
+    "company_name": "Avia Farma Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NOXR",
+    "company_name": "Jasa Persada Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NOGG",
+    "company_name": "Mahaka Offshore Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JWEG",
+    "company_name": "Karya Hospitals Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PVXV",
+    "company_name": "Wisma Offshore Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EXTE",
+    "company_name": "Andalan Chemical Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HONJ",
+    "company_name": "Sentosa Land Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PNKT",
+    "company_name": "Dirgantara Wahana Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZNYU",
+    "company_name": "Gas Satria Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DDYO",
+    "company_name": "Pantai Hospitals Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NDSP",
+    "company_name": "Sumber Wahana Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ATZE",
+    "company_name": "Utama Tunggal Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZHCW",
+    "company_name": "Delta Pulp Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AHVG",
+    "company_name": "Mandiri Karya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QAEL",
+    "company_name": "Hana Jaya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YNTH",
+    "company_name": "Paramount Tunggal Tbk.",
+    "sector": "Energi",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "LVAA",
+    "company_name": "Wira Mineral Tbk.",
+    "sector": "Barang Baku",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "JKJT",
+    "company_name": "Perkasa Marine Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NVCN",
+    "company_name": "Jaya Surya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XXLI",
+    "company_name": "Pertamina Petroleum Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GNFO",
+    "company_name": "Aria Perkasa Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PWCB",
+    "company_name": "Merdeka Tunggal Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTJR",
+    "company_name": "Tiga Teknik Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BJDS",
+    "company_name": "Asuransi Sistem Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SEDO",
+    "company_name": "Ciputra Paper Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TRVK",
+    "company_name": "Eka Tech Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LKPS",
+    "company_name": "Indah Hospitals Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XMUH",
+    "company_name": "Vale Sistem Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WOMA",
+    "company_name": "Vale Media Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KDQG",
+    "company_name": "Bintang Radio Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DRMX",
+    "company_name": "Mesta Teknologi Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CBGI",
+    "company_name": "Guna Tambang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XREA",
+    "company_name": "Chandra Renewables Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SPPQ",
+    "company_name": "Graha Dunia Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GPFR",
+    "company_name": "Sido Pratama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TRLA",
+    "company_name": "Bakrie Logistik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CVTR",
+    "company_name": "Mandiri Nusantara Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TCIH",
+    "company_name": "Harum Aset Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GZOJ",
+    "company_name": "Lestari Sistem Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ENXW",
+    "company_name": "Duta Renewables Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NGQR",
+    "company_name": "Lippo Prima Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IPBX",
+    "company_name": "Aspirasi Logistik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ODNA",
+    "company_name": "Erajaya Tractors Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WWTB",
+    "company_name": "Mulia Petroleum Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GYHB",
+    "company_name": "Telkom Sentosa Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DXSF",
+    "company_name": "Citra Radio Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IDDO",
+    "company_name": "Victoria Resources Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CNOX",
+    "company_name": "Kencana Niaga Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QDRG",
+    "company_name": "Tri Logistik Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FLTQ",
+    "company_name": "Indosat Beton Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RQSY",
+    "company_name": "Jagad National Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AWPO",
+    "company_name": "Darma Cemerlang Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZGFS",
+    "company_name": "Anugerah Nusantara Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QBJU",
+    "company_name": "Focus Paper Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YRSU",
+    "company_name": "Bayan Chemical Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EIBZ",
+    "company_name": "Paramount Solusindo Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IDWS",
+    "company_name": "Anugerah Niaga Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OCLB",
+    "company_name": "Gas Resources Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DTYQ",
+    "company_name": "Karya Karya Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TBNW",
+    "company_name": "Astra Tambang Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LYSJ",
+    "company_name": "Darma Investama Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TIZX",
+    "company_name": "Mesta Baku Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CVDQ",
+    "company_name": "Lestari Lestari Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SJBV",
+    "company_name": "Java Utama Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GEGR",
+    "company_name": "Anugerah Paper Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PHUS",
+    "company_name": "Pratama Renewables Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KJOJ",
+    "company_name": "Focus Logistik Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JEZR",
+    "company_name": "Aneka Pratama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SXRJ",
+    "company_name": "Aria Media Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NMLN",
+    "company_name": "Timah Logistik Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WKQJ",
+    "company_name": "Ciputra Niaga Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RSZX",
+    "company_name": "Indah Utama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TZUK",
+    "company_name": "Kalbe Sentosa Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YUUS",
+    "company_name": "Aneka Pratama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CORO",
+    "company_name": "Jagad Medika Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IVOW",
+    "company_name": "Agung Sentosa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GZVK",
+    "company_name": "Nusantara Sari Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VQKG",
+    "company_name": "Avia Marine Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WXJM",
+    "company_name": "Utama Pulp Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZCCJ",
+    "company_name": "Panin Teknologi Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QSSD",
+    "company_name": "Wisma Baku Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PVXB",
+    "company_name": "Jasa Tech Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SWXO",
+    "company_name": "Nusantara Surya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CZCC",
+    "company_name": "Bakrie Teknologi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QNCP",
+    "company_name": "Anugerah Hospitals Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RPDK",
+    "company_name": "Wira Media Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WKUK",
+    "company_name": "Pertamina Barang Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JYPL",
+    "company_name": "Astra Radio Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KSHS",
+    "company_name": "Harum Tunggal Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JHJO",
+    "company_name": "Indah Chemical Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OBXV",
+    "company_name": "Amara Mandiri Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UJJD",
+    "company_name": "Barito Sukses Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QVEE",
+    "company_name": "Bogor Tractors Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FOYP",
+    "company_name": "Java Prima Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FSXP",
+    "company_name": "Dwipa Sumatera Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "JTPC",
+    "company_name": "Arta Lestari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ACOS",
+    "company_name": "Samudra Perkasa Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XHGI",
+    "company_name": "Tunggal Land Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IIVI",
+    "company_name": "Barito Tractors Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YFVU",
+    "company_name": "Mulia Baku Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NGIK",
+    "company_name": "Elang Petroleum Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TGKO",
+    "company_name": "Pakuwon Sumatera Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KJYD",
+    "company_name": "Prima Cemerlang Tbk.",
+    "sector": "Barang Baku",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "RAJA",
+    "company_name": "Garuda Lestari Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AZPK",
+    "company_name": "Karya Tambang Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LNHN",
+    "company_name": "Agung Tambang Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GEYZ",
+    "company_name": "Jaya Inti Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RWDZ",
+    "company_name": "Wisma Nusantara Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KUKT",
+    "company_name": "Amanah Medika Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QJIR",
+    "company_name": "Andalan Wijaya Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IQSO",
+    "company_name": "Brahma Renewables Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XSNJ",
+    "company_name": "Cahaya Radio Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TCUL",
+    "company_name": "Indo Pacific Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SRBS",
+    "company_name": "Delapan Industri Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IYIX",
+    "company_name": "Duta Steel Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WKFD",
+    "company_name": "Elnusa Logistik Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FVEN",
+    "company_name": "Candi Marine Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JMPE",
+    "company_name": "Tri Energi Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GPZP",
+    "company_name": "Gesta Sejahtera Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KIPR",
+    "company_name": "Multi Indah Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RDTB",
+    "company_name": "Adhi Land Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KPQC",
+    "company_name": "Fajar Sistem Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CQKW",
+    "company_name": "Sari Sukses Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VCHE",
+    "company_name": "Aria Pangan Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BEIP",
+    "company_name": "Adhi Pratama Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GGZE",
+    "company_name": "Adhi Energi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OYHD",
+    "company_name": "Gelora Renewables Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZXNE",
+    "company_name": "Timah Renewables Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UIFL",
+    "company_name": "Lippo Karya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FZFA",
+    "company_name": "United Teknik Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZIGD",
+    "company_name": "Indo Raya Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YWXY",
+    "company_name": "Chandra Karya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ARIN",
+    "company_name": "Indofood Makmur Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UBGJ",
+    "company_name": "Semen Sejahtera Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IPCP",
+    "company_name": "Cipta Beton Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TTIL",
+    "company_name": "Focus Prima Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CLFD",
+    "company_name": "Pantai Baku Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XXHQ",
+    "company_name": "Energi Petroleum Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DEGB",
+    "company_name": "Aneka Farma Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QKHS",
+    "company_name": "Aria Solusindo Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FWBR",
+    "company_name": "Intan Petroleum Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CESC",
+    "company_name": "Adi Sari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UQMZ",
+    "company_name": "Wira Marine Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZJKZ",
+    "company_name": "Vale Kreasi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OYMF",
+    "company_name": "Timah Teknik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LDKL",
+    "company_name": "Panin Land Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CGPV",
+    "company_name": "Perkasa Radio Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LEBC",
+    "company_name": "Jaya Indah Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SNPV",
+    "company_name": "Nusantara Solusindo Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DXJV",
+    "company_name": "Mitra Inti Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YJLV",
+    "company_name": "Pembangunan Teknologi Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TXSA",
+    "company_name": "Vale Logistik Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YGKP",
+    "company_name": "Sinar Kreasi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RODR",
+    "company_name": "Indo Agro Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CIRP",
+    "company_name": "Anugerah Pangan Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AILV",
+    "company_name": "Multi Tractors Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OBIL",
+    "company_name": "Energi Mineral Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IPSN",
+    "company_name": "Mahaka Baku Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZBJL",
+    "company_name": "Maju Land Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VARZ",
+    "company_name": "Aria Baku Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JMTB",
+    "company_name": "Putra Inti Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TXGR",
+    "company_name": "Arta Sentosa Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JZKM",
+    "company_name": "Bakrie Sari Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NZPP",
+    "company_name": "Mega Makmur Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ATPP",
+    "company_name": "Alam Renewables Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DAVM",
+    "company_name": "Bakrie Wijaya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WEPQ",
+    "company_name": "Sido Megah Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YXCJ",
+    "company_name": "Samudra Renewables Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TPGD",
+    "company_name": "Fajar Farma Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GREM",
+    "company_name": "Wira Barang Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CRAH",
+    "company_name": "Adhi Baku Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HDHH",
+    "company_name": "Harapan Persada Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CPHG",
+    "company_name": "Indofood Offshore Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RWGM",
+    "company_name": "Telkom Kreasi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YVSB",
+    "company_name": "Abisatya Tech Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FIOJ",
+    "company_name": "Solusi Sinergi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XAPW",
+    "company_name": "Indika Persada Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SQGZ",
+    "company_name": "Adhi Teknologi Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XZVX",
+    "company_name": "Agung Investama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PBTL",
+    "company_name": "Gajah Mandiri Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XQLQ",
+    "company_name": "Pantai Coal Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ITZZ",
+    "company_name": "Akasha Paper Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JFWD",
+    "company_name": "Mesta Raya Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YCEK",
+    "company_name": "Global Inti Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FIPM",
+    "company_name": "Andalan Pulp Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KDCY",
+    "company_name": "Intan Teknik Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SHQN",
+    "company_name": "Eka Sekuritas Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EYUX",
+    "company_name": "Gas Digital Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GRVF",
+    "company_name": "Pertamina Barang Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VVQT",
+    "company_name": "Nusantara Media Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CWVC",
+    "company_name": "Astra Utama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MPFH",
+    "company_name": "Tri Energi Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MPBE",
+    "company_name": "Nusa Logistik Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZAJE",
+    "company_name": "Jaya Tech Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IBMB",
+    "company_name": "Citra Digital Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NFQZ",
+    "company_name": "Global Land Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YKAD",
+    "company_name": "Semen Marine Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WSOP",
+    "company_name": "Mahaka Baku Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RHDT",
+    "company_name": "Avia Pangan Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DKUT",
+    "company_name": "Putra Mineral Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BUQR",
+    "company_name": "Paramount Medika Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NSZW",
+    "company_name": "Abisatya Kreasi Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QFKT",
+    "company_name": "Lestari Sukses Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LMSB",
+    "company_name": "Lippo Energi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PUQX",
+    "company_name": "Bina Raya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FBVG",
+    "company_name": "Harum Jaya Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FJQI",
+    "company_name": "Pembangunan Sumatera Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TAVO",
+    "company_name": "Maju Mandiri Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CQXG",
+    "company_name": "Barito Coal Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DQKS",
+    "company_name": "Abisatya Radio Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BYNX",
+    "company_name": "Mitra Pulp Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XIYH",
+    "company_name": "Victoria Nusantara Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AMUL",
+    "company_name": "Harum Raya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XBEM",
+    "company_name": "Raya Sinergi Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BSHV",
+    "company_name": "Dian Sukses Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RUNZ",
+    "company_name": "Matahari Megah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PSUX",
+    "company_name": "Global Sejahtera Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UPWA",
+    "company_name": "Surya Sukses Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZLVD",
+    "company_name": "Indo Tech Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TDIB",
+    "company_name": "Brahma Mandiri Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IOKX",
+    "company_name": "Cahaya Karya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SJKB",
+    "company_name": "Akasha Land Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TVPI",
+    "company_name": "Chandra Teknologi Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WYVO",
+    "company_name": "Unilever Marine Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XWMV",
+    "company_name": "Java Prima Tbk.",
+    "sector": "Energi",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "HRHP",
+    "company_name": "Dwipa Energi Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RHWY",
+    "company_name": "Amara Persada Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JQBB",
+    "company_name": "Jasa Petroleum Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WWQM",
+    "company_name": "Karya Steel Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UCIS",
+    "company_name": "Atma Agro Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FDNO",
+    "company_name": "Aspirasi Industri Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XOZQ",
+    "company_name": "Andalan Jaya Tbk.",
+    "sector": "Teknologi",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "UUYN",
+    "company_name": "Guna Baku Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YRRK",
+    "company_name": "Global Baku Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EUQB",
+    "company_name": "Solusi Sejahtera Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EGLF",
+    "company_name": "Reksa Wijaya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CPDL",
+    "company_name": "Bumi Tunggal Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZNLI",
+    "company_name": "Jagad Perkasa Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MKFQ",
+    "company_name": "Ciputra Teknologi Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AYEE",
+    "company_name": "Jagad Makmur Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LKPE",
+    "company_name": "Bogor Steel Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XQAK",
+    "company_name": "Brahma Coal Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OGYD",
+    "company_name": "Pantai Medika Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AJMQ",
+    "company_name": "Indah Pacific Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XIGF",
+    "company_name": "Gesta Digital Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DVUQ",
+    "company_name": "Nusa Wana Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HYCB",
+    "company_name": "Langgeng Pangan Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KYFN",
+    "company_name": "Kencana Aset Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CSBS",
+    "company_name": "Citra Sistem Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WQXT",
+    "company_name": "Timah Sekuritas Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VUWN",
+    "company_name": "Jasa Wahana Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CWXJ",
+    "company_name": "Garuda Marine Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DRME",
+    "company_name": "Semen Nusantara Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BEDR",
+    "company_name": "Hermina Niaga Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EGNT",
+    "company_name": "Perdana Makmur Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADIJ",
+    "company_name": "Asha Otoparts Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YTVC",
+    "company_name": "Sumber Megah Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VOPU",
+    "company_name": "Sinar Steel Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EZYX",
+    "company_name": "Wira Jaya Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KBNP",
+    "company_name": "Eka Satria Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LWUJ",
+    "company_name": "Unilever Cemerlang Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WIAY",
+    "company_name": "Eka Kreasi Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YWNE",
+    "company_name": "Focus Solusindo Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HEMN",
+    "company_name": "Gelora Resources Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AYJM",
+    "company_name": "Harapan Jaya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YPLC",
+    "company_name": "Sinergi Farma Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RLYN",
+    "company_name": "Guna Nusantara Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RHHG",
+    "company_name": "Sentosa Kreasi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JVZU",
+    "company_name": "Java Niaga Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LDTR",
+    "company_name": "Wira Otoparts Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KTPQ",
+    "company_name": "Adi Sinergi Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ASMP",
+    "company_name": "Mulia Wahana Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SLXV",
+    "company_name": "Kalbe Steel Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GXSI",
+    "company_name": "Sinar Indah Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QBRA",
+    "company_name": "Candi Hospitals Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DBPX",
+    "company_name": "Sumber Paper Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CQSA",
+    "company_name": "Fajar Sari Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HSCI",
+    "company_name": "Energi Marine Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NETY",
+    "company_name": "Amanah Steel Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KMLN",
+    "company_name": "Lippo Beton Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ETAW",
+    "company_name": "Bangun Radio Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MYAI",
+    "company_name": "Graha Medika Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OTSL",
+    "company_name": "Jasa Marine Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ADXS",
+    "company_name": "Agung Digital Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HJQS",
+    "company_name": "Kencana Sejahtera Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGPI",
+    "company_name": "Pakuwon Makmur Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AEQF",
+    "company_name": "Unilever Barang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KMUU",
+    "company_name": "Raya Persada Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FGTI",
+    "company_name": "Pembangunan Persada Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NCUY",
+    "company_name": "Telkom Investama Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PFBK",
+    "company_name": "Utama Industri Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JFEP",
+    "company_name": "Anugerah Perkasa Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CWOF",
+    "company_name": "Pertamina Agro Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WNDB",
+    "company_name": "Sinar Kreasi Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IHJX",
+    "company_name": "Energi Sistem Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GSPB",
+    "company_name": "Duta Pacific Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KSWC",
+    "company_name": "Citra Persada Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KVKS",
+    "company_name": "Perkasa Paper Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RKCR",
+    "company_name": "Pratama Nusantara Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YLXG",
+    "company_name": "Melati Media Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VTZE",
+    "company_name": "Solusi Sistem Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KTBW",
+    "company_name": "Indika Otoparts Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CXOV",
+    "company_name": "Elang Energi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SRYX",
+    "company_name": "Dwipa Chemical Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TPLM",
+    "company_name": "Abisatya Renewables Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HYRW",
+    "company_name": "Cahaya Marine Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MLTF",
+    "company_name": "Mahaka Sejahtera Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LHBY",
+    "company_name": "Chandra Investama Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WPVT",
+    "company_name": "Intiga Satria Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RPBX",
+    "company_name": "Sido Chemical Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VPNP",
+    "company_name": "Amanah Inti Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NUWK",
+    "company_name": "Global Pulp Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LWNJ",
+    "company_name": "Asha Otoparts Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KGPO",
+    "company_name": "Inti Medika Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SLWX",
+    "company_name": "Candi Beton Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "COIW",
+    "company_name": "Delapan Nusantara Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OADA",
+    "company_name": "Elang National Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "FXIX",
+    "company_name": "Harum Paper Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YXTP",
+    "company_name": "Amara Sekuritas Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ACVQ",
+    "company_name": "Energi Lestari Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FHDT",
+    "company_name": "Kalbe Farma Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ICNZ",
+    "company_name": "Solusi Mineral Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QWAO",
+    "company_name": "Unilever Utama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GISH",
+    "company_name": "Melati Sinergi Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IRRW",
+    "company_name": "Cipta Energi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OHAV",
+    "company_name": "Pratama Medika Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SYNI",
+    "company_name": "Andalan Pulp Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RPES",
+    "company_name": "Elang Petroleum Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TPMX",
+    "company_name": "Indo Energi Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FKMQ",
+    "company_name": "Astra National Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NYJS",
+    "company_name": "Dwipa Wijaya Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EUUL",
+    "company_name": "Indosat Media Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XGUB",
+    "company_name": "Brahma Media Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FRBN",
+    "company_name": "Surya Utama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KXVD",
+    "company_name": "Amanah Tech Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZNCR",
+    "company_name": "Aria National Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QKEE",
+    "company_name": "Ciputra Offshore Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JHSA",
+    "company_name": "Mahaka Baku Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JRDK",
+    "company_name": "Sinergi Medika Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LYJY",
+    "company_name": "Inti Sinergi Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OPWU",
+    "company_name": "Semen Resources Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ASJJ",
+    "company_name": "Jasa Otoparts Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IHMF",
+    "company_name": "Brahma Pacific Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XIHJ",
+    "company_name": "Alam Otoparts Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IWNF",
+    "company_name": "Nusantara Sentosa Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KJAH",
+    "company_name": "Anugerah Mineral Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LFGY",
+    "company_name": "Mesta Indah Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KUYO",
+    "company_name": "Sinergi Steel Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WFRC",
+    "company_name": "Energi Prima Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FHML",
+    "company_name": "Kertajaya Megah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OJDS",
+    "company_name": "Eka Prima Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FKMT",
+    "company_name": "Medco Sukses Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AAWX",
+    "company_name": "Avia Offshore Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OCOF",
+    "company_name": "Chandra Jaya Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VSXL",
+    "company_name": "Gudang Dunia Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YAAN",
+    "company_name": "Semen Pangan Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WNOG",
+    "company_name": "Kertajaya Utama Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UFLR",
+    "company_name": "Mahaka Mineral Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FPAO",
+    "company_name": "United Solusindo Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YGET",
+    "company_name": "Hermina Inti Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YMNF",
+    "company_name": "Asuransi Karya Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LHYZ",
+    "company_name": "Perkasa Teknologi Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KPVG",
+    "company_name": "Vale Industri Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FNVS",
+    "company_name": "Bakrie Pratama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TMOR",
+    "company_name": "Bakrie Media Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DQNY",
+    "company_name": "Gudang Sejahtera Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DVDK",
+    "company_name": "Mesta Marine Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JERL",
+    "company_name": "Gesta Aset Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FYCT",
+    "company_name": "Kalbe Digital Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MVCS",
+    "company_name": "Pelita Teknik Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JXXD",
+    "company_name": "Delta Sinergi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DITB",
+    "company_name": "Arta Paper Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LDWL",
+    "company_name": "Maju Tractors Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JZMY",
+    "company_name": "Brahma Energi Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EVHF",
+    "company_name": "Maju Pangan Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TUWT",
+    "company_name": "Indika Sari Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ELYK",
+    "company_name": "Atma Renewables Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VWMU",
+    "company_name": "Melati Megah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KEQI",
+    "company_name": "Elnusa Hospitals Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VVLC",
+    "company_name": "Bakrie Lestari Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QOUQ",
+    "company_name": "Lestari Paper Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YVSM",
+    "company_name": "Arta Cemerlang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OXNK",
+    "company_name": "Astra Surya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WIAU",
+    "company_name": "Pantai Tech Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IJBP",
+    "company_name": "Raya Wijaya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LOFS",
+    "company_name": "Lestari Teknik Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MHYP",
+    "company_name": "Samudra Tunggal Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MICK",
+    "company_name": "Lippo Marine Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZUQR",
+    "company_name": "Brahma Sentosa Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OIRH",
+    "company_name": "Atma Agro Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UHWR",
+    "company_name": "Wisma Aset Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BUTX",
+    "company_name": "Reksa Dunia Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IMIZ",
+    "company_name": "Avia Agro Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WIGO",
+    "company_name": "Prima Sukses Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DIOR",
+    "company_name": "United Cemerlang Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NOAZ",
+    "company_name": "Candi Baku Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QKSR",
+    "company_name": "Asuransi Marine Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XHFJ",
+    "company_name": "Pakuwon Teknologi Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LPUL",
+    "company_name": "Wisma Jaya Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QDHA",
+    "company_name": "Nusantara National Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LOCV",
+    "company_name": "Langgeng Barang Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HTPH",
+    "company_name": "Pembangunan Land Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CPQB",
+    "company_name": "Pakuwon Energi Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GNQX",
+    "company_name": "Merdeka Medika Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SRKV",
+    "company_name": "Panin Barang Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PMLU",
+    "company_name": "Avia Steel Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CGAT",
+    "company_name": "Sinergi Persada Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IAUM",
+    "company_name": "Bayan Perkasa Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WEBF",
+    "company_name": "Panin Niaga Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OLUE",
+    "company_name": "Garuda Sentosa Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QOAW",
+    "company_name": "Lestari Petroleum Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PSFJ",
+    "company_name": "Indika Surya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LRZW",
+    "company_name": "Asuransi Industri Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EXAU",
+    "company_name": "Medco Wijaya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LKJL",
+    "company_name": "Unilever Wijaya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XDJQ",
+    "company_name": "Intiga Hospitals Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QFVV",
+    "company_name": "Bogor Makmur Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GGNU",
+    "company_name": "Brahma Tambang Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CBOO",
+    "company_name": "Panin Beton Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KGZE",
+    "company_name": "Graha Marine Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FEZC",
+    "company_name": "Tri Land Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YQLE",
+    "company_name": "Duta Hospitals Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PQGI",
+    "company_name": "Jagad Wijaya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NNHG",
+    "company_name": "Pelita Sukses Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PSPQ",
+    "company_name": "Utama Cemerlang Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PTKW",
+    "company_name": "Bangun Renewables Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CUPG",
+    "company_name": "Perdana Sumatera Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PXRJ",
+    "company_name": "Adi Wijaya Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EHEU",
+    "company_name": "Medco Inti Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MFBH",
+    "company_name": "Putra Perkasa Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KWJL",
+    "company_name": "Eka Pacific Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WYCV",
+    "company_name": "Perkasa Logistik Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LYGZ",
+    "company_name": "Aria Lestari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BHPD",
+    "company_name": "Indofood Agro Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SRTI",
+    "company_name": "Erajaya Karya Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UAXF",
+    "company_name": "Wijaya Sumatera Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KDPM",
+    "company_name": "Inti Farma Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AWNY",
+    "company_name": "Akasha Sari Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YYBC",
+    "company_name": "Indo Chemical Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZCMP",
+    "company_name": "Melati Tech Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BELB",
+    "company_name": "Elang Petroleum Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WKPB",
+    "company_name": "Aria Sejahtera Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZZXV",
+    "company_name": "Arta Investama Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CABI",
+    "company_name": "Harapan Wahana Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OPNG",
+    "company_name": "Aria Offshore Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GQQW",
+    "company_name": "Kertajaya Pulp Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ATOD",
+    "company_name": "Asha Raya Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NDVO",
+    "company_name": "Citra Kreasi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MMOC",
+    "company_name": "Sumber Medika Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZSZQ",
+    "company_name": "Kalbe Wahana Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UKZA",
+    "company_name": "Mitra Cemerlang Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KQVJ",
+    "company_name": "Duta Sistem Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VFCC",
+    "company_name": "Bumi Tech Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZLFT",
+    "company_name": "Aneka Pangan Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SNOI",
+    "company_name": "Pantai Farma Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RLKD",
+    "company_name": "Adhi Utama Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "IVFR",
+    "company_name": "Brahma Aset Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RWEB",
+    "company_name": "Mulia Utama Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PHXI",
+    "company_name": "Intan Sekuritas Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FWEY",
+    "company_name": "Timah Petroleum Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EPLQ",
+    "company_name": "Bogor Tunggal Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TWHV",
+    "company_name": "Barito Beton Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CIHQ",
+    "company_name": "Intan Sejahtera Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GRHP",
+    "company_name": "Dian Tambang Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HNUC",
+    "company_name": "Solusi Petroleum Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "EZKA",
+    "company_name": "Dian Tambang Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZVPC",
+    "company_name": "Utama Wana Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GSRQ",
+    "company_name": "Telkom Pulp Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AGJQ",
+    "company_name": "Avia Digital Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HFUE",
+    "company_name": "Indah Lestari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZEUT",
+    "company_name": "Mulia Wana Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YYKR",
+    "company_name": "Elnusa Medika Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YFYY",
+    "company_name": "Inti Beton Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QYAF",
+    "company_name": "Adhi Agro Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DENP",
+    "company_name": "Tri Pratama Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JKHL",
+    "company_name": "Pembangunan Tech Tbk.",
+    "sector": "Barang Baku",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "IZHM",
+    "company_name": "Indofood Beton Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ESKR",
+    "company_name": "Mandiri Energi Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HRGL",
+    "company_name": "Graha Persada Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LVQL",
+    "company_name": "Samudra Perkasa Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GLIJ",
+    "company_name": "Dirgantara Satria Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PRWV",
+    "company_name": "Perkasa Jaya Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RCVJ",
+    "company_name": "Tri Raya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LDND",
+    "company_name": "Candi Karya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QHFQ",
+    "company_name": "Mahaka Industri Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PDFD",
+    "company_name": "Mesta Wana Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QFNI",
+    "company_name": "Timah Surya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ABWV",
+    "company_name": "Mulia Satria Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UAFE",
+    "company_name": "Mitra Aset Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SFDY",
+    "company_name": "Indosat Aset Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FMQF",
+    "company_name": "Bangun Prima Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DPNG",
+    "company_name": "Aspirasi Renewables Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WOWJ",
+    "company_name": "Pantai Coal Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VKRH",
+    "company_name": "Wisma Chemical Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "JHPH",
+    "company_name": "Nusa Tech Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PBZH",
+    "company_name": "Delapan Teknologi Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RYTF",
+    "company_name": "Bayan Tunggal Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MBDI",
+    "company_name": "Kertajaya Utama Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BUXE",
+    "company_name": "Bumi Sekuritas Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NVJC",
+    "company_name": "Raya Farma Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UTNV",
+    "company_name": "Tunggal Farma Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PBYO",
+    "company_name": "Intiga Sari Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OIGE",
+    "company_name": "Akasha Tech Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "PCEQ",
+    "company_name": "Astra Jaya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UFWC",
+    "company_name": "Inti Coal Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UHSI",
+    "company_name": "Gesta Barang Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DBOP",
+    "company_name": "Putra Resources Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KZMU",
+    "company_name": "Wijaya National Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KBWA",
+    "company_name": "Alam Prima Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GSCS",
+    "company_name": "Garuda Beton Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YCIT",
+    "company_name": "Mega Hospitals Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VSOX",
+    "company_name": "Harum Inti Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XMBE",
+    "company_name": "Eka Dunia Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DDMM",
+    "company_name": "Barito Baku Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PNHX",
+    "company_name": "Indo Mineral Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AVII",
+    "company_name": "Java Cemerlang Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RWMD",
+    "company_name": "Pelita Wana Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TBEB",
+    "company_name": "Anugerah Beton Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XSTW",
+    "company_name": "Pakuwon Megah Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UJKY",
+    "company_name": "Indosat Karya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KKEO",
+    "company_name": "Intan Prima Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SXKO",
+    "company_name": "Sido Pulp Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DOKX",
+    "company_name": "Sinergi Media Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KOQT",
+    "company_name": "Andalan Lestari Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "LSFM",
+    "company_name": "Lippo Surya Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UCPH",
+    "company_name": "Global Mandiri Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XOYP",
+    "company_name": "Astra Medika Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BPNP",
+    "company_name": "Bina Solusindo Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BWZB",
+    "company_name": "Tiga Renewables Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HMXL",
+    "company_name": "Agung Tambang Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BZKR",
+    "company_name": "Delta Medika Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GLXV",
+    "company_name": "Tri Karya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NGAY",
+    "company_name": "Amara Chemical Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "BSFM",
+    "company_name": "Wira Teknik Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ICDZ",
+    "company_name": "Amara Persada Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DQKP",
+    "company_name": "Hana Wahana Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZDPA",
+    "company_name": "Guna Solusindo Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YSPM",
+    "company_name": "Duta Mineral Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AEIQ",
+    "company_name": "Asuransi Pulp Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PGFC",
+    "company_name": "Avia Aset Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "QUIJ",
+    "company_name": "Indo Solusindo Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OAOU",
+    "company_name": "Mega Marine Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OJZU",
+    "company_name": "Surya Teknologi Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZFPG",
+    "company_name": "Sinergi Indah Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YOCL",
+    "company_name": "Langgeng Wana Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XZFP",
+    "company_name": "Perdana Inti Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TOBE",
+    "company_name": "Pakuwon Beton Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "AXSH",
+    "company_name": "Astra Otoparts Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OOEN",
+    "company_name": "Aneka Pulp Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MEPG",
+    "company_name": "Abisatya Prima Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WBFO",
+    "company_name": "Karya Sari Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CAHQ",
+    "company_name": "Perdana Indah Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "TOMW",
+    "company_name": "Tri Sari Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "DSGP",
+    "company_name": "Nusa Media Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "VWNV",
+    "company_name": "Unilever Pangan Tbk.",
+    "sector": "Transportasi & Logistik",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "COEK",
+    "company_name": "Java Teknik Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "KYKG",
+    "company_name": "Mandiri Prima Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XCFP",
+    "company_name": "Indo Sistem Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XTJH",
+    "company_name": "Adi Jaya Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FKNH",
+    "company_name": "Langgeng Medika Tbk.",
+    "sector": "Barang Konsumen Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "MFXJ",
+    "company_name": "Candi Sukses Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "NDDY",
+    "company_name": "Wisma Jaya Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UQEE",
+    "company_name": "Indo Cemerlang Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "APXM",
+    "company_name": "Garuda Sinergi Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RALL",
+    "company_name": "Matahari Petroleum Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RIFB",
+    "company_name": "Sido Resources Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XCOC",
+    "company_name": "Mulia Teknologi Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ZTFT",
+    "company_name": "Apex Barang Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "FXWH",
+    "company_name": "Pertamina Sinergi Tbk.",
+    "sector": "Finansial",
+    "status": "Suspended"
+  },
+  {
+    "ticker": "LYZD",
+    "company_name": "Mesta Surya Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HMNJ",
+    "company_name": "Wijaya Coal Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XXVY",
+    "company_name": "Cahaya Marine Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "CHHQ",
+    "company_name": "Bogor Investama Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "YAGV",
+    "company_name": "Dwipa Pangan Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SDJG",
+    "company_name": "Gajah Baku Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XYKP",
+    "company_name": "Unilever Land Tbk.",
+    "sector": "Barang Baku",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GQCG",
+    "company_name": "Chandra Lestari Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "RQHE",
+    "company_name": "Sinergi Lestari Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "XHGV",
+    "company_name": "Jasa Sukses Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GRCP",
+    "company_name": "Lestari Renewables Tbk.",
+    "sector": "Energi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "PUAY",
+    "company_name": "Mitra Chemical Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GBXI",
+    "company_name": "Dirgantara Investama Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "UWBZ",
+    "company_name": "Garuda Logistik Tbk.",
+    "sector": "Kesehatan",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "ELZD",
+    "company_name": "Unilever Industri Tbk.",
+    "sector": "Properti & Real Estate",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "SRVM",
+    "company_name": "Surya Persada Tbk.",
+    "sector": "Barang Konsumen Non-Primer",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "GFPS",
+    "company_name": "Cahaya Tractors Tbk.",
+    "sector": "Finansial",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "OYXG",
+    "company_name": "Sentosa Mandiri Tbk.",
+    "sector": "Perindustrian",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HZPU",
+    "company_name": "Merdeka Agro Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "WOLH",
+    "company_name": "Wijaya Marine Tbk.",
+    "sector": "Teknologi",
+    "status": "Aktif"
+  },
+  {
+    "ticker": "HFBG",
+    "company_name": "Ikhtiar Investama Tbk.",
+    "sector": "Infrastruktur",
+    "status": "Aktif"
+  }
+]

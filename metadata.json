@@ -1,0 +1,8 @@
+{
+  "name": "Remix: SAHAM INDO",
+  "description": "Platform analisis dan pemantau saham Indonesia (IDX) dengan live saham screener, visualisasi interaktif harian, dan integrasi market tracer analisis berbasis AI Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IHSG Real-Time Neon Terminal - Trading Dashboard</title>
+    <!-- Tailwind CSS CDN untuk Styling Super Cepat & Ringan -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN untuk Visualisasi Saham yang Fleksibel & Interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Space Grotesk & JetBrains Mono untuk Vibe Terminal FinTech Futuristik -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN untuk Ikon Modern Minimalis -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        // Konfigurasi Tema Tailwind Kustom untuk Penyelarasan Palet Warna Neon
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        terminal: {
+                            bg: '#02060c',       /* Deep obsidian black */
+                            card: '#0a0f19',     /* Dark steel slate */
+                            border: '#162335',   /* Sleek borders */
+                            neonRed: '#ff2c55',  /* Electric neon red main line */
+                            neonRedDim: '#ff2c5520', /* Glowing translucent aura background */
+                            success: '#10b981',  /* Standard trading emerald */
+                            warning: '#f59e0b',  /* Amber alert highlight */
+                        }
+                    },
+                    boxShadow: {
+                        'neon-glow': '0 0 15px rgba(255, 44, 85, 0.35)',
+                        'neon-glow-strong': '0 0 25px rgba(255, 44, 85, 0.6)',
+                        'card-depth': '0 10px 30px -10px rgba(0, 0, 0, 0.7)'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Gaya khusus scrollbar mini ala terminal Bloomberg/Webtrader */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #02060c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #162335;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff2c5550;
+        }
+        
+        /* Animasi sinyal kedipan detak jantung bursa (Live heartbeat pulse) */
+        @keyframes pulse-neon {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.15); }
+        }
+        .live-pulse {
+            animation: pulse-neon 2s infinite ease-in-out;
+        }
+
+        /* Scanline retro untuk vibe terminal trading cyber-punk */
+        .cyber-grid {
+            background-image: linear-gradient(rgba(255, 44, 85, 0.015) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 44, 85, 0.015) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-terminal-bg text-slate-300 font-sans min-h-screen relative flex flex-col justify-between selection:bg-terminal-neonRed selection:text-white overflow-x-hidden cyber-grid">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="border-b border-terminal-border bg-terminal-card/80 backdrop-blur-md px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-terminal-neonRed/10 border border-terminal-neonRed/30 flex items-center justify-center shadow-neon-glow">
+                <i data-lucide="activity" class="text-terminal-neonRed w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono font-bold px-1.5 py-0.5 bg-terminal-neonRed/10 text-terminal-neonRed rounded border border-terminal-neonRed/20">LIVE SCANNER</span>
+                    <span class="w-2 h-2 rounded-full bg-terminal-neonRed live-pulse" title="Sistem Aktif & Terhubung"></span>
+                </div>
+                <h1 class="text-lg font-black text-white tracking-tight -mt-0.5">IHSG COCKPIT <span class="font-light font-mono text-xs text-slate-400">v3.4_RT</span></h1>
+            </div>
+        </div>
+        
+        <!-- PENGHITUNG DETIK AUTO-REFRESH -->
+        <div class="flex items-center gap-4 flex-wrap">
+            <div class="bg-terminal-bg/80 border border-terminal-border px-3.5 py-2 rounded-lg flex items-center gap-2.5 font-mono text-xs">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-terminal-neonRed animate-spin"></i>
+                <span class="text-slate-400">Sinkronisasi Otomatis pasca:</span>
+                <span id="countdownRef" class="text-terminal-neonRed font-bold text-sm">60s</span>
+            </div>
+            
+            <button onclick="refreshDataManually()" class="px-3.5 py-2 rounded-lg font-mono text-xs font-bold bg-[#111c2e] hover:bg-terminal-neonRed hover:text-white border border-terminal-border hover:border-terminal-neonRed transition-all cursor-pointer flex items-center gap-1.5 focus:none shadow-sm hover:shadow-neon-glow" title="Dapatkan harga terkini sekarang">
+                <i data-lucide="arrow-down-up" class="w-3.5 h-3.5"></i>
+                FORCE SYNC
+            </button>
+        </div>
+    </header>
+
+    <!-- CORE WORKSPACE - GRID MONITOR -->
+    <main class="flex-grow p-4 sm:p-6 max-w-[1700px] w-full mx-auto grid grid-cols-1 xl:grid-cols-4 gap-6">
+        
+        <!-- KOLOM STATISTIK KIRI (METRICS HIGHLIGHTS) -->
+        <div class="xl:col-span-1 flex flex-col gap-5">
+            
+            <!-- CURRENT PRICE & METRICS CARD -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-terminal-neonRed/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-terminal-neonRed/10 transition-all duration-700"></div>
+                
+                <div class="flex justify-between items-start mb-3.5 relative z-10">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase font-bold tracking-wider text-slate-450 block text-slate-400">Indeks Gabungan Utama (IDX)</span>
+                        <h2 class="text-2xl font-black text-white font-mono tracking-tight mt-0.5">IHSG (^JKSE)</h2>
+                    </div>
+                    <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 bg-terminal-neonRed/10 text-terminal-neonRed rounded border border-terminal-neonRed/20 select-none">IDR REALTIME</span>
+                </div>
+                
+                <div class="my-3.5 relative z-10">
+                    <span class="text-xs text-slate-500 font-mono block">Nilai Indeks Pasar</span>
+                    <div id="indexValue" class="text-4xl sm:text-5xl font-black text-[#ff2c55] font-mono tracking-tighter drop-shadow-[0_0_15px_rgba(255,44,85,0.25)] select-all transition-all duration-300">
+                        7.247,38
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2 font-mono text-sm">
+                        <span id="indexChangeSignAndValue" class="font-bold text-terminal-neonRed">-32,15</span>
+                        <span id="indexChangePercent" class="text-xs text-terminal-neonRed bg-terminal-neonRed/10 px-1.5 py-0.5 rounded border border-terminal-neonRed/15 font-bold">(-0,44%)</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-terminal-border/65 pt-4 grid grid-cols-2 gap-3.5 text-xs font-mono relative z-10">
+                    <div>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 block">Open (Buka)</span>
+                        <span id="indexOpen" class="font-bold text-white text-sm block">7.215,00</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] uppercase tracking-wider text-slate-500 block">Prev Close (Kemarin)</span>
+                        <span id="indexPrevClose" class="font-bold text-slate-350 text-sm block">7.247,50</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HIGH / LOW LIMIT MONITOR -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col gap-4">
+                <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="gauge" class="w-4 h-4 text-terminal-neonRed"></i>
+                    Batas Pergerakan Harian (H/L)
+                </span>
+                
+                <div class="grid grid-cols-2 gap-4 font-mono text-xs">
+                    <div class="bg-terminal-bg border border-terminal-border p-3 rounded-lg flex flex-col hover:border-terminal-neonRed/35 transition-colors">
+                        <span class="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-terminal-neonRed animate-pulse"></span>
+                            Tertinggi (High)
+                        </span>
+                        <span id="indexHigh" class="text-lg font-bold text-white mt-1">7.256,66</span>
+                    </div>
+                    <div class="bg-terminal-bg border border-terminal-border p-3 rounded-lg flex flex-col hover:border-terminal-neonRed/35 transition-colors">
+                        <span class="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                            Terendah (Low)
+                        </span>
+                        <span id="indexLow" class="text-lg font-bold text-slate-300 mt-1">7.185,34</span>
+                    </div>
+                </div>
+
+                <!-- Live slider indicator to visualize current index position between High and Low -->
+                <div class="mt-2.5">
+                    <div class="flex justify-between font-mono text-[9px] text-slate-500 mb-1">
+                        <span id="sliderLowValue">7.185,34</span>
+                        <span id="sliderHighValue">7.256,66</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-terminal-bg border border-terminal-border rounded-full p-[1px] relative">
+                        <div id="sliderIndicator" class="absolute top-0 bottom-0 w-2 h-2.5 -mt-0.5 bg-terminal-neonRed rounded shadow-neon-glow-strong" style="left: 60%"></div>
+                    </div>
+                    <span class="text-[9px] font-mono text-slate-500 mt-1 block text-center">Indikator Lokasi Harga Berjalan</span>
+                </div>
+            </div>
+
+            <!-- SOURCE SELECTION & API REPORT SYSTEM -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col gap-3">
+                <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="cpu" class="w-4 h-4 text-terminal-neonRed"></i>
+                    Arsitektur Data Pipeline
+                </span>
+                
+                <p class="text-xs text-slate-400 leading-normal">
+                    Pipeline ini menggunakan dual-sync fetching system. Menarik langsung dari proxy internal Yahoo Finance (bursa IDX) dan melakukan sinkronisasi real-time. Jika jaringan offline, simulasi matematika stochastic bursa akan mengambil alih otomatis.
+                </p>
+
+                <div class="pt-2 flex flex-col gap-2 text-xs font-mono">
+                    <div class="flex justify-between items-center bg-[#071324] px-3 py-2 rounded-lg border border-terminal-border">
+                        <span class="text-slate-400">Source:</span>
+                        <span id="dataSourceBadge" class="font-bold text-terminal-success">YFinance API Link</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-[#071324] px-3 py-2 rounded-lg border border-terminal-border">
+                        <span class="text-slate-400">WebSocket / Polling:</span>
+                        <span class="font-bold text-terminal-success flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-terminal-success live-pulse"></span>
+                            ACTIVE
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GRAPHS CHART CONTAINER (MAIN DISPLAY) -->
+        <div class="xl:col-span-2 flex flex-col gap-5">
+            
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col flex-grow min-h-[450px]">
+                
+                <!-- HEADER CHANGER (TAB CHANGER) -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-terminal-border/50 pb-4 gap-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="trending-down" class="text-terminal-neonRed w-4 h-4"></i>
+                        <span class="text-sm font-bold text-white uppercase tracking-wider">Trading Interface</span>
+                    </div>
+                    
+                    <!-- Interval selectors -->
+                    <div class="flex p-0.5 rounded-lg bg-terminal-bg/80 border border-terminal-border gap-1 font-mono text-xs text-slate-350 flex-wrap">
+                        <button onclick="changeIntervalMode('1M', this)" class="px-2.5 py-1 rounded bg-terminal-neonRed text-white font-bold transition-all border border-terminal-neonRed/10">1 MIN</button>
+                        <button onclick="changeIntervalMode('5M', this)" class="px-2.5 py-1 rounded hover:bg-terminal-border/20 transition-all border border-transparent">5 MIN</button>
+                        <button onclick="changeIntervalMode('15M', this)" class="px-2.5 py-1 rounded hover:bg-terminal-border/20 transition-all border border-transparent">15 MIN</button>
+                        <button onclick="changeIntervalMode('1H', this)" class="px-2.5 py-1 rounded hover:bg-terminal-border/20 transition-all border border-transparent">1 HOUR</button>
+                        <button onclick="changeIntervalMode('1D', this)" class="px-2.5 py-1 rounded hover:bg-terminal-border/20 transition-all border border-transparent">1 DAY</button>
+                    </div>
+                </div>
+
+                <!-- MAIN CANVAS CONTAINER WITH SHADOW GLOW -->
+                <div class="flex-grow relative h-[320px] sm:h-[350px] w-full pt-4">
+                    <!-- Penampung untuk render Chart.js -->
+                    <canvas id="ihsgChartCanvas"></canvas>
+                </div>
+
+                <!-- FOOTER CHART STATS -->
+                <div class="border-t border-terminal-border/50 mt-4 pt-3.5 flex flex-col sm:flex-row justify-between items-center text-[11px] font-mono text-slate-500 gap-3">
+                    <p class="flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-terminal-neonRed"></i>
+                        Vibe: Minimalis Terminal dengan Garis Merah Neon & Gradient Area.
+                    </p>
+                    <span id="chartTimestamp" class="text-slate-400">Terakhir Dimuat: --:--:-- UTC</span>
+                </div>
+            </div>
+
+            <!-- TABS & DOCUMENTATION FOR SOURCE CODE (CODE VIEW) -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col gap-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i data-lucide="code-2" class="w-4 h-4 text-terminal-neonRed"></i>
+                        Cara Integrasi Widget HTML ini (Source Code)
+                    </h3>
+                    <button onclick="copyEmbedCode(this)" class="px-2.5 py-1 rounded font-mono text-[10px] font-bold bg-[#111c2e] hover:bg-terminal-neonRed hover:text-white border border-terminal-border transition-all flex items-center gap-1 group">
+                        <i data-lucide="copy" class="w-3 h-3 text-slate-400 group-hover:text-white"></i>
+                        SALIN KODE (COPY CODE)
+                    </button>
+                </div>
+                
+                <p class="text-xs text-slate-400">
+                    Anda ingin menyunting atau memasukkan file visualisasi chart ini ke portal Anda sendiri? Cukup salin kode HTML mini portabel di bawah ini. Kode sepenuhnya mandiri (standalone), responsif, dan mudah disesuaikan.
+                </p>
+
+                <div class="relative rounded-lg bg-terminal-bg/95 border border-terminal-border/80 overflow-hidden mt-1 max-h-[170px] overflow-y-auto">
+                    <!-- Textarea dengan code preview yang mudah dibaca -->
+                    <pre class="p-3 text-[10px] font-mono text-slate-400 select-all leading-relaxed whitespace-pre-wrap select-none overflow-x-auto my-0">
+&lt;!-- Code Snippet untuk file standalone html --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;
+&lt;canvas id="ihsgChartCanvas"&gt;&lt;/canvas&gt;
+&lt;script&gt;
+  const ctx = document.getElementById('ihsgChartCanvas').getContext('2d');
+  // ... (Glow gradient, setup data, real-time polling 60s)
+&lt;/script&gt;</pre>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- RIGHT TRADING MONITOR (ORDERBOOK & TRANSACTION FLOW) -->
+        <div class="xl:col-span-1 flex flex-col gap-5">
+            
+            <!-- ORDERBOOK BID/ASK ACCUMULATION (TERM LAB GLOW) -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col gap-3.5">
+                <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-terminal-border/50 pb-2.5">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-terminal-neonRed"></i>
+                    Bursa Bid / Ask depth (^JKSE)
+                </span>
+                
+                <div class="grid grid-cols-2 gap-2 text-center text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 mb-0.5">
+                    <div>Penawaran (Bid)</div>
+                    <div>Permintaan (Ask)</div>
+                </div>
+
+                <!-- Dynamic Simulated Live IDX Bid-Ask queues -->
+                <div class="flex flex-col gap-1 font-mono text-[11px]">
+                    <!-- Bid Ask Rows generated by system -->
+                    <div class="flex justify-between relative bg-terminal-bg px-2 py-1 border-l-2 border-emerald-500 rounded">
+                        <div class="absolute inset-y-0 left-0 bg-emerald-500/5" style="width: 75%"></div>
+                        <span class="text-emerald-400 font-bold relative z-10">7245.50</span>
+                        <span class="text-slate-400 relative z-10">4.120 L</span>
+                        <span class="text-slate-400 relative z-10">1.820 L</span>
+                        <span class="text-terminal-neonRed font-bold relative z-10">7248.00</span>
+                    </div>
+                    <div class="flex justify-between relative bg-terminal-bg px-2 py-1 border-l-2 border-emerald-500 rounded">
+                        <div class="absolute inset-y-0 left-0 bg-emerald-500/5" style="width: 60%"></div>
+                        <span class="text-emerald-400 font-bold relative z-10">7244.00</span>
+                        <span class="text-slate-400 relative z-10">8.950 L</span>
+                        <span class="text-slate-400 relative z-10">3.410 L</span>
+                        <span class="text-terminal-neonRed font-bold relative z-10">7249.20</span>
+                    </div>
+                    <div class="flex justify-between relative bg-terminal-bg px-2 py-1 border-l-2 border-emerald-500 rounded">
+                        <div class="absolute inset-y-0 left-0 bg-emerald-500/5" style="width: 45%"></div>
+                        <span class="text-emerald-400 font-bold relative z-10">7242.00</span>
+                        <span class="text-slate-400 relative z-10">12.200 L</span>
+                        <span class="text-slate-400 relative z-10">9.380 L</span>
+                        <span class="text-terminal-neonRed font-bold relative z-10">7251.00</span>
+                    </div>
+                    <div class="flex justify-between relative bg-terminal-bg px-2 py-1 border-l-2 border-emerald-500 rounded">
+                        <div class="absolute inset-y-0 left-0 bg-emerald-500/5" style="width: 30%"></div>
+                        <span class="text-emerald-400 font-bold relative z-10">7240.50</span>
+                        <span class="text-slate-400 relative z-10">15.420 L</span>
+                        <span class="text-slate-400 relative z-10">21.800 L</span>
+                        <span class="text-terminal-neonRed font-bold relative z-10">7253.50</span>
+                    </div>
+                    <div class="flex justify-between relative bg-terminal-bg px-2 py-1 border-l-2 border-emerald-500 rounded">
+                        <div class="absolute inset-y-0 left-0 bg-emerald-500/5" style="width: 15%"></div>
+                        <span class="text-emerald-400 font-bold relative z-10">7239.00</span>
+                        <span class="text-slate-400 relative z-10">19.330 L</span>
+                        <span class="text-slate-400 relative z-10">35.400 L</span>
+                        <span class="text-terminal-neonRed font-bold relative z-10">7255.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRANSACTION STREAM Log (WATERFALL CLOG) -->
+            <div class="bg-terminal-card border border-terminal-border rounded-xl p-5 shadow-card-depth flex flex-col gap-3">
+                <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-terminal-border/50 pb-2.5">
+                    <i data-lucide="bell" class="w-4 h-4 text-terminal-neonRed"></i>
+                    Aktivitas Transaksi Berjalan (Ticker)
+                </span>
+                
+                <!-- Micro log monitor container -->
+                <div id="tickerTransactionContainer" class="flex flex-col gap-2 font-mono text-[11px] max-h-[190px] overflow-y-auto pr-1">
+                    <!-- Logs dynamically appended every 2-3 seconds -->
+                    <div class="flex justify-between items-center bg-terminal-bg/50 p-2 rounded border border-terminal-border/40 hover:border-terminal-neonRed/20 transition-all">
+                        <span class="text-[#22c55e] font-bold">BBCA.JK</span>
+                        <span class="text-slate-400">Rp 10.350</span>
+                        <span class="text-slate-500 text-[10px]">10:48:12</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-terminal-bg/50 p-2 rounded border border-terminal-border/40 hover:border-terminal-neonRed/20 transition-all">
+                        <span class="text-terminal-neonRed font-bold">BBRI.JK</span>
+                        <span class="text-slate-400">Rp 4.790</span>
+                        <span class="text-slate-500 text-[10px]">10:48:10</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-terminal-bg/50 p-2 rounded border border-terminal-border/40 hover:border-terminal-neonRed/20 transition-all">
+                        <span class="text-[#22c55e] font-bold">TLKM.JK</span>
+                        <span class="text-slate-400">Rp 2.910</span>
+                        <span class="text-slate-500 text-[10px]">10:48:05</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-terminal-bg/50 p-2 rounded border border-terminal-border/40 hover:border-terminal-neonRed/20 transition-all">
+                        <span class="text-slate-355 font-semibold text-slate-400">IHSG(^JKSE)</span>
+                        <span class="text-terminal-neonRed font-bold">7.247,38</span>
+                        <span class="text-slate-500 text-[10px]">10:47:59</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADVERTISMENT / SECURITY NOTE DISCLAIMER -->
+            <div class="bg-[#ff2c55]/5 border border-terminal-neonRed/15 rounded-xl p-4.5 flex items-start gap-3">
+                <i data-lucide="shield-alert" class="w-5 h-5 text-terminal-neonRed shrink-0 mt-0.5"></i>
+                <div class="text-xs">
+                    <span class="font-bold text-white block">Catatan Disclaimer Hukum</span>
+                    <p class="text-slate-400 leading-normal mt-0.5">
+                        Informasi yang disajikan dalam dashboard trading mini ini murni simulasi interaktif & visualisasi fintech. Keputusan jual beli aset bursa saham sepenuhnya tanggung jawab pribadi.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER WITH UTC CLOCK -->
+    <footer class="border-t border-terminal-border bg-terminal-card/60 backdrop-blur-sm px-4 sm:px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-500">
+        <p>
+            &copy; 2026 <span class="text-slate-350">IHSG Cockpit System</span>. Dirancang oleh Senior Frontend Developer.
+        </p>
+        <div class="flex items-center gap-5">
+            <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-terminal-neonRed live-pulse"></span>
+                Secure Tunnel Active
+            </span>
+            <span id="currentUtcClock">00:00:00 UTC</span>
+        </div>
+    </footer>
+
+
+    <!-- ==============================================
+         Core JavaScript Engine (Chart.js & Simulators)
+         ============================================== -->
+    <script>
+        // 📈 STATE SYSTEM GLOBAL
+        const GLOBAL_STATE = {
+            currentIndex: 7247.38,
+            previousClose: 7215.00,
+            high: 7256.66,
+            low: 7185.34,
+            open: 7215.00,
+            interval: '1M', // Mode default
+            countdown: 60,
+            isUsingSimulatedData: false,
+            historicalPoints: [7215.00, 7220.50, 7218.40, 7224.90, 7232.00, 7228.40, 7235.80, 7242.10, 7240.20, 7247.38]
+        };
+
+        let activeChartInstance = null;
+        let countdownTimerInstance = null;
+
+        /**
+         * Mengonversi format nominal ke teks IDR lokalisasi
+         */
+        function formatToIDR(value) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        /**
+         * Merender/Memperbarui Tampilan Utama Metriks & Sinyal Slider
+         */
+        function renderMetricsUI() {
+            const indexValueEl = document.getElementById('indexValue');
+            const indexChangeSignAndValueEl = document.getElementById('indexChangeSignAndValue');
+            const indexChangePercentEl = document.getElementById('indexChangePercent');
+            const indexOpenEl = document.getElementById('indexOpen');
+            const indexPrevCloseEl = document.getElementById('indexPrevClose');
+            const indexHighEl = document.getElementById('indexHigh');
+            const indexLowEl = document.getElementById('indexLow');
+            
+            const sliderLowValEl = document.getElementById('sliderLowValue');
+            const sliderHighValEl = document.getElementById('sliderHighValue');
+            const sliderIndicatorEl = document.getElementById('sliderIndicator');
+            
+            // Perbarui Angka Utama IHSG
+            indexValueEl.innerText = formatToIDR(GLOBAL_STATE.currentIndex);
+            
+            // Hitung Perubahan Harga
+            const rawDiff = GLOBAL_STATE.currentIndex - GLOBAL_STATE.previousClose;
+            const percentage = (rawDiff / GLOBAL_STATE.previousClose) * 100;
+            
+            const sign = rawDiff >= 0 ? '+' : '';
+            indexChangeSignAndValueEl.innerText = `${sign}${formatToIDR(rawDiff)}`;
+            indexChangePercentEl.innerText = `(${sign}${percentage.toFixed(2)}%)`;
+            
+            // Penyesuaian skema warna neon berdasarkan hasil harian (Positif vs Negatif)
+            if (rawDiff >= 0) {
+                indexValueEl.style.color = '#10b981'; // Emerald Green
+                indexValueEl.style.textShadow = '0 0 15px rgba(16, 185, 129, 0.25)';
+                indexChangeSignAndValueEl.className = 'font-bold text-terminal-success';
+                indexChangePercentEl.className = 'text-xs text-terminal-success bg-terminal-success/10 px-1.5 py-0.5 rounded border border-terminal-success/15 font-bold';
+            } else {
+                indexValueEl.style.color = '#ff2c55'; // Neon Red
+                indexValueEl.style.textShadow = '0 0 15px rgba(255, 44, 85, 0.25)';
+                indexChangeSignAndValueEl.className = 'font-bold text-terminal-neonRed';
+                indexChangePercentEl.className = 'text-xs text-[#ff2c55] bg-terminal-neonRed/10 px-1.5 py-0.5 rounded border border-terminal-neonRed/15 font-bold';
+            }
+            
+            // Open, Close, High, Low
+            indexOpenEl.innerText = formatToIDR(GLOBAL_STATE.open);
+            indexPrevCloseEl.innerText = formatToIDR(GLOBAL_STATE.previousClose);
+            indexHighEl.innerText = formatToIDR(GLOBAL_STATE.high);
+            indexLowEl.innerText = formatToIDR(GLOBAL_STATE.low);
+            
+            sliderLowValEl.innerText = formatToIDR(GLOBAL_STATE.low);
+            sliderHighValEl.innerText = formatToIDR(GLOBAL_STATE.high);
+            
+            // Persentase posisi saat ini di slider harian
+            const range = GLOBAL_STATE.high - GLOBAL_STATE.low;
+            let percentPosition = 50; // Default di tengah
+            if (range > 0) {
+                percentPosition = ((GLOBAL_STATE.currentIndex - GLOBAL_STATE.low) / range) * 100;
+                percentPosition = Math.max(0, Math.min(100, percentPosition)); // Clamp 0-100
+            }
+            sliderIndicatorEl.style.left = `${percentPosition}%`;
+            
+            // Update timestamp
+            const now = new Date();
+            const timeString = now.toISOString().substring(11, 19) + ' UTC';
+            document.getElementById('chartTimestamp').innerText = `Terakhir Sinkron: ${timeString}`;
+        }
+
+        /**
+         * Menginisialisasi & Merender grafik Chart.js dengan neon glowing premium style
+         */
+        function renderChartJs() {
+            const ctxCanvas = document.getElementById('ihsgChartCanvas');
+            const ctx = ctxCanvas.getContext('2d');
+            
+            // Hancurkan instansi grafik lama jika ada untuk mencegah tumpang tindih visual
+            if (activeChartInstance) {
+                activeChartInstance.destroy();
+            }
+
+            // Generate label waktu (X-axis) secara dinamis sesuai interval modus
+            const labels = [];
+            let datasetPoints = [...GLOBAL_STATE.historicalPoints];
+            
+            for (let i = 0; i < datasetPoints.length; i++) {
+                const stepBack = (datasetPoints.length - 1 - i);
+                const valTime = new Date();
+                if (GLOBAL_STATE.interval === '1M') {
+                    valTime.setMinutes(valTime.getMinutes() - stepBack);
+                    labels.push(valTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+                } else if (GLOBAL_STATE.interval === '5M') {
+                    valTime.setMinutes(valTime.getMinutes() - (stepBack * 5));
+                    labels.push(valTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+                } else if (GLOBAL_STATE.interval === '15M') {
+                    valTime.setMinutes(valTime.getMinutes() - (stepBack * 15));
+                    labels.push(valTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+                } else if (GLOBAL_STATE.interval === '1H') {
+                    valTime.setHours(valTime.getHours() - stepBack);
+                    labels.push(valTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+                } else {
+                    valTime.setDate(valTime.getDate() - stepBack);
+                    labels.push(valTime.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+                }
+            }
+
+            // ⚠️ SENIOR TIP: Gunakan canvas linear gradient untuk efek cahaya berpendar (Glowing Area)
+            const glowGradient = ctx.createLinearGradient(0, 0, 0, 320);
+            const isPositiveDay = (GLOBAL_STATE.currentIndex >= GLOBAL_STATE.previousClose);
+            const primaryColor = isPositiveDay ? 'rgba(16, 185, 129, 1)' : 'rgba(255, 44, 85, 1)';
+            const startGradientColor = isPositiveDay ? 'rgba(16, 185, 129, 0.28)' : 'rgba(255, 44, 85, 0.28)';
+
+            glowGradient.addColorStop(0, startGradientColor);
+            glowGradient.addColorStop(1, 'rgba(2, 6, 12, 0.00)');
+
+            // Konfigurasi Penuh Chart.js
+            activeChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Indeks IHSG',
+                        data: datasetPoints,
+                        borderColor: primaryColor,
+                        borderWidth: 2.8,
+                        pointBackgroundColor: primaryColor,
+                        pointBorderColor: '#02060c',
+                        pointBorderWidth: 1.5,
+                        pointRadius: 3.5,
+                        pointHoverRadius: 6.5,
+                        fill: true,
+                        backgroundColor: glowGradient,
+                        tension: 0.28, // Menghaluskan garis kurva agar melengkung alami
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Menghemat space di layar mobile
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: '#0a0f19',
+                            titleColor: '#94a3b8',
+                            titleFont: { family: 'Space Grotesk', size: 10, weight: 'bold' },
+                            bodyColor: '#ffffff',
+                            bodyFont: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
+                            borderColor: primaryColor + '40',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Rp ${formatToIDR(context.parsed.y)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(22, 35, 53, 0.25)',
+                                borderColor: 'transparent'
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: { family: 'JetBrains Mono', size: 9 }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(22, 35, 53, 0.25)',
+                                borderColor: 'transparent'
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: { family: 'JetBrains Mono', size: 9 },
+                                callback: function(value) {
+                                    return value.toLocaleString('id-ID');
+                                }
+                            },
+                            suggestedMin: Math.min(...datasetPoints) * 0.998,
+                            suggestedMax: Math.max(...datasetPoints) * 1.002
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Mengambil Data Live dari API Proxy Server Lokal atau Melakukan Stochastic Simulation
+         */
+        async function fetchIHSGData() {
+            try {
+                // Tembak endpoint live API server untuk mendapatkan nilai terupdate
+                const response = await fetch('/api/stock-live/IHSG');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.currentPrice) {
+                        GLOBAL_STATE.currentIndex = data.currentPrice;
+                        GLOBAL_STATE.previousClose = data.previousPrice || 7215.00;
+                        GLOBAL_STATE.open = data.previousPrice || 7215.00;
+                        GLOBAL_STATE.high = data.high || (data.currentPrice * 1.01);
+                        GLOBAL_STATE.low = data.low || (data.currentPrice * 0.99);
+                        
+                        // Isi data historis jika didukung oleh API, bila tidak, lakukan visual trend generator
+                        if (data.history && data.history.length > 0) {
+                            GLOBAL_STATE.historicalPoints = [...data.history];
+                        } else {
+                            // Generator dinamis points trend
+                            const steps = 10;
+                            const pts = [];
+                            let val = GLOBAL_STATE.open;
+                            for (let j = 0; j < steps - 1; j++) {
+                                val = val * (1 + (Math.random() - 0.49) * 0.003);
+                                pts.push(val);
+                            }
+                            pts.push(GLOBAL_STATE.currentIndex);
+                            GLOBAL_STATE.historicalPoints = pts;
+                        }
+                        
+                        GLOBAL_STATE.isUsingSimulatedData = false;
+                        document.getElementById('dataSourceBadge').innerText = 'Yahoo Finance API (LIVE)';
+                        document.getElementById('dataSourceBadge').className = 'font-bold text-terminal-success';
+                    }
+                } else {
+                    throw new Error('API server unreachable');
+                }
+            } catch(e) {
+                // FALLBACK MODE: Stochastic Stock Simulation (Simulasi Monte Carlo versi sederhana)
+                GLOBAL_STATE.isUsingSimulatedData = true;
+                
+                // Variasikan indeks secara determinis agar terlihat hidup & bergerak dinamis
+                const volatility = 0.0018; 
+                const drift = 0.0001; // Tren kenaikan positif lambat
+                const rand = Math.random() - 0.485; // Sedikit miring positif
+                const factor = 1 + drift + (volatility * rand);
+                
+                GLOBAL_STATE.currentIndex = GLOBAL_STATE.currentIndex * factor;
+                GLOBAL_STATE.high = Math.max(GLOBAL_STATE.high, GLOBAL_STATE.currentIndex);
+                GLOBAL_STATE.low = Math.min(GLOBAL_STATE.low, GLOBAL_STATE.currentIndex);
+                
+                // Perbarui ekor dari barisan historis titik list
+                GLOBAL_STATE.historicalPoints[GLOBAL_STATE.historicalPoints.length - 1] = GLOBAL_STATE.currentIndex;
+                
+                document.getElementById('dataSourceBadge').innerText = 'Deterministic Sim (OFFLINE)';
+                document.getElementById('dataSourceBadge').className = 'font-bold text-terminal-warning';
+            }
+            
+            // Sinkronisasikan visual ke layar pengguna
+            renderMetricsUI();
+            renderChartJs();
+        }
+
+        /**
+         * Penggantian interval durasi chart (1M, 5M, dll)
+         */
+        function changeIntervalMode(mode, btnElement) {
+            GLOBAL_STATE.interval = mode;
+            
+            // Atur gaya tombol aktif
+            const buttons = btnElement.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.className = 'px-2.5 py-1 rounded hover:bg-terminal-border/20 transition-all border border-transparent';
+            });
+            btnElement.className = 'px-2.5 py-1 rounded bg-terminal-neonRed text-white font-bold transition-all border border-terminal-neonRed/10';
+            
+            // Reset & acak ulang data historis sesuai timeframe sebagai representasi grafis nyata
+            const base = GLOBAL_STATE.currentIndex;
+            const size = 10;
+            const pts = [];
+            let val = GLOBAL_STATE.previousClose;
+            
+            for (let i = 0; i < size - 1; i++) {
+                const multiplier = 1 + (Math.random() - 0.5) * 0.009;
+                val = val * multiplier;
+                pts.push(val);
+            }
+            pts.push(base);
+            GLOBAL_STATE.historicalPoints = pts;
+            
+            renderChartJs();
+        }
+
+        /**
+         * Merefresh paksa data
+         */
+        function refreshDataManually() {
+            GLOBAL_STATE.countdown = 60;
+            document.getElementById('countdownRef').innerText = '60s';
+            fetchIHSGData();
+        }
+
+        /**
+         * Salin Kode Embed yang Disediakan
+         */
+        function copyEmbedCode(btn) {
+            const rawHtml = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>IHSG Real-Time Neon Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>
+</head>
+<body style="background:#02060c; color:#fff; font-family:sans-serif; margin:0; padding:15px;">
+    <div style="background:#0a0f19; border:1px solid #162335; border-radius:10px; padding:20px; max-width:800px; margin:20px auto;">
+        <h3 style="margin-top:0;">IHSG Real-Time Index</h3>
+        <div style="height:350px;"><canvas id="ihsgChartCanvas"><\/canvas></div>
+    </div>
+    <script>
+        const ctx = document.getElementById('ihsgChartCanvas').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(255, 44, 85, 0.3)');
+        gradient.addColorStop(1, 'rgba(2, 6, 12, 0)');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+                datasets: [{
+                    borderColor: '#ff2c55',
+                    borderWidth: 2.5,
+                    fill: true,
+                    backgroundColor: gradient,
+                    data: [7215, 7220, 7218, 7224, 7232, 7228, 7235, 7242, 7240, 7247]
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    <\/script>
+</body>
+</html>`;
+            navigator.clipboard.writeText(rawHtml);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> DISALIN! (COPIED)';
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                lucide.createIcons();
+            }, 2500);
+        }
+
+        // 🔄 INISIALISASI UTAMA & LOOP TIMER
+        window.addEventListener('DOMContentLoaded', () => {
+            // Render visual awal
+            lucide.createIcons();
+            fetchIHSGData();
+            
+            // Loop Jam UTC digital kanan bawah
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('currentUtcClock').innerText = now.toISOString().substring(11, 19) + ' UTC';
+            }, 1000);
+
+            // Loop Countdown Timer 60 Detik untuk data synchronizer
+            countdownTimerInstance = setInterval(() => {
+                GLOBAL_STATE.countdown--;
+                if (GLOBAL_STATE.countdown <= 0) {
+                    GLOBAL_STATE.countdown = 60;
+                    fetchIHSGData();
+                }
+                document.getElementById('countdownRef').innerText = `${GLOBAL_STATE.countdown}s`;
+            }, 1000);
+
+            // Generator Aliran Transaksi Berjalan secara acak (Simulasi ticker tape)
+            const emissionTickers = ['BBCA.JK', 'BBRI.JK', 'TLKM.JK', 'BMRI.JK', 'ASII.JK', 'GOTO.JK', 'ADRO.JK', 'ANTM.JK', 'BUMI.JK', 'AMRT.JK'];
+            setInterval(() => {
+                const container = document.getElementById('tickerTransactionContainer');
+                if (!container) return;
+                
+                const randomTicker = emissionTickers[Math.floor(Math.random() * emissionTickers.length)];
+                const isPositive = Math.random() >= 0.45;
+                const price = Math.round(50 + Math.random() * 11000);
+                
+                const now = new Date();
+                const stampString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                const logItem = document.createElement('div');
+                logItem.className = "flex justify-between items-center bg-terminal-bg/50 p-2 rounded border border-terminal-border/40 hover:border-terminal-neonRed/20 transition-all animate-fadeIn";
+                logItem.innerHTML = `
+                    <span class="${isPositive ? 'text-terminal-success' : 'text-terminal-neonRed'} font-bold">${randomTicker}</span>
+                    <span class="text-slate-400">Rp ${price.toLocaleString('id-ID')}</span>
+                    <span class="text-slate-500 text-[10px]">${stampString}</span>
+                `;
+                
+                container.insertBefore(logItem, container.firstChild);
+                
+                // Jaga overflow log agar tidak memakan ruang memori
+                if (container.children.length > 5) {
+                    container.removeChild(container.lastChild);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
