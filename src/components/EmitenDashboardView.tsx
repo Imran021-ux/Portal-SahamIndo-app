@@ -25,6 +25,46 @@ import { generateDynamicIdxStock } from "../utils/idxGenerator";
 import { marketData } from "../marketData";
 import { DataService } from "../dataService";
 
+// Highly stylized animated custom tooltip displaying dynamic price indicators, percentage change and custom volume estimates
+const CustomAnimatedTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const isChangePos = data.changePercent >= 0;
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        className="bg-[#020b13]/95 border border-cyan-500/20 p-3.5 rounded-xl shadow-2xl backdrop-blur-md space-y-2 min-w-[200px]"
+      >
+        <div className="flex justify-between items-center border-b border-cyan-950/40 pb-1.5">
+          <span className="text-[10px] font-black font-mono text-cyan-400 uppercase tracking-wider">{label}</span>
+          <span className="text-[8px] bg-cyan-950 px-1.5 py-0.5 rounded text-cyan-500/80 font-mono font-bold">ANALISA LIVE</span>
+        </div>
+        <div className="space-y-1">
+          <div className="flex justify-between items-center text-[11px] gap-4">
+            <span className="text-slate-400 font-sans">Harga Saham:</span>
+            <span className="text-white font-mono font-black">Rp {data.Harga?.toLocaleString("id-ID")}</span>
+          </div>
+          <div className="flex justify-between items-center text-[11px] gap-4">
+            <span className="text-slate-400 font-sans">Perubahan:</span>
+            <span className={`font-mono font-bold ${isChangePos ? "text-emerald-400" : "text-rose-450"}`}>
+              {isChangePos ? "▲ +" : "▼ "}{data.changePercent || "0"}%
+            </span>
+          </div>
+          {data.volume && (
+            <div className="flex justify-between items-center text-[11px] border-t border-white/5 pt-1 mt-1 gap-4">
+              <span className="text-slate-400 font-sans">Volume:</span>
+              <span className="text-cyan-300 font-mono font-bold">{data.volume.toLocaleString("id-ID")} Lot</span>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+  return null;
+};
+
 interface BandarTrade {
   id: string;
   time: string;
@@ -407,7 +447,7 @@ export default function EmitenDashboardView({
   onSelectBroker
 }: EmitenDashboardViewProps) {
   
-  const [activeHubTab, setActiveHubTab] = useState<"ringkasan" | "teknikal" | "fundamental" | "sector" | "verdict" | "broker" | "analisa-pasar">("ringkasan");
+  const [activeHubTab, setActiveHubTab] = useState<"ringkasan" | "teknikal" | "fundamental" | "sector" | "verdict" | "broker" | "analisa-pasar" | "ramalan-ai">("ringkasan");
   const [chartType, setChartType] = useState<"native" | "tradingview">("native");
   const [isFullscreenChartOpen, setIsFullscreenChartOpen] = useState(false);
   const [brokerActivityView, setBrokerActivityView] = useState<"chart" | "table">("chart");
@@ -1019,6 +1059,51 @@ export default function EmitenDashboardView({
     }
     return stock;
   }, [stocks, selectedTicker, emitenLiveStock]);
+
+  // states for Gemini-powered 3-day short-term price & sentiment forecast
+  const [forecastData, setForecastData] = useState<any>(null);
+  const [forecastLoading, setForecastLoading] = useState<boolean>(false);
+  const [forecastError, setForecastError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedTicker) return;
+    let active = true;
+    
+    const fetchForecast = async () => {
+      setForecastLoading(true);
+      setForecastError(null);
+      try {
+        const res = await fetch("/api/forecast-stock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ticker: selectedTicker,
+            name: activeStock?.name || selectedTicker,
+            currentPrice: activeStock?.currentPrice || 1000,
+            sector: activeStock?.sector || "Umum"
+          })
+        });
+        if (!res.ok) throw new Error("Gagal mengambil data ramalan");
+        const data = await res.json();
+        if (active) {
+          setForecastData(data);
+        }
+      } catch (err: any) {
+        if (active) {
+          setForecastError(err.message || "Gagal memproses ramalan");
+        }
+      } finally {
+        if (active) {
+          setForecastLoading(false);
+        }
+      }
+    };
+
+    fetchForecast();
+    return () => {
+      active = false;
+    };
+  }, [selectedTicker, activeStock?.currentPrice]);
 
   // Generate recommendation
   const rec = useMemo(() => {
@@ -2150,7 +2235,8 @@ export default function EmitenDashboardView({
             { id: "fundamental", label: "🏛️ Fundamental", desc: "7 Golden Ratios" },
             { id: "sector", label: "⚖️ vs Sektor", desc: "Perbandingan Industri" },
             { id: "verdict", label: "🔮 Verdict", desc: "Kesimpulan AI" },
-            { id: "broker", label: "🤵 Broker Flow", desc: "Detektor Bandar" }
+            { id: "broker", label: "🤵 Broker Flow", desc: "Detektor Bandar" },
+            { id: "ramalan-ai", label: "🔮 Ramalan AI", desc: "Ramalan Harga 3 Hari" }
           ] as const).map((tab) => (
             <button
               key={tab.id}
@@ -3304,12 +3390,17 @@ export default function EmitenDashboardView({
                             <h5 className="text-xs font-black uppercase text-cyan-300 tracking-wider flex items-center gap-1.5 font-mono">
                               <BarChart3 className="w-4.5 h-4.5 text-cyan-400" /> Kinerja Keuangan Historis ({activeStock.ticker})
                             </h5>
-                            <p className="text-[10px] text-slate-500">Visualisasi data historis kinerja operasional, solvabilitas keuntungan, dan distribusi EPS berdasarkan IDX</p>
+                            <p className="text-[10px] text-slate-500 font-sans">Visualisasi data historis kinerja operasional, solvabilitas keuntungan, dan distribusi EPS berdasarkan IDX</p>
                           </div>
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                             {/* CHART 1: REVENUE vs NET INCOME */}
-                            <div className="bg-[#010912]/80 border border-slate-850 p-4 rounded-xl space-y-3 shadow-inner">
+                            <motion.div 
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, ease: "easeOut" }}
+                              className="bg-[#010912]/80 border border-slate-850 p-4 rounded-xl space-y-3 shadow-inner"
+                            >
                               <div className="flex justify-between items-center select-none">
                                 <span className="text-[9.5px] text-white font-extrabold font-mono uppercase tracking-wider">Pendapatan vs Laba Bersih</span>
                                 <span className="text-[8px] text-cyan-400 font-mono bg-cyan-950/40 border border-cyan-800/30 px-1.5 py-0.5 rounded text-right">Triliun Rupiah (Rp T)</span>
@@ -3330,10 +3421,15 @@ export default function EmitenDashboardView({
                                   </BarChart>
                                 </ResponsiveContainer>
                               </div>
-                            </div>
+                            </motion.div>
 
                             {/* CHART 2: EPS GROWTH */}
-                            <div className="bg-[#010912]/80 border border-slate-850 p-4 rounded-xl space-y-3 shadow-inner">
+                            <motion.div 
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+                              className="bg-[#010912]/80 border border-slate-850 p-4 rounded-xl space-y-3 shadow-inner"
+                            >
                               <div className="flex justify-between items-center select-none">
                                 <span className="text-[9.5px] text-white font-extrabold font-mono uppercase tracking-wider">Earnings Per Share (EPS)</span>
                                 <span className="text-[8px] text-cyan-400 font-mono bg-cyan-950/40 border border-cyan-800/30 px-1.5 py-0.5 rounded text-right">Rupiah (Rp per Lembar)</span>
@@ -3358,7 +3454,7 @@ export default function EmitenDashboardView({
                                   </AreaChart>
                                 </ResponsiveContainer>
                               </div>
-                            </div>
+                            </motion.div>
                           </div>
                         </div>
                       );
@@ -4340,6 +4436,204 @@ export default function EmitenDashboardView({
             </div>
           )}
 
+          {activeHubTab === "ramalan-ai" && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="bg-[#020b14]/95 border border-cyan-500/15 p-5 md:p-6 rounded-2xl shadow-xl space-y-6">
+                
+                {/* Header */}
+                <div className="border-b border-cyan-950/30 pb-3 flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <span className="text-[10px] text-cyan-400 font-extrabold tracking-widest uppercase block font-mono">🔮 RAMALAN SENTIMEN AI (3 HARI JANGKA PENDEK)</span>
+                    <h3 className="text-sm font-black text-white mt-0.5">Analisis Prediktif & Probabilitas {activeStock.ticker}</h3>
+                  </div>
+                  <span className="text-[9px] bg-cyan-950/70 border border-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded uppercase font-bold font-mono tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+                    POWERED BY GEMINI 3.5
+                  </span>
+                </div>
+
+                {forecastLoading ? (
+                  <div className="py-20 flex flex-col items-center justify-center space-y-4 animate-pulse">
+                    <div className="relative w-12 h-12">
+                      <div className="absolute inset-0 border-2 border-cyan-500/10 rounded-full"></div>
+                      <div className="absolute inset-0 border-2 border-t-cyan-400 rounded-full animate-spin"></div>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-cyan-400 font-mono">🔮 MERAMAL GRAFIK & ANALISIS SENTIMEN...</p>
+                      <p className="text-[10px] text-slate-500 mt-1">Sistem sedang berkonsultasi dengan Gemini AI dan merumuskan titik harga 3 sesi bursa mendatang.</p>
+                    </div>
+                  </div>
+                ) : forecastError ? (
+                  <div className="py-12 text-center text-rose-450 border border-rose-950/30 bg-rose-950/10 rounded-xl p-4 font-mono text-xs">
+                    ⚠️ {forecastError}. <button onClick={() => setRefreshCount(r => r + 1)} className="underline cursor-pointer hover:text-white">Coba lagi</button>
+                  </div>
+                ) : forecastData ? (
+                  <div className="space-y-6">
+                    {/* General Summary Card / Banner */}
+                    <div className="p-4 bg-slate-950/60 border border-slate-900 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <span className="text-[9px] text-slate-500 font-black block font-mono uppercase">AI Consensus Mood</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-lg tracking-wider ${
+                            forecastData.generalSentiment === "BULLISH" 
+                              ? "bg-emerald-950/45 text-emerald-400 border border-emerald-500/30" 
+                              : forecastData.generalSentiment === "BEARISH"
+                              ? "bg-rose-950/45 text-rose-450 border border-rose-500/30"
+                              : "bg-slate-900 text-slate-300 border border-slate-700" 
+                          }`}>
+                            {forecastData.generalSentiment}
+                          </span>
+                          <span className="text-xs text-slate-400 font-bold font-sans">
+                            {forecastData.generalSentiment === "BULLISH" 
+                              ? "Konsensus mengarah ke kenaikan tren volume-price." 
+                              : forecastData.generalSentiment === "BEARISH"
+                              ? "Terdeteksi rintangan distribusi pasokan jangka pendek."
+                              : "Pergerakan harga diprediksi bergerak datar (sideways)."}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs md:text-right">
+                        <span className="text-[9px] text-slate-500 font-black block font-mono uppercase">PROYEKSI HARGA S/R JANGKA PENDEK</span>
+                        <span className="text-white font-mono font-bold">
+                          Rp {Math.round(activeStock.currentPrice * 0.97)} — Rp {Math.round(activeStock.currentPrice * 1.05)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Proyeksi Reasoning */}
+                    <div className="p-4 bg-cyan-950/15 border border-cyan-500/10 rounded-xl space-y-2">
+                      <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase font-mono">
+                        <Info className="w-4 h-4 text-cyan-400 shrink-0" />
+                        Interpretasi Rasionil (Dasar Analisis AI)
+                      </span>
+                      <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                        {forecastData.reasoning}
+                      </p>
+                    </div>
+
+                    {/* Prediction 3-Day Bento Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {forecastData.forecast && forecastData.forecast.map((item: any, idx: number) => {
+                        const isPos = item.priceChangePercent >= 0;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 shadow-inner transition-all hover:scale-[1.01] ${
+                              item.sentiment === "BULLISH"
+                                ? "bg-emerald-950/5 border-emerald-500/10 hover:border-emerald-500/20"
+                                : item.sentiment === "BEARISH"
+                                ? "bg-rose-950/5 border-rose-500/10 hover:border-rose-500/20"
+                                : "bg-slate-900/10 border-slate-800 hover:border-slate-750"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start border-b border-white/5 pb-2">
+                              <div>
+                                <span className="text-[9px] text-slate-500 font-extrabold uppercase font-mono">{item.day}</span>
+                                <h4 className="text-xs font-black text-white uppercase tracking-wider mt-0.5">{item.indicatorSignal || "Technical Sinyal"}</h4>
+                              </div>
+                              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
+                                item.sentiment === "BULLISH"
+                                  ? "bg-emerald-950/60 text-emerald-400"
+                                  : item.sentiment === "BEARISH"
+                                  ? "bg-rose-950/60 text-rose-450"
+                                  : "bg-slate-950 text-slate-400"
+                              }`}>
+                                {item.sentiment}
+                              </span>
+                            </div>
+
+                            <div className="py-1">
+                              <span className="text-[9.5px] text-slate-400 block font-sans font-bold">Prediksi Harga Penutupan</span>
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="text-lg font-black font-mono text-white">Rp {item.predictedPrice.toLocaleString("id-ID")}</span>
+                                <span className={`text-xs font-mono font-bold ${isPos ? "text-emerald-400" : "text-rose-450"}`}>
+                                  {isPos ? "▲ +" : "▼ "}{item.priceChangePercent}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1 pt-1.5 border-t border-white/5">
+                              <div className="flex justify-between text-[8px] font-bold font-mono text-slate-400 select-none">
+                                <span>PROBABILITAS ESTIMASI</span>
+                                <span className="text-cyan-400">{item.probability}%</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-900 rounded-lg overflow-hidden flex">
+                                <div 
+                                  className="h-full bg-cyan-400 rounded-full" 
+                                  style={{ width: `${item.probability}%` }} 
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Chart Visualizer for Forecast */}
+                    <div className="bg-[#010912]/80 border border-slate-850 p-4 rounded-xl space-y-3">
+                      <div>
+                        <span className="text-[9.5px] text-white font-extrabold font-mono uppercase tracking-wider">Grafik Lintasan Prediksi Harga</span>
+                        <p className="text-[10px] text-slate-500">Visualisasi tren pergerakan prediksi harga untuk 3 sesi bursa modal mendatang.</p>
+                      </div>
+                      <div className="h-44 w-full text-[10px] font-mono">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart 
+                            data={[
+                              { name: "Sekarang", Harga: activeStock.currentPrice },
+                              ...(forecastData.forecast || []).map((f: any) => ({ name: f.day, Harga: f.predictedPrice }))
+                            ]}
+                            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                          >
+                            <defs>
+                              <linearGradient id="forecastChartGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.25} />
+                                <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#081525" />
+                            <XAxis dataKey="name" stroke="#475569" strokeWidth={1} style={{ fontSize: "10px" }} />
+                            <YAxis 
+                              stroke="#475569" 
+                              strokeWidth={1} 
+                              style={{ fontSize: "10px" }} 
+                              domain={[
+                                Math.min(activeStock.currentPrice, ...(forecastData.forecast || []).map((f: any) => f.predictedPrice)) * 0.99,
+                                Math.max(activeStock.currentPrice, ...(forecastData.forecast || []).map((f: any) => f.predictedPrice)) * 1.01
+                              ]}
+                              tickFormatter={(val) => `Rp ${val}`}
+                            />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: "#020b13", borderColor: "#0ea5e9", borderRadius: "12px", fontSize: "11px" }}
+                              labelStyle={{ fontWeight: "bold", color: "#22d3ee" }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="Harga" 
+                              stroke="#22d3ee" 
+                              strokeWidth={2.5} 
+                              fillOpacity={1} 
+                              fill="url(#forecastChartGrad)" 
+                              activeDot={{ r: 6 }} 
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    <p className="text-[9px] text-slate-500 leading-relaxed font-sans text-center select-none pt-2">
+                      ⚠️ DISCLAIMER: Analisis Ramalan Harga AI di atas dihasilkan oleh kecerdasan buatan Gemini berdasarkan kalkulasi pemodelan tren dan data historis. Keadaan pasar yang sebenarnya dapat berfluktuasi secara dinamis dan tidak terduga. SahamIndo Pro tidak memikul tanggung jawab hukum atas kerugian investasi yang diderita pengguna. Do your own research.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-slate-500 font-mono text-xs">
+                    ⏳ Belum ada koordinat ramalan yang dimuat.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {activeHubTab === "analisa-pasar" && (
             <TransactionDashboard
               activeStock={activeStock}
@@ -5271,7 +5565,20 @@ export default function EmitenDashboardView({
 
                       {/* Main Fullscreen chart responsive SVG plot */}
                       <ResponsiveContainer id="fullscreen_technical_chart" width="100%" height="100%">
-                        <AreaChart data={prices.map((p, idx) => ({ name: `T-${9-idx}`, Harga: p }))}>
+                        <AreaChart 
+                          data={prices.map((p, idx) => {
+                            const prevP = idx === 0 ? p : prices[idx - 1];
+                            const changePct = idx === 0 ? 0 : Number((((p - prevP) / prevP) * 100).toFixed(2));
+                            const baseVol = activeStock.volume || 120000;
+                            const volModifier = 0.7 + ((p % 17) / 100) + (changePct > 0 ? 0.35 : 0);
+                            return {
+                              name: `Sesi T-${9-idx}`,
+                              Harga: p,
+                              changePercent: changePct,
+                              volume: Math.round(baseVol * volModifier)
+                            };
+                          })}
+                        >
                           <defs>
                             <linearGradient id="fullscreenGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0%" stopColor={activeStock.changePercent >= 0 ? "#22c55e" : "#ef4444"} stopOpacity={0.2} strokeWidth={3} />
@@ -5287,10 +5594,7 @@ export default function EmitenDashboardView({
                             tickLine={false} 
                             tickFormatter={(v) => `Rp ${v}`}
                           />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: "#020b13", borderColor: "rgba(6,182,212,0.15)", borderRadius: "12px", fontFamily: "monospace", fontSize: "11px" }} 
-                            labelStyle={{ color: "#64748b" }}
-                          />
+                          <Tooltip content={<CustomAnimatedTooltip />} />
                           <Area 
                             type="monotone" 
                             dataKey="Harga" 
