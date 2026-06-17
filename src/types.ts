@@ -59,3 +59,15 @@ export interface TechnicalIndicator {
   value: string;
   status: 'buy' | 'sell' | 'neutral';
 }
+
+export interface PriceAlert {
+  id: string;
+  ticker: string;
+  targetPrice: number;
+  condition: "ABOVE" | "BELOW";
+  triggered: boolean;
+  createdAt: string;
+  triggeredAt?: string;
+  dismissed?: boolean;
+}
+

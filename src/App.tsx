@@ -5,8 +5,9 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { UserSession, Stock } from "./types";
+import { UserSession, Stock, PriceAlert } from "./types";
 import { INITIAL_STOCKS, tickStockPrices } from "./data";
+import PriceAlertsManager from "./components/PriceAlertsManager";
 import { getFormattedDateIndo } from "./utils/date";
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import LoginView from "./components/LoginView";
@@ -35,7 +36,7 @@ import {
   Award, RefreshCw, User, Terminal, Flame,
   Menu, X, Upload, LayoutGrid, MoreVertical,
   Plus, Trash2, Bell, Sparkles, ArrowLeft, Star,
-  Activity, Coins, Eye, Layers, Search
+  Activity, Coins, Eye, Layers, Search, AlertOctagon
 } from "lucide-react";
 
 export default function App() {
@@ -76,6 +77,88 @@ export default function App() {
         return [...prev, clean];
       }
     });
+  };
+
+  // 🔔 6.5. Price Alerts States & Controllers
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<PriceAlert[]>(() => {
+    try {
+      const saved = localStorage.getItem("idx_price_alerts");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Watch stocks to find if any price alerts are triggered
+  useEffect(() => {
+    if (stocks.length === 0) return;
+    
+    setAlerts(prevAlerts => {
+      let changed = false;
+      const nextAlerts = prevAlerts.map(alert => {
+        if (alert.triggered) return alert;
+        const matchedStock = stocks.find(s => s.ticker.toUpperCase() === alert.ticker.toUpperCase());
+        if (!matchedStock) return alert;
+        
+        let isTriggered = false;
+        const currentPrice = matchedStock.currentPrice;
+        if (alert.condition === "ABOVE" && currentPrice >= alert.targetPrice) {
+          isTriggered = true;
+        } else if (alert.condition === "BELOW" && currentPrice <= alert.targetPrice) {
+          isTriggered = true;
+        }
+        
+        if (isTriggered) {
+          changed = true;
+          return {
+            ...alert,
+            triggered: true,
+            triggeredAt: new Date().toLocaleTimeString("id-ID")
+          };
+        }
+        return alert;
+      });
+      
+      if (changed) {
+        localStorage.setItem("idx_price_alerts", JSON.stringify(nextAlerts));
+        return nextAlerts;
+      }
+      return prevAlerts;
+    });
+  }, [stocks]);
+
+  // Alert Action Handlers
+  const handleAddAlert = (ticker: string, targetPrice: number, condition: "ABOVE" | "BELOW") => {
+    const newAlert: PriceAlert = {
+      id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ticker: ticker.toUpperCase(),
+      targetPrice,
+      condition,
+      triggered: false,
+      createdAt: new Date().toLocaleDateString("id-ID")
+    };
+    const updated = [newAlert, ...alerts];
+    setAlerts(updated);
+    localStorage.setItem("idx_price_alerts", JSON.stringify(updated));
+  };
+
+  const handleDeleteAlert = (id: string) => {
+    const updated = alerts.filter(a => a.id !== id);
+    setAlerts(updated);
+    localStorage.setItem("idx_price_alerts", JSON.stringify(updated));
+  };
+
+  const handleClearHistory = () => {
+    const updated = alerts.filter(a => !a.triggered);
+    setAlerts(updated);
+    localStorage.setItem("idx_price_alerts", JSON.stringify(updated));
+  };
+
+  const handleDismissAlert = (id: string) => {
+    const updated = alerts.map(a => a.id === id ? { ...a, dismissed: true } : a);
+    setAlerts(updated);
+    localStorage.setItem("idx_price_alerts", JSON.stringify(updated));
   };
 
   // 📈 7. IHSG Index States (Updated dynamically to real bursa levels)
@@ -207,17 +290,41 @@ export default function App() {
   useEffect(() => {
     fetch('/data/latest_prices.json')
       .then(res => res.json())
-      .then(data => {
+      .then(async data => {
         setPrices(data); // Data harga disimpan di state global
         
         // Sengaja sinkronkan harga awal agar emiten dan IHSG terisi valid dari JSON
         if (data) {
-          if (data.IHSG) {
-            const rawVal = data.IHSG.currentPrice;
-            const validated = validatePrice(rawVal, "IHSG");
-            setIhsgPrice(normalizePrice(validated, marketData.ihsg_close));
-            if (data.IHSG.previousPrice) {
-              setIhsgPrevClose(data.IHSG.previousPrice);
+          // FORCED EXCLUSIVE DEPENDENCY FOR IHSG: Rely exclusively on /api/stock-live/IHSG endpoint
+          try {
+            const ihsgResponse = await fetch(`/api/stock-live/IHSG?t=${Date.now()}`, { cache: "no-cache" });
+            if (ihsgResponse.ok) {
+              const liveIhsg = await ihsgResponse.json();
+              if (liveIhsg && liveIhsg.currentPrice) {
+                const valPrice = validatePrice(liveIhsg.currentPrice, "IHSG");
+                const finalPrice = normalizePrice(valPrice, marketData.ihsg_close);
+                setIhsgPrice(finalPrice);
+                if (liveIhsg.previousPrice) {
+                  setIhsgPrevClose(liveIhsg.previousPrice);
+                }
+              }
+            } else if (data.IHSG) {
+              const rawVal = data.IHSG.currentPrice;
+              const validated = validatePrice(rawVal, "IHSG");
+              setIhsgPrice(normalizePrice(validated, marketData.ihsg_close));
+              if (data.IHSG.previousPrice) {
+                setIhsgPrevClose(data.IHSG.previousPrice);
+              }
+            }
+          } catch (e) {
+            console.warn("[App Initializer] Gagal mengambil IHSG dari endpoint live, menggunakan local fallback:", e);
+            if (data.IHSG) {
+              const rawVal = data.IHSG.currentPrice;
+              const validated = validatePrice(rawVal, "IHSG");
+              setIhsgPrice(normalizePrice(validated, marketData.ihsg_close));
+              if (data.IHSG.previousPrice) {
+                setIhsgPrevClose(data.IHSG.previousPrice);
+              }
             }
           }
           
@@ -549,13 +656,34 @@ export default function App() {
         </div>
 
         {/* User context quick badge and custom Last Updated display matching prompt */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 relative">
           <div className="hidden sm:flex flex-col items-end text-right px-2.5">
             <span className="text-[8px] text-slate-450 text-cyan-400 font-sans uppercase font-extrabold tracking-widest leading-none">IDX Live Feed Status</span>
             <span className="text-[10px] text-emerald-400 font-mono font-black mt-1">Aktif: {getFormattedDateIndo()}</span>
           </div>
 
           <div className="h-4 w-[1px] bg-cyan-900/30 hidden sm:block"></div>
+
+          {/* Price Alerts Bell Notification Trigger */}
+          <button
+            id="price-alert-bell"
+            onClick={() => setIsAlertsOpen(!isAlertsOpen)}
+            className={`p-2 rounded border relative active:scale-95 transition-all text-xs flex items-center justify-center cursor-pointer ${
+              isAlertsOpen 
+                ? "bg-cyan-950 border-cyan-500 text-cyan-300"
+                : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30"
+            }`}
+            title="Price Alert Manager (Kelola Alarm Harga)"
+          >
+            <Bell className={`w-3.5 h-3.5 ${alerts.some(a => !a.triggered) ? "animate-pulse text-cyan-400" : ""}`} />
+            {alerts.filter(a => !a.triggered).length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-cyan-500 text-slate-950 text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center scale-90 border border-slate-950">
+                {alerts.filter(a => !a.triggered).length}
+              </span>
+            )}
+          </button>
+
+          <div className="h-4 w-[1px] bg-cyan-900/30"></div>
 
           <button
             onClick={handleLogout}
@@ -564,8 +692,66 @@ export default function App() {
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
+
+          {/* Price Alerts Manager Popup Panel */}
+          <AnimatePresence>
+            {isAlertsOpen && (
+              <>
+                {/* Backdrop overlay specialized to close panel when clicking outside */}
+                <div 
+                  className="fixed inset-0 z-30" 
+                  onClick={() => setIsAlertsOpen(false)} 
+                />
+                <PriceAlertsManager 
+                  stocks={stocks}
+                  alerts={alerts}
+                  onAddAlert={handleAddAlert}
+                  onDeleteAlert={handleDeleteAlert}
+                  onClearHistory={handleClearHistory}
+                  onClose={() => setIsAlertsOpen(false)}
+                />
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </header>
+
+      {/* 🔔 Dynamic Price Alert Notification Banners inside or just below header */}
+      <AnimatePresence>
+        {alerts.filter(a => a.triggered && !a.dismissed).map((alert) => (
+          <motion.div
+            key={alert.id}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="w-full bg-gradient-to-r from-amber-950 via-amber-900 to-amber-950 border-b border-amber-500/35 px-4 md:px-6 py-2 flex items-center justify-between text-xs font-sans text-amber-100 relative z-25 overflow-hidden group shadow-lg shadow-amber-950/20"
+          >
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <AlertOctagon className="w-4 h-4 text-amber-400 shrink-0" />
+              <div className="min-w-0 leading-relaxed text-[11px] md:text-xs">
+                <span className="font-extrabold uppercase bg-amber-950 px-1.5 py-0.5 rounded text-amber-400 border border-amber-500/20 font-mono text-[9px] mr-1.5">ALARM HARGA TERPICU</span>
+                <span>
+                  Saham <strong className="font-black font-mono text-white text-[12px] md:text-[13px]">{alert.ticker}</strong> telah menyentuh target Anda{" "} 
+                  <strong className="font-black text-amber-300 font-mono text-[12px] md:text-[13px]">Rp {alert.targetPrice.toLocaleString("id-ID")}</strong>{" "}
+                  {alert.condition === "ABOVE" ? "(Naik Melewati ▲)" : "(Turun Melewati ▼)"} pada pukul <span className="font-mono text-slate-350 font-bold">{alert.triggeredAt}</span>!
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => handleDismissAlert(alert.id)}
+              className="ml-4 p-1 rounded-md bg-amber-900/60 hover:bg-amber-800 text-amber-300 hover:text-white border border-amber-500/20 transition-all font-bold cursor-pointer text-[10px] uppercase flex items-center gap-1 active:scale-95 shrink-0"
+              title="Sembunyikan Alarm"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Tutup</span>
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
 
       {/* 🖤 Overlay Backdrop for Mobile Menu Drawer */}
       {isSidebarOpen && (

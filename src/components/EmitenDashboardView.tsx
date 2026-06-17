@@ -1092,6 +1092,7 @@ export default function EmitenDashboardView({
 
   useEffect(() => {
     if (!selectedTicker) return;
+    if (activeHubTab !== "ramalan-ai") return;
     let active = true;
     
     const fetchForecast = async () => {
@@ -1128,7 +1129,7 @@ export default function EmitenDashboardView({
     return () => {
       active = false;
     };
-  }, [selectedTicker, activeStock?.currentPrice]);
+  }, [selectedTicker, activeHubTab, refreshCount]);
 
   // Generate recommendation
   const rec = useMemo(() => {
