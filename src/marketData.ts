@@ -1,9 +1,9 @@
 // Official manual reference market data for SahamIndo.com
 export const marketData = {
-  ihsg_close: 6254.97,
-  prev_close: 6007.66,
+  ihsg_close: 6120.05,
+  prev_close: 6220.74,
   chartConfig: {
-    min: 5800,
+    min: 5700,
     max: 6500
   },
   categories: {
@@ -18,6 +18,6 @@ export const marketData = {
     BBNI: { currentPrice: 4890, prevClose: 4890, name: "PT Bank Negara Indonesia (Persero) Tbk" },
     TLKM: { currentPrice: 2780, prevClose: 2750, name: "PT Telkom Indonesia Tbk" },
     ASII: { currentPrice: 4650, prevClose: 4700, name: "PT Astra International Tbk" },
-    IHSG: { currentPrice: 6254.97, prevClose: 6007.66, name: "IHSG Composite" }
+    IHSG: { currentPrice: 6120.05, prevClose: 6220.74, name: "IHSG Composite" }
   } as Record<string, { currentPrice: number; prevClose: number; name: string }>
 };

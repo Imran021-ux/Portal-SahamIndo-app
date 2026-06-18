@@ -214,10 +214,10 @@ export default function App() {
   ];
 
   const ihsgWeeklyData = [
-    { day: "Sen", value: 6007.66 },
-    { day: "Sel", value: 6050.40 },
-    { day: "Rab", value: 6110.25 },
-    { day: "Kam", value: 6180.12 },
+    { day: "Sen", value: 6240.50 },
+    { day: "Sel", value: 6250.20 },
+    { day: "Rab", value: 6230.10 },
+    { day: "Kam", value: 6220.74 },
     { day: "Jum", value: ihsgPrice }
   ];
 
@@ -283,71 +283,124 @@ export default function App() {
     }
   }, []);
 
-  // State global untuk data harga terkini dari file lokal
+  // State global untuk data harga terkini dari file lokal/API
   const [prices, setPrices] = useState<any>(null);
 
-  // Gunakan useEffect untuk memuat data dari file yang sama
+  // Gunakan useEffect untuk memuat data langsung dari NeaByte API IDX terpusat atau file lokal
   useEffect(() => {
-    fetch('/data/latest_prices.json')
-      .then(res => res.json())
-      .then(async data => {
-        setPrices(data); // Data harga disimpan di state global
-        
-        // Sengaja sinkronkan harga awal agar emiten dan IHSG terisi valid dari JSON
-        if (data) {
-          // FORCED EXCLUSIVE DEPENDENCY FOR IHSG: Rely exclusively on /api/stock-live/IHSG endpoint
-          try {
-            const ihsgResponse = await fetch(`/api/stock-live/IHSG?t=${Date.now()}`, { cache: "no-cache" });
-            if (ihsgResponse.ok) {
-              const liveIhsg = await ihsgResponse.json();
-              if (liveIhsg && liveIhsg.currentPrice) {
-                const valPrice = validatePrice(liveIhsg.currentPrice, "IHSG");
-                const finalPrice = normalizePrice(valPrice, marketData.ihsg_close);
-                setIhsgPrice(finalPrice);
-                if (liveIhsg.previousPrice) {
-                  setIhsgPrevClose(liveIhsg.previousPrice);
-                }
-              }
-            } else if (data.IHSG) {
-              const rawVal = data.IHSG.currentPrice;
-              const validated = validatePrice(rawVal, "IHSG");
-              setIhsgPrice(normalizePrice(validated, marketData.ihsg_close));
-              if (data.IHSG.previousPrice) {
-                setIhsgPrevClose(data.IHSG.previousPrice);
-              }
-            }
-          } catch (e) {
-            console.warn("[App Initializer] Gagal mengambil IHSG dari endpoint live, menggunakan local fallback:", e);
-            if (data.IHSG) {
-              const rawVal = data.IHSG.currentPrice;
-              const validated = validatePrice(rawVal, "IHSG");
-              setIhsgPrice(normalizePrice(validated, marketData.ihsg_close));
-              if (data.IHSG.previousPrice) {
-                setIhsgPrevClose(data.IHSG.previousPrice);
-              }
-            }
-          }
+    const initializeData = async () => {
+      let neabyteLoaded = false;
+      try {
+        // Tarik data IDX real-time terpusat dari NeaByte API
+        const neabyteList = await DataService.fetchNeabyteStocks();
+        if (neabyteList && neabyteList.length > 0) {
+          console.log(`[App] Berhasil memuat ${neabyteList.length} emiten real-time dari NeaByte API.`);
           
+          // Simpan data NeaByte dalam format pemetaan harga
+          const mappedPrices: Record<string, any> = {};
+          neabyteList.forEach((item: any) => {
+            const ticker = (item.ticker || item.symbol || "").toUpperCase();
+            if (ticker) {
+              const currentPrice = parseFloat(item.price ?? item.currentPrice ?? item.current_price ?? item.close ?? 500);
+              const previousPrice = parseFloat(item.prevClose ?? item.previousPrice ?? item.prev_close ?? item.open ?? currentPrice);
+              const change = item.change !== undefined ? parseFloat(item.change) : (currentPrice - previousPrice);
+              const changePercent = item.changePercent !== undefined ? parseFloat(item.changePercent) : (previousPrice > 0 ? (change / previousPrice) * 100 : 0);
+              
+              mappedPrices[ticker] = {
+                currentPrice,
+                previousPrice,
+                change,
+                changePercent,
+                low: item.low || Math.min(previousPrice, currentPrice),
+                high: item.high || Math.max(previousPrice, currentPrice),
+                volume: item.volume ?? item.vol ?? 12500000,
+                longName: item.name || item.companyName || item.company_name || `${ticker} Tbk.`,
+                history: item.history && Array.isArray(item.history) && item.history.length > 0
+                  ? item.history.map((h: any) => parseFloat(h))
+                  : [previousPrice, Math.round((previousPrice + currentPrice) / 2), currentPrice]
+              };
+            }
+          });
+
+          setPrices(mappedPrices);
+
+          // Update seluruh list stocks real-time
           setStocks((prev) => {
             const updated = [...prev];
             updated.forEach((s, idx) => {
               const ticker = s.ticker.toUpperCase();
-              if (data[ticker]) {
-                const rawVal = data[ticker].currentPrice;
-                const validated = validatePrice(rawVal, ticker);
-                updated[idx].currentPrice = normalizePrice(validated, s.currentPrice);
-                if (data[ticker].previousPrice) {
-                  updated[idx].previousPrice = data[ticker].previousPrice;
-                  updated[idx].change = updated[idx].currentPrice - updated[idx].previousPrice;
-                  updated[idx].changePercent = Number(((updated[idx].change / updated[idx].previousPrice) * 100).toFixed(2));
+              const apiItem = mappedPrices[ticker];
+              if (apiItem) {
+                updated[idx].currentPrice = apiItem.currentPrice;
+                updated[idx].previousPrice = apiItem.previousPrice;
+                updated[idx].change = apiItem.change;
+                updated[idx].changePercent = Number(apiItem.changePercent.toFixed(2));
+                if (apiItem.history) {
+                  updated[idx].history = apiItem.history;
                 }
+                if (apiItem.low) updated[idx].low = apiItem.low;
+                if (apiItem.high) updated[idx].high = apiItem.high;
+                if (apiItem.volume) updated[idx].volume = apiItem.volume;
               }
             });
             return updated;
           });
+          neabyteLoaded = true;
         }
-      })
-      .catch(err => console.warn("Peringatan: Gagal memuat file default latest_prices.json", err));
+      } catch (err) {
+        console.warn("[App Initializer] Gagal memuat data dari NeaByte API, menggunakan fallback standard JSON:", err);
+      }
+
+      // Jika NeaByte gagal dimuat atau ada issues, gunakan fallback file lokal
+      if (!neabyteLoaded) {
+        try {
+          const res = await fetch('/data/latest_prices.json');
+          const data = await res.json();
+          if (data) {
+            setPrices(data);
+            setStocks((prev) => {
+              const updated = [...prev];
+              updated.forEach((s, idx) => {
+                const ticker = s.ticker.toUpperCase();
+                if (data[ticker]) {
+                  const rawVal = data[ticker].currentPrice;
+                  const validated = validatePrice(rawVal, ticker);
+                  updated[idx].currentPrice = normalizePrice(validated, s.currentPrice);
+                  if (data[ticker].previousPrice) {
+                    updated[idx].previousPrice = data[ticker].previousPrice;
+                    updated[idx].change = updated[idx].currentPrice - updated[idx].previousPrice;
+                    updated[idx].changePercent = Number(((updated[idx].change / updated[idx].previousPrice) * 100).toFixed(2));
+                  }
+                }
+              });
+              return updated;
+            });
+          }
+        } catch (fallbackErr) {
+          console.warn("[App Initializer] Fallback lokal juga gagal:", fallbackErr);
+        }
+      }
+
+      // Tarik serta sinkronisasi IHSG secara real-time
+      try {
+        const ihsgResponse = await fetch(`/api/stock-live/IHSG?t=${Date.now()}`, { cache: "no-cache" });
+        if (ihsgResponse.ok) {
+          const liveIhsg = await ihsgResponse.json();
+          if (liveIhsg && liveIhsg.currentPrice) {
+            const valPrice = validatePrice(liveIhsg.currentPrice, "IHSG");
+            const finalPrice = normalizePrice(valPrice, marketData.ihsg_close);
+            setIhsgPrice(finalPrice);
+            if (liveIhsg.previousPrice) {
+              setIhsgPrevClose(liveIhsg.previousPrice);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[App Initializer] Gagal melakukan sinkronisasi IHSG awal:", e);
+      }
+    };
+
+    initializeData();
   }, []);
 
   // 🔄 Unified Real-time Yahoo Finance & IHSG Index Synchronizer (Refreshes every 60s)

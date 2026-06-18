@@ -12,6 +12,42 @@ import fs from "fs";
 
 dotenv.config();
 
+import YahooFinance from "yahoo-finance2";
+const yahooFinance = new YahooFinance();
+
+// Suppress notices if function exists
+try {
+  if (yahooFinance && (yahooFinance as any).suppressNotices) {
+    (yahooFinance as any).suppressNotices(['yahooSurrogate']);
+  }
+} catch (e) {}
+
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+const yahooFinanceCache: Record<string, CacheEntry> = {};
+const CACHE_TTL_MS = 60000; // 60 seconds
+
+function getSectorForTicker(cleanTicker: string): string {
+  let defaultSector = "Sektor Publik IDX";
+  const t = cleanTicker.toUpperCase();
+  if (t.startsWith("BB") || t === "BMRI" || t === "BDMN" || t === "PNBN") {
+    return "Finansial";
+  } else if (t === "TLKM" || t === "JSMR" || t === "EXCL" || t === "ISAT") {
+    return "Infrastruktur";
+  } else if (t === "GOTO" || t === "BUKA" || t === "WIFI") {
+    return "Teknologi";
+  } else if (t === "ASII" || t === "UNVR" || t === "ICBP" || t === "INDF" || t === "AMRT" || t === "MIDI") {
+    return "Konsumer";
+  } else if (t === "ADRO" || t === "BUMI" || t === "ITMG" || t === "PTBA") {
+    return "Energi";
+  } else if (t === "ANTM" || t === "TINS" || t === "INCO") {
+    return "Pertambangan";
+  }
+  return defaultSector;
+}
+
 const REAL_PRICE_LOOKUP: Record<string, number> = {
   "GOTO": 51, "BUMI": 135, "BREN": 7150, "TPIA": 7650, "BYAN": 16200, "AMMN": 8750, "ADMR": 1320, "BRMS": 396,
   "DSSA": 78000, "PANI": 11250, "SMGR": 3810, "INTP": 7250, "INDF": 6220, "MYOR": 2640, "SIDO": 615, "ACES": 820,
@@ -27,9 +63,42 @@ const REAL_PRICE_LOOKUP: Record<string, number> = {
   "AUTO": 2040, "MAIN": 680, "MDIA": 50, "KLBF": 1440, "SRIL": 50, "KIJA": 140, "SSIA": 950, "ADHI-R": 20, "AMRT": 3200
 };
 
+let serverStocksCache: any[] | null = null;
+let serverCacheTimestamp = 0;
+const SERVER_CACHE_TTL = 30000; // 30 seconds
+
+async function fetchNeabyteStocksFromServer(): Promise<any[]> {
+  const now = Date.now();
+  if (serverStocksCache && (now - serverCacheTimestamp < SERVER_CACHE_TTL)) {
+    return serverStocksCache;
+  }
+
+  try {
+    console.log("[Server] Menarik data real-time terpusat dari NeaByte API...");
+    const response = await fetch("https://api.neabyte.com/idx/stocks", {
+      headers: { "Accept": "application/json" }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const mapped = Array.isArray(data) ? data : (data?.data || []);
+      serverStocksCache = mapped;
+      serverCacheTimestamp = Date.now();
+      return serverStocksCache;
+    }
+  } catch (err) {
+    // Clean and silent log to avoid dump analysis issues on non-resolvable DNS API endpoint
+    console.log("[Server] Koneksi NeaByte API tidak dapat dihubungi. Menggunakan fallback data internal.");
+  }
+
+  return serverStocksCache || [];
+}
+
 // Helper to fetch live IDX price data from Yahoo Finance or Single Source of Truth
 async function fetchYahooStock(ticker: string) {
   const cleanTicker = ticker.toUpperCase().trim();
+  const yahooSymbol = (cleanTicker === "IHSG" || cleanTicker === "^JKSE") ? "^JKSE" : (cleanTicker.endsWith(".JK") ? cleanTicker : `${cleanTicker}.JK`);
+  const now = Date.now();
+
   let currentPrice = 0;
   let previousPrice = 0;
   let change = 0;
@@ -43,36 +112,137 @@ async function fetchYahooStock(ticker: string) {
   let marketCapValue = 0;
   let dividendYield = 0;
 
-  let loadedFromJSON = false;
+  let loaded = false;
 
-  // Single Source of Truth: Membaca file JSON eksternal terlebih dahulu agar data di dashboard identik dengan hasil script updates
-  try {
-    const filePath = path.join(process.cwd(), "public/data/latest_prices.json");
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, "utf-8");
-      const jsonPrices = JSON.parse(content);
-      const cachedStock = jsonPrices[cleanTicker];
-      if (cachedStock && cachedStock.currentPrice > 0) {
-        currentPrice = cachedStock.currentPrice;
-        previousPrice = cachedStock.previousPrice || currentPrice;
-        change = cachedStock.change !== undefined ? cachedStock.change : (currentPrice - previousPrice);
-        changePercent = cachedStock.changePercent !== undefined ? cachedStock.changePercent : (previousPrice !== 0 ? (change / previousPrice) * 100 : 0);
-        low = cachedStock.low || currentPrice * 0.98;
-        high = cachedStock.high || currentPrice * 1.02;
-        volume = cachedStock.volume || 1120000;
-        longName = cachedStock.longName || `${cleanTicker} Tbk.`;
-        history = cachedStock.history || [previousPrice, currentPrice];
+  // 0. Coba gunakan yahoo-finance2 dengan in-memory cache untuk kecepatan maksimal dan menghindari rate-limit
+  if (yahooFinanceCache[yahooSymbol] && (now - yahooFinanceCache[yahooSymbol].timestamp < CACHE_TTL_MS)) {
+    console.log(`[Yahoo Cache Hit] Ticker: ${yahooSymbol}`);
+    const cached = yahooFinanceCache[yahooSymbol].data;
+    currentPrice = cached.currentPrice;
+    previousPrice = cached.previousPrice;
+    change = cached.change;
+    changePercent = cached.changePercent;
+    low = cached.low;
+    high = cached.high;
+    volume = cached.volume;
+    longName = cached.longName;
+    history = cached.history;
+    loaded = true;
+  } else {
+    try {
+      console.log(`[Yahoo API Query] Fetching live data for ${yahooSymbol} from yahoo-finance2...`);
+      const quote = (await yahooFinance.quote(yahooSymbol)) as any;
+      if (quote) {
+        currentPrice = quote.regularMarketPrice || quote.price || 0;
+        previousPrice = quote.regularMarketPreviousClose || quote.regularMarketOpen || currentPrice;
+        change = quote.regularMarketChange !== undefined ? quote.regularMarketChange : (currentPrice - previousPrice);
+        changePercent = quote.regularMarketChangePercent !== undefined ? quote.regularMarketChangePercent : (previousPrice > 0 ? (change / previousPrice) * 100 : 0);
+        low = quote.regularMarketDayLow || Math.min(previousPrice, currentPrice);
+        high = quote.regularMarketDayHigh || Math.max(previousPrice, currentPrice);
+        volume = quote.regularMarketVolume || 0;
+        longName = quote.longName || quote.shortName || `${cleanTicker} Tbk.`;
+        marketCapValue = quote.marketCap || (currentPrice * (volume || 10000000));
+        trailingPE = quote.trailingPe || (currentPrice / (quote.epsTrailingTwelveMonths || 10)) || 12.5;
+        dividendYield = quote.dividendYield || 0;
+
+        history = [previousPrice, Math.round((previousPrice + currentPrice) / 2), currentPrice];
         while (history.length < 10) {
           history.unshift(previousPrice);
         }
-        loadedFromJSON = true;
+
+        const resolvedStock = {
+          currentPrice,
+          previousPrice,
+          change,
+          changePercent,
+          low,
+          high,
+          volume,
+          longName,
+          history
+        };
+
+        yahooFinanceCache[yahooSymbol] = {
+          data: resolvedStock,
+          timestamp: now
+        };
+
+        loaded = true;
+        console.log(`[Yahoo API Success] Ticker: ${yahooSymbol} price: ${currentPrice}`);
       }
+    } catch (err: any) {
+      console.warn(`[Yahoo API Error] Failed to fetch quote for ${yahooSymbol} from yahoo-finance2, checking offline fallbacks... Error:`, err.message);
     }
-  } catch (err: any) {
-    // Abaikan error pembacaan JSON secara diam-diam
   }
 
-  if (!loadedFromJSON) {
+  // 1. Coba dapatkan data real-time dari NeaByte API cache terlebih dahulu
+  if (!loaded) {
+    try {
+      const neabyteStocks = await fetchNeabyteStocksFromServer();
+      const found = neabyteStocks.find((s: any) => 
+        s.ticker?.toUpperCase() === cleanTicker || s.symbol?.toUpperCase() === cleanTicker
+      );
+
+      if (found) {
+        const priceVal = parseFloat(found.price ?? found.currentPrice ?? found.current_price ?? found.close ?? 0);
+        if (priceVal > 0) {
+          currentPrice = priceVal;
+          previousPrice = parseFloat(found.prevClose ?? found.previousPrice ?? found.prev_close ?? found.open ?? currentPrice);
+          change = found.change !== undefined ? parseFloat(found.change) : (currentPrice - previousPrice);
+          changePercent = found.changePercent !== undefined ? parseFloat(found.changePercent) : (previousPrice > 0 ? (change / previousPrice) * 100 : 0);
+          volume = found.volume ?? found.vol ?? 12500000;
+          longName = found.name || found.companyName || found.company_name || `${cleanTicker} Tbk.`;
+          
+          if (found.history && Array.isArray(found.history) && found.history.length > 0) {
+            history = found.history.map((h: any) => parseFloat(h));
+          } else {
+            history = [previousPrice, Math.round((previousPrice + currentPrice) / 2), currentPrice];
+          }
+          while (history.length < 10) {
+            history.unshift(previousPrice);
+          }
+          
+          low = found.low || Math.min(previousPrice, currentPrice);
+          high = found.high || Math.max(previousPrice, currentPrice);
+          marketCapValue = found.marketCap || (currentPrice * volume);
+          loaded = true;
+        }
+      }
+    } catch (err) {
+      console.warn(`[Server Yahoo] Gagal memproses data NeaByte untuk ${cleanTicker}:`, err);
+    }
+  }
+
+  // 2. Single Source of Truth: Membaca file JSON eksternal jika NeaByte tidak memuat data ticker ini
+  if (!loaded) {
+    try {
+      const filePath = path.join(process.cwd(), "public/data/latest_prices.json");
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, "utf-8");
+        const jsonPrices = JSON.parse(content);
+        const cachedStock = jsonPrices[cleanTicker];
+        if (cachedStock && cachedStock.currentPrice > 0) {
+          currentPrice = cachedStock.currentPrice;
+          previousPrice = cachedStock.previousPrice || currentPrice;
+          change = cachedStock.change !== undefined ? cachedStock.change : (currentPrice - previousPrice);
+          changePercent = cachedStock.changePercent !== undefined ? cachedStock.changePercent : (previousPrice !== 0 ? (change / previousPrice) * 100 : 0);
+          low = cachedStock.low || currentPrice * 0.98;
+          high = cachedStock.high || currentPrice * 1.02;
+          volume = cachedStock.volume || 1120000;
+          longName = cachedStock.longName || `${cleanTicker} Tbk.`;
+          history = cachedStock.history || [previousPrice, currentPrice];
+          while (history.length < 10) {
+            history.unshift(previousPrice);
+          }
+          loaded = true;
+        }
+      }
+    } catch (err: any) {
+      // Abaikan error pembacaan JSON secara diam-diam
+    }
+  }
+
+  if (!loaded) {
     // Gunakan static / local lookup tanpa memanggil network eksternal untuk menghindari rate-limit dan kegagalan handshaking
     const baseEst = REAL_PRICE_LOOKUP[cleanTicker] || (Math.floor(100 + (cleanTicker.charCodeAt(0) % 15) * 200 + (cleanTicker.charCodeAt(1) % 10) * 50));
     const variance = 0.01 + ((cleanTicker.charCodeAt(0) + cleanTicker.charCodeAt(1)) % 10) * 0.002;
@@ -158,10 +328,12 @@ async function fetchYahooStock(ticker: string) {
   let finalPct = changePercent;
   
   if (cleanTicker === "IHSG" || cleanTicker === "^JKSE" || cleanTicker === "IDX") {
-    finalCurrent = 6254.97;
-    finalPrev = 6007.66;
-    finalChange = 247.31;
-    finalPct = 4.12;
+    if (finalCurrent <= 0) {
+      finalCurrent = 6120.05;
+      finalPrev = 6220.74;
+      finalChange = -100.69;
+      finalPct = -1.62;
+    }
   }
 
   return {
@@ -204,6 +376,60 @@ async function startServer() {
     } catch (error: any) {
       console.warn(`Fallback fetch Yahoo Stock: ${error.message}`);
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Endpoint to fetch historical 1-month stock data for chart rendering
+  app.get("/api/stock-history/:ticker", async (req, res) => {
+    try {
+      const cleanTicker = req.params.ticker.toUpperCase().trim();
+      const yahooSymbol = (cleanTicker === "IHSG" || cleanTicker === "^JKSE") ? "^JKSE" : (cleanTicker.endsWith(".JK") ? cleanTicker : `${cleanTicker}.JK`);
+      
+      const now = new Date();
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(now.getMonth() - 1);
+      
+      console.log(`[Yahoo History API Query] Fetching historical data for ${yahooSymbol} from ${oneMonthAgo.toISOString().split('T')[0]} to ${now.toISOString().split('T')[0]}...`);
+      
+      const results = await yahooFinance.historical(yahooSymbol, {
+        period1: oneMonthAgo,
+        period2: now,
+        interval: "1d",
+      });
+
+      // Map results to a simpler format
+      const formattedPoints = results.map((item: any) => ({
+        date: new Date(item.date).toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+        close: item.close || item.adjClose || 0,
+        open: item.open || 0,
+        high: item.high || 0,
+        low: item.low || 0,
+        volume: item.volume || 0,
+      }));
+
+      res.json({ points: formattedPoints });
+    } catch (error: any) {
+      console.warn(`[Yahoo History API Error] Failed to fetch historical data for ${req.params.ticker}: ${error.message}`);
+      // Fallback synthetic data if Yahoo Finance historical query fails
+      const ticker = req.params.ticker.toUpperCase().trim();
+      const points = [];
+      const basePrice = ticker === "BBCA" ? 10000 : ticker === "BBRI" ? 4500 : ticker === "TLKM" ? 3000 : 1000;
+      const now = new Date();
+      for (let i = 22; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i * 1.4);
+        const jitter = Math.sin(i * 0.5) * (basePrice * 0.03);
+        const trend = -i * (basePrice * 0.001);
+        points.push({
+          date: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+          close: Math.round(basePrice + trend + jitter),
+          open: Math.round(basePrice + trend + jitter * 0.9),
+          high: Math.round(basePrice + trend + Math.abs(jitter) * 1.1),
+          low: Math.round(basePrice + trend - Math.abs(jitter) * 1.1),
+          volume: Math.round(5000000 + Math.random() * 2000000),
+        });
+      }
+      res.json({ points, isFallback: true });
     }
   });
 
@@ -849,7 +1075,7 @@ Harap keluarkan respon dalam format JSON objek murni yang memuat:
     for (const [ticker, basePrice] of Object.entries(REAL_PRICE_LOOKUP)) {
       const tickerUpper = ticker.toUpperCase();
       if (tickerUpper === "IHSG") {
-        validatedPrices[tickerUpper] = 6254.97;
+        validatedPrices[tickerUpper] = 6120.05;
       } else {
         // Small premium active fluctuation to keep the app highly engaging and updated
         const changePct = 1 + (Math.random() - 0.495) * 0.006; // safe realistic fluctuation
@@ -860,7 +1086,7 @@ Harap keluarkan respon dalam format JSON objek murni yang memuat:
     }
 
     if (!validatedPrices["IHSG"]) {
-      validatedPrices["IHSG"] = 6254.97;
+      validatedPrices["IHSG"] = 6120.05;
     }
 
     return validatedPrices;
@@ -896,10 +1122,10 @@ Harap keluarkan respon dalam format JSON objek murni yang memuat:
             // Special case for IHSG, keeping it strictly at the official BEI price
             if (tickerUpper === "IHSG") {
               json[ticker] = {
-                currentPrice: 6254.97,
-                previousPrice: 6007.66,
-                change: 247.31,
-                changePercent: 4.12
+                currentPrice: 6120.05,
+                previousPrice: 6220.74,
+                change: -100.69,
+                changePercent: -1.62
               };
             } else if (validatedPrices[tickerUpper] !== undefined) {
               const currentPrice = validatedPrices[tickerUpper];
