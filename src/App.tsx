@@ -990,7 +990,13 @@ export default function App() {
                   <Activity className="w-4.5 h-4.5 text-emerald-400 shrink-0" />
                   <div className="flex flex-col text-left">
                     <span className="font-veneer text-[20px] tracking-tight antialiased leading-none">Akumulasi &amp; Distribusi</span>
-                    <span className="text-[8px] text-emerald-400 font-extrabold uppercase leading-none block mt-1 pl-0.5">Top 7 Radar &amp; Bandar</span>
+                    <span className="text-[8px] text-emerald-400 font-extrabold uppercase leading-none mt-1 pl-0.5 flex items-center gap-1.5">
+                      Top 7 Radar &amp; Bandar
+                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 bg-cyan-950/80 border border-cyan-500/30 rounded text-[7px] text-cyan-400 font-bold tracking-wider animate-pulse normal-case font-mono">
+                        <span className="w-1 h-1 rounded-full bg-cyan-400 animate-ping inline-block"></span>
+                        Live
+                      </span>
+                    </span>
                   </div>
                 </button>
 

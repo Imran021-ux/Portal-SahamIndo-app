@@ -2076,97 +2076,103 @@ export default function EmitenDashboardView({
               <span className="text-5xl md:text-6xl font-black text-white font-mono tracking-tighter leading-none">{activeStock.ticker}</span>
               <div className="flex flex-col gap-1">
                 <span className="text-xs bg-cyan-950/80 text-cyan-400 font-extrabold px-3 py-1 rounded-full border border-cyan-500/20 w-fit">{activeStock.sector}</span>
-                {activeStock.verificationRequired ? (
-                  <span className="text-[9.5px] bg-rose-950/70 text-[#f87171] font-mono border border-rose-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
-                    ⚠️ Data Perlu Verifikasi (Deviasi &gt; 10%)
-                  </span>
-                ) : (
-                  <span className="text-[9.5px] bg-emerald-950/70 text-emerald-400 font-mono border border-emerald-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
-                    🟢 Terverifikasi BEI & RTI Live Feed
-                  </span>
-                )}
               </div>
             </div>
             <h2 className="text-base md:text-lg font-bold text-slate-300 tracking-tight leading-snug">{activeStock.name}</h2>
           </div>
 
           {/* KANAN: Harga, Pergerakan, 52W High/Low, & Quick Actions diatur Sejajar dengan Rapi */}
-          <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center md:items-end lg:items-center gap-6 shrink-0 w-full md:w-auto">
+          <div className="flex flex-col items-start sm:items-end text-left sm:text-right gap-4 shrink-0 w-full md:w-auto">
             {/* Harga & 52W */}
-            <div className="flex flex-col items-start sm:items-end md:items-end text-left sm:text-right">
-              <div className="flex items-center gap-2.5 pb-1 flex-wrap">
-                <motion.span
-                  key={activeStock.currentPrice}
-                  animate={{
-                    color: priceFlash === "up" 
-                      ? "#4ade80" 
-                      : priceFlash === "down" 
-                      ? "#f87171" 
-                      : (activeStock.change >= 0 ? "#22c55e" : "#ef4444"),
-                    scale: priceFlash ? [1, 1.05, 1] : 1,
-                    textShadow: priceFlash === "up"
-                      ? "0 0 15px rgba(74,222,128,0.7)"
-                      : priceFlash === "down"
-                      ? "0 0 15px rgba(248,113,113,0.7)"
-                      : "0 0 0px rgba(0,0,0,0)"
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    ease: "easeOut"
-                  }}
-                  className="text-4xl font-extrabold font-mono inline-block origin-right select-none cursor-default"
-                >
-                  {formatIDR(activeStock.currentPrice)}
-                </motion.span>
-                <span className={`text-sm font-black ${activeStock.change >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
-                  {activeStock.change >= 0 ? "▲" : "▼"} {activeStock.change >= 0 ? "+" : ""}{activeStock.changePercent.toFixed(2)}%
-                </span>
-                <span className="text-[10px] uppercase font-mono font-black bg-slate-900 text-cyan-400 border border-cyan-500/15 px-1.5 py-0.5 rounded shadow">
-                  Data: {activeStock.source === "YahooFinance" || activeStock.source === "Yahoo Finance" ? "Yahoo" : "BEI"}
-                </span>
-              </div>
-              <div className="text-[10px] text-slate-400 font-mono flex flex-wrap gap-x-3 gap-y-1 pt-1 border-t border-slate-900 w-full sm:justify-end">
-                <span>Low Hari Ini: <strong className="text-rose-500 font-bold">{formatIDR(activeStock.low || Math.round(activeStock.currentPrice * 0.98))}</strong></span>
-                <span>•</span>
-                <span>High Hari Ini: <strong className="text-emerald-400 font-bold">{formatIDR(activeStock.high || Math.round(activeStock.currentPrice * 1.02))}</strong></span>
-                <span>•</span>
-                <span className="text-slate-500">52W Low: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 0.65))}</strong></span>
-                <span>•</span>
-                <span className="text-slate-500">52W High: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 1.35))}</strong></span>
-              </div>
+            <div className="flex items-center gap-2.5 pb-1 flex-wrap">
+              <motion.span
+                key={activeStock.currentPrice}
+                animate={{
+                  color: priceFlash === "up" 
+                    ? "#4ade80" 
+                    : priceFlash === "down" 
+                    ? "#f87171" 
+                    : (activeStock.change >= 0 ? "#22c55e" : "#ef4444"),
+                  scale: priceFlash ? [1, 1.05, 1] : 1,
+                  textShadow: priceFlash === "up"
+                    ? "0 0 15px rgba(74,222,128,0.7)"
+                    : priceFlash === "down"
+                    ? "0 0 15px rgba(248,113,113,0.7)"
+                    : "0 0 0px rgba(0,0,0,0)"
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: "easeOut"
+                }}
+                className="text-4xl font-extrabold font-mono inline-block origin-right select-none cursor-default"
+              >
+                {formatIDR(activeStock.currentPrice)}
+              </motion.span>
+              <span className={`text-sm font-black ${activeStock.change >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
+                {activeStock.change >= 0 ? "▲" : "▼"} {activeStock.change >= 0 ? "+" : ""}{activeStock.changePercent.toFixed(2)}%
+              </span>
+              <span className="text-[10px] uppercase font-mono font-black bg-slate-900 text-cyan-400 border border-cyan-500/15 px-1.5 py-0.5 rounded shadow">
+                Data: {activeStock.source === "YahooFinance" || activeStock.source === "Yahoo Finance" ? "Yahoo" : "BEI"}
+              </span>
+            </div>
+            
+            <div className="text-[10px] text-slate-400 font-mono flex flex-wrap gap-x-3 gap-y-1 pt-1 border-t border-slate-900 w-full sm:justify-end">
+              <span>Low Hari Ini: <strong className="text-rose-500 font-bold">{formatIDR(activeStock.low || Math.round(activeStock.currentPrice * 0.98))}</strong></span>
+              <span>•</span>
+              <span>High Hari Ini: <strong className="text-emerald-400 font-bold">{formatIDR(activeStock.high || Math.round(activeStock.currentPrice * 1.02))}</strong></span>
+              <span>•</span>
+              <span className="text-slate-500">52W Low: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 0.65))}</strong></span>
+              <span>•</span>
+              <span className="text-slate-500">52W High: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 1.35))}</strong></span>
+            </div>
 
-              {/* Visual Terminal Alur Akumulasi/Distribusi */}
-              <div className="w-full mt-2.5 p-2 bg-[#00050a] border border-slate-900 rounded-lg font-mono text-[9px] space-y-1 text-left sm:text-right flex flex-col items-start sm:items-end w-full">
-                <div className="flex justify-between items-center w-full text-slate-400 select-none">
-                  <span className="text-[8px] text-cyan-400 font-black tracking-wider uppercase">[JATS_SYSTEM: RADAR AKUMULASI / DISTRIBUSI]</span>
-                  <span className="text-emerald-400 animate-pulse text-[7.5px] font-bold">● ONLINE TAPE</span>
-                </div>
-                {(() => {
-                  const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-                  const accumPct = 40 + (charSum % 36); // e.g., 40% - 75%
-                  const distPct = 100 - accumPct;
-                  return (
-                    <div className="space-y-1 w-full">
-                      <div className="flex h-1.5 w-full bg-slate-950 rounded overflow-hidden">
-                        <div className="bg-[#22c55e]" style={{ width: `${accumPct}%` }} title={`Akumulasi / Beli: ${accumPct}%`} />
-                        <div className="bg-[#ef4444]" style={{ width: `${distPct}%` }} title={`Distribusi / Jual: ${distPct}%`} />
-                      </div>
-                      <div className="flex justify-between items-center text-[8px] font-bold w-full">
-                        <span className="text-[#22c55e]">▲ AKUM: {accumPct}% ({(accumPct * 1150).toLocaleString("id-ID")} Lot)</span>
-                        <span className="text-[#ef4444]">▼ DIST: {distPct}% ({(distPct * 1150).toLocaleString("id-ID")} Lot)</span>
-                      </div>
+            {/* Informasi Harga BEI Real Time */}
+            <div className="w-full flex justify-start sm:justify-end">
+              {activeStock.verificationRequired ? (
+                <span className="text-[9.5px] bg-rose-950/70 text-[#f87171] font-mono border border-rose-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
+                  ⚠️ Data Perlu Verifikasi (Deviasi &gt; 10%)
+                </span>
+              ) : (
+                <span className="text-[9.5px] bg-emerald-950/70 text-emerald-400 font-mono border border-emerald-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
+                  🟢 Terverifikasi BEI & RTI Live Feed
+                </span>
+              )}
+            </div>
+
+            {/* Visual Terminal Alur Akumulasi/Distribusi */}
+            <div className="w-full mt-1 p-2 bg-[#00050a] border border-slate-900 rounded-lg font-mono text-[9px] space-y-1 text-left sm:text-right flex flex-col items-start sm:items-end w-full">
+              <div className="flex justify-between items-center w-full text-slate-400 select-none">
+                <span className="text-[8px] text-cyan-400 font-black tracking-wider uppercase">[JATS_SYSTEM: RADAR AKUMULASI / DISTRIBUSI]</span>
+                <span className="text-emerald-400 animate-pulse text-[7.5px] font-bold">● ONLINE TAPE</span>
+              </div>
+              {(() => {
+                const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+                const accumPct = 40 + (charSum % 36); // e.g., 40% - 75%
+                const distPct = 100 - accumPct;
+                return (
+                  <div className="space-y-1 w-full">
+                    <div className="flex h-1.5 w-full bg-slate-950 rounded overflow-hidden">
+                      <div className="bg-[#22c55e]" style={{ width: `${accumPct}%` }} title={`Akumulasi / Beli: ${accumPct}%`} />
+                      <div className="bg-[#ef4444]" style={{ width: `${distPct}%` }} title={`Distribusi / Jual: ${distPct}%`} />
                     </div>
-                  );
-                })()}
-              </div>
+                    <div className="flex justify-between items-center text-[8px] font-bold w-full">
+                      <span className="text-[#22c55e]">▲ AKUM: {accumPct}% ({(accumPct * 1150).toLocaleString("id-ID")} Lot)</span>
+                      <span className="text-[#ef4444]">▼ DIST: {distPct}% ({(distPct * 1150).toLocaleString("id-ID")} Lot)</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
 
+            {/* Combined Row: 7 Hari Beli Foreign & Quick Actions samping-sampingan */}
+            <div className="mt-2 pt-3 border-t border-slate-900/60 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               {/* Visual 7 Hari Beli Foreign */}
-              <div className="mt-3.5 pt-2 border-t border-slate-900/60 w-full flex flex-col items-start sm:items-end">
+              <div className="flex flex-col items-start lg:items-end lg:order-last shrink-0">
                 <span className="text-[9px] text-[#94a3b8] font-bold font-mono tracking-wider uppercase mb-1.5 inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   7-Day Foreign Net Flow (Miliar Rp)
                 </span>
-                <div className="flex gap-1.5 select-none sm:justify-end w-full">
+                <div className="flex gap-1.5 select-none lg:justify-end w-full">
                   {Array.from({ length: 7 }).map((_, i) => {
                     const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
                     const valModifier = ((charSum * (i + 1) * 3) % 103) - 45; // -45M to +58M
@@ -2190,82 +2196,81 @@ export default function EmitenDashboardView({
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Quick Actions (Favorit, Block, Share) */}
-            <div className="flex items-center gap-2 bg-[#010911]/80 p-2 rounded-xl border border-cyan-950/60 h-fit self-center sm:self-auto md:self-end lg:self-auto select-none">
-              
-              {/* Stack: Favorit (Simpan) on Top, Unduh Laporan PDF on Bottom */}
-              <div className="flex flex-col gap-1.5 border-r border-cyan-950/50 pr-2">
-                {/* Favorit (Simpan) */}
+              {/* Quick Actions (Favorit, Block, Share) */}
+              <div className="flex items-center gap-2 bg-[#010911]/80 p-2 rounded-xl border border-cyan-950/60 h-fit self-center lg:self-auto select-none flex-wrap xs:flex-nowrap">
+                {/* Stack: Favorit (Simpan) on Top, Unduh Laporan PDF on Bottom */}
+                <div className="flex flex-col gap-1.5 border-r border-cyan-950/50 pr-2">
+                  {/* Favorit (Simpan) */}
+                  <button
+                    onClick={() => onToggleWatchlist?.(activeStock.ticker)}
+                    className="p-1 px-2.5 rounded-md hover:bg-amber-950/30 text-slate-400 hover:text-amber-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0 pointer-events-auto"
+                    title={watchlist.includes(activeStock.ticker) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${watchlist.includes(activeStock.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
+                    <span>Simpan</span>
+                  </button>
+
+                  {/* Unduh Laporan PDF (Move below) */}
+                  <button
+                    onClick={handleDownloadPDFReport}
+                    className="p-1 px-2.5 rounded-md bg-[#0f2d24]/60 hover:bg-[#12382c] border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0 whitespace-nowrap pointer-events-auto"
+                    title="Unduh laporan ringkasan performa saham & analisis AI"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Unduh Laporan PDF</span>
+                  </button>
+                </div>
+
+                {/* Block */}
                 <button
-                  onClick={() => onToggleWatchlist?.(activeStock.ticker)}
-                  className="p-1 px-2.5 rounded-md hover:bg-amber-950/30 text-slate-400 hover:text-amber-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0"
-                  title={watchlist.includes(activeStock.ticker) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                  onClick={() => {
+                    if (blockedTickers.includes(activeStock.ticker)) {
+                      setBlockedTickers(blockedTickers.filter(t => t !== activeStock.ticker));
+                    } else {
+                      setBlockedTickers([...blockedTickers, activeStock.ticker]);
+                    }
+                  }}
+                  className={`p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 pointer-events-auto ${
+                    blockedTickers.includes(activeStock.ticker)
+                      ? "bg-rose-950/40 text-rose-450 border border-rose-800/20"
+                      : "hover:bg-rose-950/10 text-slate-400 hover:text-rose-450"
+                  }`}
+                  title={blockedTickers.includes(activeStock.ticker) ? "Unlock Emiten" : "Block Emiten"}
                 >
-                  <Star className={`w-3.5 h-3.5 ${watchlist.includes(activeStock.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
-                  <span>Simpan</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span className="hidden xs:inline">Block</span>
                 </button>
 
-                {/* Unduh Laporan PDF (Move below) */}
+                {/* Share */}
                 <button
-                  onClick={handleDownloadPDFReport}
-                  className="p-1 px-2.5 rounded-md bg-[#0f2d24]/60 hover:bg-[#12382c] border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0 whitespace-nowrap"
-                  title="Unduh laporan ringkasan performa saham & analisis AI"
+                  onClick={() => {
+                    setShareSuccess(true);
+                    navigator.clipboard.writeText(window.location.href);
+                    setTimeout(() => setShareSuccess(false), 2000);
+                  }}
+                  className="p-2 rounded-lg hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black relative shrink-0 pointer-events-auto"
+                  title="Salin Link Analisis"
                 >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Unduh Laporan PDF</span>
+                  <Eye className="w-4 h-4 text-cyan-400" />
+                  <span className="hidden xs:inline">Share</span>
+                  {shareSuccess && (
+                    <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-cyan-900 border border-cyan-400 text-[8px] text-white font-mono px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap animate-bounce font-sans">
+                      Tersalin!
+                    </span>
+                  )}
+                </button>
+
+                {/* Quick Compare with IHSG */}
+                <button
+                  onClick={() => setIsCompareOpen(true)}
+                  className="p-2 rounded-lg bg-[#0c2a45]/35 hover:bg-[#0d2a42]/90 text-cyan-450 hover:text-cyan-305 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 animate-pulse pointer-events-auto"
+                  title="Bandingkan harga saham secara visual dengan indeks IHSG"
+                >
+                  <BarChart3 className="w-4 h-4 text-cyan-400" />
+                  <span className="hidden xs:inline">Compare IHSG</span>
                 </button>
               </div>
-
-              {/* Block */}
-              <button
-                onClick={() => {
-                  if (blockedTickers.includes(activeStock.ticker)) {
-                    setBlockedTickers(blockedTickers.filter(t => t !== activeStock.ticker));
-                  } else {
-                    setBlockedTickers([...blockedTickers, activeStock.ticker]);
-                  }
-                }}
-                className={`p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 ${
-                  blockedTickers.includes(activeStock.ticker)
-                    ? "bg-rose-950/40 text-rose-400 border border-rose-800/20"
-                    : "hover:bg-rose-950/10 text-slate-400 hover:text-rose-400"
-                }`}
-                title={blockedTickers.includes(activeStock.ticker) ? "Unlock Emiten" : "Block Emiten"}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span className="hidden xs:inline">Block</span>
-              </button>
-
-              {/* Share */}
-              <button
-                onClick={() => {
-                  setShareSuccess(true);
-                  navigator.clipboard.writeText(window.location.href);
-                  setTimeout(() => setShareSuccess(false), 2000);
-                }}
-                className="p-2 rounded-lg hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black relative shrink-0"
-                title="Salin Link Analisis"
-              >
-                <Eye className="w-4 h-4" />
-                <span className="hidden xs:inline">Share</span>
-                {shareSuccess && (
-                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-cyan-900 border border-cyan-400 text-[8px] text-white font-mono px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap animate-bounce">
-                    Tersalin!
-                  </span>
-                )}
-              </button>
-
-              {/* Quick Compare with IHSG */}
-              <button
-                onClick={() => setIsCompareOpen(true)}
-                className="p-2 rounded-lg bg-[#0c2a45]/35 hover:bg-[#0d2a42]/90 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 animate-pulse"
-                title="Bandingkan harga saham secara visual dengan indeks IHSG"
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden xs:inline">Compare IHSG</span>
-              </button>
             </div>
           </div>
         </div>

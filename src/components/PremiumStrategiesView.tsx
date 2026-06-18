@@ -73,20 +73,27 @@ const renderRecommendationBadge = (ticker: string) => {
 
 export default function PremiumStrategiesView({ stocks, onSelectStock, initialCategory = "multibager" }: PremiumStrategiesViewProps) {
   const [activeCategory, setActiveCategory] = useState<"multibager" | "ara" | "momentum" | "undervalue" | "near_support" | "bull_divergence" | "early_breakout" | "bandarmology">(initialCategory);
-  const [priceSortOrder, setPriceSortOrder] = useState<"none" | "low_to_high" | "high_to_low">("none");
+  const [priceFilterRange, setPriceFilterRange] = useState<"all" | "under_200" | "200_1000" | "1000_5000" | "above_5000">("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
     setActiveCategory(initialCategory);
   }, [initialCategory]);
 
-  const sortStocksByPriceHelper = (arr: any[]): any[] => {
-    if (priceSortOrder === "low_to_high") {
-      return [...arr].sort((a, b) => a.currentPrice - b.currentPrice);
-    }
-    if (priceSortOrder === "high_to_low") {
-      return [...arr].sort((a, b) => b.currentPrice - a.currentPrice);
-    }
-    return arr;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, priceFilterRange]);
+
+  const filterStocksByPriceHelper = (arr: any[]): any[] => {
+    return arr.filter((stock) => {
+      const price = stock.currentPrice;
+      if (priceFilterRange === "under_200") return price < 200;
+      if (priceFilterRange === "200_1000") return price >= 200 && price <= 1000;
+      if (priceFilterRange === "1000_5000") return price >= 1000 && price <= 5000;
+      if (priceFilterRange === "above_5000") return price > 5000;
+      return true;
+    });
   };
 
   const categoryTitles = {
@@ -177,7 +184,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         compoundPot,
         score
       };
-    }).sort((a, b) => b.score - a.score).slice(0, 12);
+    }).sort((a, b) => b.score - a.score).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate Ara Pattern entries
@@ -197,7 +204,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         statusLabel,
         bandarScore: Math.round(top3Participation + bandarNetBuyM / 10)
       };
-    }).sort((a, b) => b.bandarScore - a.bandarScore).slice(0, 12);
+    }).sort((a, b) => b.bandarScore - a.bandarScore).slice(0, 48);
   }, [realStocksOnly]);
 
   const araStocks = useMemo(() => {
@@ -216,7 +223,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         retailFearScore,
         probability: Math.round(55 + (hash % 38)) // 55% - 93%
       };
-    }).sort((a, b) => b.probability - a.probability).slice(0, 12);
+    }).sort((a, b) => b.probability - a.probability).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate technical momentum entries
@@ -240,7 +247,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         statusText,
         momentumScore: Math.round((rsiVal + buyFlowIndex) / 2)
       };
-    }).sort((a, b) => b.momentumScore - a.momentumScore).slice(0, 12);
+    }).sort((a, b) => b.momentumScore - a.momentumScore).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate deep undervalue deep value entries
@@ -262,7 +269,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         dividendCoverage,
         safetyMargin
       };
-    }).sort((a, b) => b.safetyMargin - a.safetyMargin).slice(0, 12);
+    }).sort((a, b) => b.safetyMargin - a.safetyMargin).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate Near Support entries
@@ -281,7 +288,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         supportPrice,
         reboundProbability
       };
-    }).sort((a, b) => b.reboundProbability - a.reboundProbability).slice(0, 12);
+    }).sort((a, b) => b.reboundProbability - a.reboundProbability).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate Bullish Divergence entries
@@ -300,7 +307,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         divergenceConfidence,
         macdHistogram
       };
-    }).sort((a, b) => b.divergenceConfidence - a.divergenceConfidence).slice(0, 12);
+    }).sort((a, b) => b.divergenceConfidence - a.divergenceConfidence).slice(0, 48);
   }, [realStocksOnly]);
 
   // Curate Early Breakout entries
@@ -319,8 +326,33 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
         breakoutResist,
         breakoutRating
       };
-    }).sort((a, b) => b.breakoutRating - a.breakoutRating).slice(0, 12);
+    }).sort((a, b) => b.breakoutRating - a.breakoutRating).slice(0, 48);
   }, [realStocksOnly]);
+
+  const rawActiveStocks = useMemo(() => {
+    switch (activeCategory) {
+      case "bandarmology": return bandarmologyStocks;
+      case "multibager": return multibagerStocks;
+      case "ara": return araStocks;
+      case "momentum": return momentumStocks;
+      case "undervalue": return undervalueStocks;
+      case "near_support": return nearSupportStocks;
+      case "bull_divergence": return bullDivergenceStocks;
+      case "early_breakout": return earlyBreakoutStocks;
+      default: return [];
+    }
+  }, [activeCategory, bandarmologyStocks, multibagerStocks, araStocks, momentumStocks, undervalueStocks, nearSupportStocks, bullDivergenceStocks, earlyBreakoutStocks]);
+
+  const filteredActiveStocks = useMemo(() => {
+    return filterStocksByPriceHelper(rawActiveStocks);
+  }, [rawActiveStocks, priceFilterRange]);
+
+  const paginatedActiveStocks = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredActiveStocks.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredActiveStocks, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredActiveStocks.length / ITEMS_PER_PAGE));
 
   return (
     <div className="space-y-6">
@@ -384,22 +416,24 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#010811]/90 border border-slate-900 rounded-2xl p-4 gap-3 select-none">
         <div>
           <span className="text-[10px] text-cyan-400 font-extrabold tracking-widest uppercase block font-mono">
-            Urutkan Harga Smart Pick
+            Filter Harga Smart Pick
           </span>
-          <span className="text-xs text-slate-400">
-            Urutkan emiten terpilih dari kriteria strategi premium.
+          <span className="text-xs text-slate-400 font-sans">
+            Saring emiten pilihan berdasarkan rentang harga per lembar saham di bursa.
           </span>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <label className="text-xs text-slate-400 font-mono shrink-0">Urutan Harga:</label>
+          <label className="text-xs text-slate-400 font-mono shrink-0">Filter Harga:</label>
           <select
-            value={priceSortOrder}
-            onChange={(e) => setPriceSortOrder(e.target.value as any)}
+            value={priceFilterRange}
+            onChange={(e) => setPriceFilterRange(e.target.value as any)}
             className="bg-slate-950 border border-slate-850 px-3 py-1.5 rounded-lg text-xs text-slate-200 outline-none focus:border-cyan-500/50 cursor-pointer w-full sm:w-[220px]"
           >
-            <option value="none">Sesuai Skor Teratas Strategi</option>
-            <option value="low_to_high">Harga Termurah ke Termahal 📈</option>
-            <option value="high_to_low">Harga Termahal ke Termurah 📉</option>
+            <option value="all">Semua Harga (All Prices) 🌐</option>
+            <option value="under_200">Di bawah Rp 200 (Sangat Murah) 🪙</option>
+            <option value="200_1000">Rp 200 - Rp 1.000 (Menengah) 💵</option>
+            <option value="1000_5000">Rp 1.000 - Rp 5.000 (Menengah Atas) 💎</option>
+            <option value="above_5000">Di atas Rp 5.000 (Blue Chip / Sultan) 👑</option>
           </select>
         </div>
       </div>
@@ -422,7 +456,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(bandarmologyStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -488,7 +522,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(multibagerStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -554,7 +588,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(araStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -621,7 +655,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(momentumStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -689,7 +723,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(undervalueStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -754,7 +788,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(nearSupportStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -816,7 +850,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(bullDivergenceStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -878,7 +912,7 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 </tr>
               </thead>
               <tbody>
-                {sortStocksByPriceHelper(earlyBreakoutStocks).map((stock) => (
+                {paginatedActiveStocks.map((stock) => (
                   <tr
                     key={stock.ticker}
                     onClick={() => onSelectStock?.(stock.ticker)}
@@ -921,6 +955,82 @@ export default function PremiumStrategiesView({ stocks, onSelectStock, initialCa
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Empty state when no stocks match price range filter */}
+        {filteredActiveStocks.length === 0 && (
+          <div className="p-12 text-center flex flex-col items-center justify-center space-y-3 select-none bg-slate-950/20">
+            <AlertCircle className="w-10 h-10 text-cyan-500 animate-pulse" />
+            <h4 className="text-sm font-black text-white">Tidak Ada Saham Terdeteksi</h4>
+            <p className="text-xs text-slate-400 max-w-sm leading-relaxed font-sans mt-1">
+              Maaf, tidak ada emiten pilihan dalam kategori ini yang masuk pada rentang filter harga {priceFilterRange === "under_200" ? "di bawah Rp 200" : priceFilterRange === "200_1000" ? "Rp 200 - Rp 1.000" : priceFilterRange === "1000_5000" ? "Rp 1.000 - Rp 5.000" : "di atas Rp 5.000"}. Silakan ubah filter harga atau pilih kategori lainnya.
+            </p>
+          </div>
+        )}
+
+        {/* Dynamic Pagination Bar shown if we have stocks */}
+        {filteredActiveStocks.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 bg-slate-950 border-t border-slate-900 select-none">
+            <div className="text-[11px] text-slate-400 font-mono">
+              Menampilkan{" "}
+              <span className="text-cyan-400 font-bold">
+                {filteredActiveStocks.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}
+              </span>
+              {" "}-{" "}
+              <span className="text-cyan-400 font-bold">
+                {Math.min(currentPage * ITEMS_PER_PAGE, filteredActiveStocks.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="text-cyan-400 font-bold">
+                {filteredActiveStocks.length}
+              </span>{" "}
+              Saham pilihan
+            </div>
+            
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-1 ${
+                  currentPage === 1
+                    ? "bg-slate-950/20 border-slate-950 text-slate-350 cursor-not-allowed"
+                    : "bg-[#0b293c]/50 border-cyan-900/30 text-cyan-400 hover:bg-[#0b293c] hover:text-white"
+                }`}
+              >
+                Sebelumnya
+              </button>
+              
+              {Array.from({ length: totalPages }).map((_, idx) => {
+                const pageNum = idx + 1;
+                const isSelected = currentPage === pageNum;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded-lg border text-xs font-bold font-mono transition-all cursor-pointer flex items-center justify-center ${
+                      isSelected
+                        ? "bg-[#0e3a54] border-cyan-500/40 text-cyan-200 font-extrabold"
+                        : "bg-slate-950 border-slate-900 text-slate-400 hover:text-white hover:border-slate-800"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-1 ${
+                  currentPage === totalPages
+                    ? "bg-slate-950/20 border-slate-950 text-slate-350 cursor-not-allowed"
+                    : "bg-[#0b293c]/50 border-cyan-900/30 text-cyan-400 hover:bg-[#0b293c] hover:text-white"
+                }`}
+              >
+                Berikutnya
+              </button>
+            </div>
           </div>
         )}
 
