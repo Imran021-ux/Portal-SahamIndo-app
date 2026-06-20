@@ -11,6 +11,7 @@ import {
   ArrowUpRight, ArrowDownRight, Target, ShieldAlert, CheckCircle2,
   ChevronRight, BrainCircuit, ExternalLink, HelpCircle, Star, Eye
 } from "lucide-react";
+import fullEmitenList from "../full_emiten_list.json";
 
 interface RecommendationsViewProps {
   stocks: Stock[];
@@ -23,6 +24,43 @@ export default function RecommendationsView({ stocks, onNavigateToTracer, watchl
   const [activeTab, setActiveTab] = useState<"bpjs" | "bsjp" | "swing">("bpjs");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRec, setSelectedRec] = useState<any | null>(null);
+
+  // Build lookups for actual BEI company names and sectors from the official JSON data
+  const emitenNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    fullEmitenList.forEach((e: any) => {
+      map.set(e.ticker.toUpperCase().trim(), e.company_name);
+    });
+    return map;
+  }, []);
+
+  const emitenSectorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    fullEmitenList.forEach((e: any) => {
+      map.set(e.ticker.toUpperCase().trim(), e.sector);
+    });
+    return map;
+  }, []);
+
+  const getEmitenRealName = (ticker: string) => {
+    const clean = ticker.toUpperCase().trim();
+    // Prioritize Yahoo Finance name if synced in stock state, then fullEmitenList name, then fallback
+    const stock = stocks.find(s => s.ticker === ticker);
+    if (stock && stock.name && !stock.name.includes("Sinar") && !stock.name.includes("Maju") && !stock.name.includes("Nusantara") && !stock.name.includes("Karya")) {
+      return stock.name;
+    }
+    const realName = emitenNameMap.get(clean);
+    if (realName) return realName;
+    return stock?.name || `${ticker} Tbk.`;
+  };
+
+  const getEmitenRealSector = (ticker: string) => {
+    const clean = ticker.toUpperCase().trim();
+    const realSector = emitenSectorMap.get(clean);
+    if (realSector) return realSector;
+    const stock = stocks.find(s => s.ticker === ticker);
+    return stock?.sector || "IDX";
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -83,6 +121,16 @@ export default function RecommendationsView({ stocks, onNavigateToTracer, watchl
       if (!s.isReal) return;
       
       const tickerUpper = s.ticker.toUpperCase();
+      
+      // Ensure only real-world BEI tickers existing in our official directory are processed,
+      // thereby weeding out fictional / procedural placeholders.
+      if (!emitenNameMap.has(tickerUpper) && 
+          tickerUpper !== "BBCA" && tickerUpper !== "BBRI" && 
+          tickerUpper !== "BMRI" && tickerUpper !== "BBNI" && 
+          tickerUpper !== "TLKM" && tickerUpper !== "ASII") {
+        return;
+      }
+
       const tickerValue = s.ticker.charCodeAt(0) + s.ticker.charCodeAt(1) + s.ticker.charCodeAt(2) + (s.ticker.charCodeAt(3) || 65);
       const isGOTO = s.ticker === "GOTO" || s.ticker === "BUMI" || s.ticker === "BRPT";
 
@@ -486,11 +534,11 @@ export default function RecommendationsView({ stocks, onNavigateToTracer, watchl
                               <span className="text-sm font-black text-white font-mono leading-none group-hover:text-emerald-400 transition-colors">{rec.ticker}</span>
                             </div>
                             <span className="text-[10px] text-slate-450 font-sans truncate max-w-[130px] mt-1.5 block">
-                              {stock?.name || "Emiten IDX"}
+                              {getEmitenRealName(rec.ticker)}
                             </span>
                           </div>
                           <span className="px-1.5 py-0.5 rounded-sm bg-slate-900 border border-slate-850 text-[8px] text-slate-450 font-bold uppercase tracking-wider shrink-0 font-mono">
-                            {stock?.sector ? stock.sector.substring(0, 8) : "IDX"}
+                            {getEmitenRealSector(rec.ticker).substring(0, 8)}
                           </span>
                           {/* Syariah or Non-Syariah compliant flag indicator */}
                           {stock?.isSyariah ? (
@@ -695,7 +743,7 @@ export default function RecommendationsView({ stocks, onNavigateToTracer, watchl
                       {activeTab === "swing" ? "📊 SWING" : activeTab === "bpjs" ? "⚡ BPJS" : "🌙 BSJP"}
                     </span>
                   </div>
-                  <h3 className="text-xs text-slate-450 font-bold font-sans truncate block">{stock?.name || "Emiten Bursa"}</h3>
+                  <h3 className="text-xs text-slate-450 font-bold font-sans truncate block">{getEmitenRealName(selectedRec.ticker)}</h3>
                 </div>
                 <button
                   onClick={() => setSelectedRec(null)}

@@ -9,6 +9,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import fs from "fs";
+import fullEmitenList from "./src/full_emiten_list.json";
 
 dotenv.config();
 
@@ -47,6 +48,42 @@ function getSectorForTicker(cleanTicker: string): string {
   }
   return defaultSector;
 }
+
+// Load valid BEI tickers from src/full_emiten_list.json statically to enforce registration checks
+const VALID_IDX_TICKERS = new Set<string>();
+
+try {
+  if (Array.isArray(fullEmitenList)) {
+    fullEmitenList.forEach((item: any) => {
+      if (item && item.ticker) {
+        const ticker = item.ticker.toUpperCase().trim();
+        if (/^[A-Z]{4}$/.test(ticker)) {
+          VALID_IDX_TICKERS.add(ticker);
+        }
+      }
+    });
+  }
+} catch (e: any) {
+  console.error("[Server] Error populating static emiten list:", e.message);
+}
+
+// Ensure emergency fallbacks are present as a absolute guarantee of service
+const emergencyFallbackTickers = [
+  "BBCA", "BBRI", "BMRI", "BBNI", "TLKM", "GOTO", "ASII", "UNVR", "BREN", "TPIA", 
+  "BYAN", "AMMN", "ADRO", "KLBF", "ICBP", "INDF", "PGAS", "JSMR", "ADMR", "BRMS",
+  "DSSA", "PANI", "SMGR", "INTP", "MYOR", "SIDO", "ACES", "MAPI", "MAPA", "ERAA",
+  "CPIN", "JPFA", "DEWA", "MEDC", "ENRG", "PGEO", "KEEN", "ADHI", "WIKA", "PTPP",
+  "MIDI", "PTRO", "ITMG", "INDY", "DOID", "TOBA", "ABMM", "ARTO", "BBTN", "BDMN",
+  "PNBN", "BJBR", "BJTM", "BANK", "AGRO", "BBYB", "BNGA", "BNLI", "PNBS", "BTPS",
+  "WOOD", "BRPT", "ANTM", "TINS", "INCO", "GIAA", "SOCI", "ELSA", "WINS", "SMDR",
+  "TMAS", "ASSA", "BIRD", "BLUE", "TAXI", "COAL", "BESS", "TCPI", "ESSA", "AKRA",
+  "PTBA", "WSKT", "PPRO", "ELTY", "LPKR", "PWON", "BSDE", "CTRA", "SMRA", "ASRI",
+  "KIJA", "MDLN", "GPRA", "JRPT", "GMTD", "BKSL", "DUTI", "FMII", "DILD", "EMDE",
+  "BUKA", "WIFI", "KREN", "MCAS", "DIVA", "NFCX", "HDIT", "ATIC", "MTDL", "MLPT"
+];
+emergencyFallbackTickers.forEach(t => VALID_IDX_TICKERS.add(t));
+
+console.log(`[Server] Active Valid BEI Ticker Registry initialized with ${VALID_IDX_TICKERS.size} symbols.`);
 
 const REAL_PRICE_LOOKUP: Record<string, number> = {
   "GOTO": 51, "BUMI": 135, "BREN": 7150, "TPIA": 7650, "BYAN": 16200, "AMMN": 8750, "ADMR": 1320, "BRMS": 396,
@@ -93,9 +130,43 @@ async function fetchNeabyteStocksFromServer(): Promise<any[]> {
   return serverStocksCache || [];
 }
 
+// Helper to validate if a ticker is registered on the Indonesian Stock Exchange (BEI) (statically or dynamically on Yahoo Finance)
+async function isValidBeiTicker(ticker: string): Promise<boolean> {
+  const cleanTicker = ticker.toUpperCase().trim();
+  if (cleanTicker === "IHSG" || cleanTicker === "^JKSE" || cleanTicker === "IDX") {
+    return true;
+  }
+  if (VALID_IDX_TICKERS.has(cleanTicker)) {
+    return true;
+  }
+  
+  // If it's a standard 4-letter alphabetic, check dynamically on Yahoo Finance (.JK exchange)
+  if (/^[A-Z]{4}$/.test(cleanTicker)) {
+    try {
+      const yahooSymbol = `${cleanTicker}.JK`;
+      console.log(`[Validation Check] Checking if ${cleanTicker} is listed on BEI dynamically (Yahoo Finance)...`);
+      const quote = await yahooFinance.quote(yahooSymbol);
+      if (quote && (quote.regularMarketPrice !== undefined || quote.price !== undefined || quote.shortName)) {
+        console.log(`[Validation Success] Ticker "${cleanTicker}" found on Yahoo! Registering dynamically as valid BEI stock.`);
+        VALID_IDX_TICKERS.add(cleanTicker);
+        return true;
+      }
+    } catch (e: any) {
+      console.warn(`[Validation Failed] "${cleanTicker}" not resolved on Yahoo Finance: ${e.message}`);
+    }
+  }
+  return false;
+}
+
 // Helper to fetch live IDX price data from Yahoo Finance or Single Source of Truth
 async function fetchYahooStock(ticker: string) {
   const cleanTicker = ticker.toUpperCase().trim();
+  
+  // Strict check: if ticker is not registered on the Indonesian Stock Exchange (BEI), reject as anomaly!
+  if (!(await isValidBeiTicker(cleanTicker))) {
+    throw new Error(`Ticker "${cleanTicker}" tidak terdaftar di Bursa Efek Indonesia (BEI).`);
+  }
+
   const yahooSymbol = (cleanTicker === "IHSG" || cleanTicker === "^JKSE") ? "^JKSE" : (cleanTicker.endsWith(".JK") ? cleanTicker : `${cleanTicker}.JK`);
   const now = Date.now();
 
@@ -243,18 +314,18 @@ async function fetchYahooStock(ticker: string) {
   }
 
   if (!loaded) {
-    // Gunakan static / local lookup tanpa memanggil network eksternal untuk menghindari rate-limit dan kegagalan handshaking
-    const baseEst = REAL_PRICE_LOOKUP[cleanTicker] || (Math.floor(100 + (cleanTicker.charCodeAt(0) % 15) * 200 + (cleanTicker.charCodeAt(1) % 10) * 50));
+    const localEmiten = fullEmitenList.find((e: any) => e.ticker.toUpperCase().trim() === cleanTicker);
+    const baseEst = localEmiten?.price || REAL_PRICE_LOOKUP[cleanTicker] || (Math.floor(100 + (cleanTicker.charCodeAt(0) % 15) * 200 + (cleanTicker.charCodeAt(1) % 10) * 50));
     const variance = 0.01 + ((cleanTicker.charCodeAt(0) + cleanTicker.charCodeAt(1)) % 10) * 0.002;
-    previousPrice = Math.max(10, Math.round(baseEst * (1 - variance) * 100) / 100);
+    previousPrice = localEmiten?.previousPrice || Math.max(10, Math.round(baseEst * (1 - variance) * 100) / 100);
     currentPrice = baseEst;
-    marketCapValue = baseEst * 100000000;
-    change = currentPrice - previousPrice;
-    changePercent = (change / previousPrice) * 100;
-    low = Math.min(previousPrice, currentPrice) * 0.99;
-    high = Math.max(previousPrice, currentPrice) * 1.015;
-    volume = 1250000;
-    history = [previousPrice, currentPrice];
+    marketCapValue = localEmiten?.marketCap || baseEst * 100000000;
+    change = localEmiten?.change !== undefined ? localEmiten.change : (currentPrice - previousPrice);
+    changePercent = localEmiten?.changePercent !== undefined ? localEmiten.changePercent : (previousPrice !== 0 ? (change / previousPrice) * 100 : 0);
+    low = localEmiten?.low || Math.min(previousPrice, currentPrice) * 0.99;
+    high = localEmiten?.high || Math.max(previousPrice, currentPrice) * 1.015;
+    volume = localEmiten?.volume || 1250000;
+    history = localEmiten?.history || [previousPrice, currentPrice];
     while (history.length < 10) {
       history.unshift(previousPrice);
     }
@@ -371,6 +442,13 @@ async function startServer() {
   // Endpoint to fetch single real-time stock price from IDX via Yahoo Finance proxy
   app.get("/api/stock-live/:ticker", async (req, res) => {
     try {
+      const cleanTicker = req.params.ticker.toUpperCase().trim();
+      
+      // Strict check: if ticker is not registered on the Indonesian Stock Exchange (BEI), reject immediately!
+      if (!(await isValidBeiTicker(cleanTicker))) {
+        return res.status(404).json({ error: `Ticker "${cleanTicker}" tidak terdaftar di Bursa Efek Indonesia (BEI).` });
+      }
+
       const stock = await fetchYahooStock(req.params.ticker);
       res.json(stock);
     } catch (error: any) {
@@ -383,6 +461,12 @@ async function startServer() {
   app.get("/api/stock-history/:ticker", async (req, res) => {
     try {
       const cleanTicker = req.params.ticker.toUpperCase().trim();
+      
+      // Strict check: if ticker is not registered on the Indonesian Stock Exchange (BEI), reject immediately!
+      if (!(await isValidBeiTicker(cleanTicker))) {
+        return res.status(404).json({ error: `Ticker "${cleanTicker}" tidak terdaftar di Bursa Efek Indonesia (BEI).` });
+      }
+
       const yahooSymbol = (cleanTicker === "IHSG" || cleanTicker === "^JKSE") ? "^JKSE" : (cleanTicker.endsWith(".JK") ? cleanTicker : `${cleanTicker}.JK`);
       
       const now = new Date();
@@ -391,21 +475,29 @@ async function startServer() {
       
       console.log(`[Yahoo History API Query] Fetching historical data for ${yahooSymbol} from ${oneMonthAgo.toISOString().split('T')[0]} to ${now.toISOString().split('T')[0]}...`);
       
-      const results = await yahooFinance.historical(yahooSymbol, {
-        period1: oneMonthAgo,
-        period2: now,
-        interval: "1d",
-      });
+      const chartResult = await yahooFinance.chart(
+        yahooSymbol,
+        {
+          period1: oneMonthAgo,
+          period2: now,
+          interval: "1d",
+        },
+        { validateResult: false }
+      );
 
-      // Map results to a simpler format
-      const formattedPoints = results.map((item: any) => ({
-        date: new Date(item.date).toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
-        close: item.close || item.adjClose || 0,
-        open: item.open || 0,
-        high: item.high || 0,
-        low: item.low || 0,
-        volume: item.volume || 0,
-      }));
+      const results = (chartResult as any).quotes || [];
+
+      // Map results to a simpler format, filtering out incomplete or null/undefined entries
+      const formattedPoints = results
+        .filter((item: any) => item && item.date && item.close !== null && item.close !== undefined)
+        .map((item: any) => ({
+          date: new Date(item.date).toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+          close: item.close || item.adjclose || 0,
+          open: item.open || item.close || 0,
+          high: item.high || item.close || 0,
+          low: item.low || item.close || 0,
+          volume: item.volume || 0,
+        }));
 
       res.json({ points: formattedPoints });
     } catch (error: any) {

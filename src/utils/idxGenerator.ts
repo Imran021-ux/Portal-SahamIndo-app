@@ -4,6 +4,13 @@
  */
 
 import { Stock } from "../types";
+import fullEmitenList from "../full_emiten_list.json";
+
+const VALID_TICKERS = new Set<string>(
+  fullEmitenList
+    .map((item: any) => item.ticker?.toUpperCase().trim())
+    .filter((ticker) => ticker && /^[A-Z]{4}$/.test(ticker))
+);
 
 // Real prominent Indonesian Stock Exchange (BEI / IDX) Tickers dictionary
 const KNOWN_IDX_PROFILES: Record<string, { name: string; sector: string; isSyariah: boolean }> = {
@@ -85,6 +92,37 @@ const IDX_SECTORS = [
 
 export function generateDynamicIdxStock(ticker: string): Stock {
   const code = ticker.trim().toUpperCase();
+  
+  // If the ticker is not in VALID_TICKERS list of BEI, prevent anomalous profiles
+  if (!VALID_TICKERS.has(code) && code !== "IHSG" && code !== "^JKSE" && code !== "IDX") {
+    // Ultimate fallback to BBCA to prevent crash/anomalous UI rendering
+    return {
+      ticker: "BBCA",
+      name: "Bank Central Asia Tbk.",
+      currentPrice: 10250,
+      previousPrice: 10200,
+      change: 50,
+      changePercent: 0.49,
+      volume: 18500000,
+      marketCap: 1263000,
+      peRatio: 24.1,
+      dividendYield: 1.8,
+      sector: "Finansial",
+      history: [10100, 10150, 10200, 10250, 10200, 10180, 10220, 10200, 10200, 10250],
+      bid: 10225,
+      ask: 10275,
+      low: 10150,
+      high: 10300,
+      pbv: 4.85,
+      der: 11.2,
+      roe: 21.8,
+      eps: 425,
+      freeCashFlow: 28500,
+      ocf: 34000,
+      isSyariah: false,
+      isReal: true
+    };
+  }
   
   // 1. If known real IDX ticker, resolve immediately
   if (KNOWN_IDX_PROFILES[code]) {

@@ -1,6 +1,7 @@
 // src/dataService.ts
 import { marketData } from './marketData';
 import fullEmitenList from './full_emiten_list.json';
+import { REAL_PRICE_LOOKUP } from './data';
 
 // Cache configuration to prevent exceeding NeaByte API limits
 interface CacheEntry {
@@ -99,14 +100,17 @@ export const DataService = {
         fullEmitenList.forEach((emiten: any) => {
           const tickerUpper = emiten.ticker.toUpperCase();
           if (!localBackupList.some(item => item.ticker === tickerUpper)) {
+            const defaultFallbackPrice = REAL_PRICE_LOOKUP[tickerUpper] || (Math.floor(100 + (tickerUpper.charCodeAt(0) % 15) * 200 + (tickerUpper.charCodeAt(1) % 10) * 50));
+            const priceVal = emiten.price || emiten.currentPrice || defaultFallbackPrice;
+            const prevCloseVal = emiten.previousPrice || emiten.prevClose || priceVal;
             localBackupList.push({
               ticker: tickerUpper,
               symbol: tickerUpper,
               name: emiten.company_name,
-              currentPrice: 500,
-              prevClose: 500,
-              price: 500,
-              volume: 1000000,
+              currentPrice: priceVal,
+              prevClose: prevCloseVal,
+              price: priceVal,
+              volume: emiten.volume || 1000000,
               sector: emiten.sector || "Industri"
             });
           }
@@ -167,9 +171,34 @@ export const DataService = {
       );
     }
 
+    // Fallback to fullEmitenList if still not found in any API
+    if (!foundApi) {
+      const localEmiten = fullEmitenList.find((e: any) => e.ticker.toUpperCase().trim() === cleanSymbol);
+      if (localEmiten) {
+        foundApi = {
+          ticker: cleanSymbol,
+          symbol: cleanSymbol,
+          name: localEmiten.company_name,
+          price: localEmiten.price,
+          prevClose: localEmiten.previousPrice || localEmiten.price,
+          volume: localEmiten.volume,
+          sector: localEmiten.sector,
+          marketCap: localEmiten.marketCap,
+          peRatio: localEmiten.peRatio,
+          dividendYield: localEmiten.dividendYield,
+          bid: localEmiten.bid,
+          ask: localEmiten.ask,
+          low: localEmiten.low,
+          high: localEmiten.high,
+          history: localEmiten.history
+        };
+      }
+    }
+
     // Extract values with flexible key parsing
     const name = foundApi?.name || foundApi?.companyName || foundApi?.company_name || `${cleanSymbol} Tbk.`;
-    const currentPrice = this.sanitizePrice(foundApi?.price ?? foundApi?.currentPrice ?? foundApi?.current_price ?? foundApi?.close, 500);
+    const defaultFallbackPrice = REAL_PRICE_LOOKUP[cleanSymbol] || (Math.floor(100 + (cleanSymbol.charCodeAt(0) % 15) * 200 + (cleanSymbol.charCodeAt(1) % 10) * 50));
+    const currentPrice = this.sanitizePrice(foundApi?.price ?? foundApi?.currentPrice ?? foundApi?.current_price ?? foundApi?.close, defaultFallbackPrice);
     const previousPrice = this.sanitizePrice(foundApi?.prevClose ?? foundApi?.previousPrice ?? foundApi?.prev_close ?? foundApi?.open, currentPrice);
     
     const change = foundApi?.change ?? (currentPrice - previousPrice);
@@ -221,7 +250,8 @@ export const DataService = {
         );
 
         if (match) {
-          const currentPrice = this.sanitizePrice(match.price ?? match.currentPrice ?? match.current_price ?? match.close, 500);
+          const defaultFallbackPrice = REAL_PRICE_LOOKUP[symbol] || (Math.floor(100 + (symbol.charCodeAt(0) % 15) * 200 + (symbol.charCodeAt(1) % 10) * 50));
+          const currentPrice = this.sanitizePrice(match.price ?? match.currentPrice ?? match.current_price ?? match.close, defaultFallbackPrice);
           const prevClose = this.sanitizePrice(match.prevClose ?? match.previousPrice ?? match.prev_close ?? match.open, currentPrice);
 
           updatedData[symbol] = {
@@ -230,18 +260,29 @@ export const DataService = {
             lastUpdated: new Date().toLocaleTimeString("id-ID")
           };
         } else {
-          // If not found in API, check local fallback
-          if (marketData.emiten[symbol]) {
+          // Check local fullEmitenList first for the correct real-world Yahoo price
+          const localEmiten = fullEmitenList.find((e: any) => e.ticker.toUpperCase().trim() === symbol);
+          if (localEmiten) {
+            const defaultFallbackPrice = REAL_PRICE_LOOKUP[symbol] || (Math.floor(100 + (symbol.charCodeAt(0) % 15) * 200 + (symbol.charCodeAt(1) % 10) * 50));
+            const priceVal = localEmiten.price || defaultFallbackPrice;
+            const prevCloseVal = localEmiten.previousPrice || priceVal;
+            updatedData[symbol] = {
+              currentPrice: priceVal,
+              prevClose: prevCloseVal,
+              lastUpdated: new Date().toLocaleTimeString("id-ID")
+            };
+          } else if (marketData.emiten[symbol]) {
             const item = marketData.emiten[symbol];
             updatedData[symbol] = {
               currentPrice: item.currentPrice,
-              prevClose: item.prevClose,
+              prevClose: item.prevClose || item.currentPrice,
               lastUpdated: new Date().toLocaleTimeString("id-ID")
             };
           } else {
+            const defaultFallbackPrice = REAL_PRICE_LOOKUP[symbol] || (Math.floor(100 + (symbol.charCodeAt(0) % 15) * 200 + (symbol.charCodeAt(1) % 10) * 50));
             updatedData[symbol] = {
-              currentPrice: 500,
-              prevClose: 500,
+              currentPrice: defaultFallbackPrice,
+              prevClose: defaultFallbackPrice,
               lastUpdated: new Date().toLocaleTimeString("id-ID")
             };
           }

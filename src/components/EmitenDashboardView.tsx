@@ -13,7 +13,7 @@ import {
   ChevronLeft, SlidersHorizontal, Filter, Star, LayoutGrid, Calendar, HelpCircle, Info, FileText, RotateCw, Copy, Check, AlertTriangle, Maximize2, Minimize2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend, LineChart, Line } from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend, LineChart, Line, ReferenceLine, Label } from "recharts";
 import { getTechnicalIndicators } from "../data";
 import TradingViewWidget from "./TradingViewWidget";
 import TradingViewGauge from "./TradingViewGauge";
@@ -449,6 +449,7 @@ export default function EmitenDashboardView({
   
   const [activeHubTab, setActiveHubTab] = useState<"ringkasan" | "teknikal" | "fundamental" | "sector" | "verdict" | "broker" | "analisa-pasar" | "ramalan-ai">("ringkasan");
   const [chartType, setChartType] = useState<"native" | "tradingview">("native");
+  const [showFibonacci, setShowFibonacci] = useState<boolean>(true);
   const [isFullscreenChartOpen, setIsFullscreenChartOpen] = useState(false);
   const [brokerActivityView, setBrokerActivityView] = useState<"chart" | "table">("chart");
   const [brokerSearch, setBrokerSearch] = useState("");
@@ -1561,6 +1562,53 @@ export default function EmitenDashboardView({
     });
   }, [prices, minVal, range]);
 
+  const fibonacciLevels = useMemo(() => {
+    if (!prices || prices.length === 0) return [];
+    
+    const swingHigh = Math.max(...prices);
+    const swingLow = Math.min(...prices);
+    const diff = swingHigh - swingLow;
+    
+    const highIdx = prices.indexOf(swingHigh);
+    const lowIdx = prices.indexOf(swingLow);
+    const isUptrend = lowIdx < highIdx;
+    
+    const ratios = [
+      { ratio: 0.0, label: "0.0%" },
+      { ratio: 0.236, label: "23.6%" },
+      { ratio: 0.382, label: "38.2%" },
+      { ratio: 0.5, label: "50.0%" },
+      { ratio: 0.618, label: "61.8%" },
+      { ratio: 0.786, label: "78.6%" },
+      { ratio: 1.0, label: "100.0%" }
+    ];
+    
+    return ratios.map(({ ratio, label }) => {
+      let price = 0;
+      if (diff === 0) {
+        price = swingHigh;
+      } else {
+        if (isUptrend) {
+          price = swingHigh - ratio * diff;
+        } else {
+          price = swingLow + ratio * diff;
+        }
+      }
+      
+      const y = 45 + (1 - (price - minVal) / range) * (svgHeight - 110);
+      
+      return {
+        ratio,
+        label,
+        price,
+        y,
+        isUptrend,
+        swingHigh,
+        swingLow
+      };
+    });
+  }, [prices, minVal, range]);
+
   const nativeAreaPath = useMemo(() => {
     if (nativeChartPoints.length === 0) return "";
     let path = `M ${nativeChartPoints[0].x} ${nativeChartPoints[0].y}`;
@@ -1965,20 +2013,50 @@ export default function EmitenDashboardView({
               <div className="absolute left-0 right-0 mt-1.5 bg-[#031320] border border-cyan-800/40 rounded-xl shadow-2xl z-40 max-h-60 overflow-y-auto divide-y divide-slate-900 text-xs">
                 {filteredStocks.length === 0 ? (
                   <div className="p-4 text-center space-y-2">
-                    <span className="text-slate-400 block text-[10px]">Emiten tidak ditemukan lokal</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const cleaned = searchQuery.trim().replace(/[^a-zA-Z]/g, "").toUpperCase();
-                        if (cleaned.length >= 3) {
-                          setSelectedTicker(cleaned);
-                          setSearchQuery("");
-                        }
-                      }}
-                      className="w-full px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 font-extrabold text-white rounded-lg text-[10px] tracking-wide transition-all cursor-pointer active:scale-95"
-                    >
-                      🔍 PANGGIL LIVE IDX: {searchQuery.trim().toUpperCase()}
-                    </button>
+                    {(() => {
+                      const cleaned = searchQuery.trim().replace(/[^a-zA-Z]/g, "").toUpperCase();
+                      const isRealBEI = stocks.some(s => s.ticker.toUpperCase() === cleaned);
+                      if (isRealBEI) {
+                        return (
+                          <>
+                            <span className="text-slate-400 block text-[10px]">Emiten ditemukan di daftar BEI</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTicker(cleaned);
+                                setSearchQuery("");
+                              }}
+                              className="w-full px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 font-extrabold text-white rounded-lg text-[10px] tracking-wide transition-all cursor-pointer active:scale-95"
+                            >
+                              🔍 MUAT DATA LIVE: {cleaned}
+                            </button>
+                          </>
+                        );
+                      } else if (/^[A-Z]{4}$/.test(cleaned)) {
+                        return (
+                          <>
+                            <span className="text-yellow-400 block text-[10px] mb-1">💡 Kode &quot;{cleaned}&quot; rill di BEI tidak di database lokal</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTicker(cleaned);
+                                setSearchQuery("");
+                              }}
+                              className="w-full p-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 font-extrabold text-white rounded-lg text-[10px] tracking-wide transition-all cursor-pointer active:scale-95"
+                            >
+                              🔍 CARI & DAFTARKAN YAHOO: {cleaned}
+                            </button>
+                          </>
+                        );
+                      } else {
+                        return (
+                          <div className="text-rose-400 font-mono text-[10.5px] p-2 leading-relaxed">
+                            ⚠️ &quot;{cleaned}&quot; tidak terdaftar di bursa efek (BEI). <br/>
+                            Hanya emiten resmi yang dapat dicari.
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                 ) : (
                   filteredStocks.map((s) => (
@@ -2078,7 +2156,12 @@ export default function EmitenDashboardView({
                 <span className="text-xs bg-cyan-950/80 text-cyan-400 font-extrabold px-3 py-1 rounded-full border border-cyan-500/20 w-fit">{activeStock.sector}</span>
               </div>
             </div>
-            <h2 className="text-base md:text-lg font-bold text-slate-300 tracking-tight leading-snug">{activeStock.name}</h2>
+            <div className="flex flex-col space-y-0.5 mt-1">
+              <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest font-sans">Nama PT Perusahaan:</span>
+              <h2 className="text-base md:text-lg font-bold text-slate-200 tracking-tight leading-snug">
+                {activeStock.name.trim().toUpperCase().startsWith("PT") ? activeStock.name : `PT ${activeStock.name}`}
+              </h2>
+            </div>
           </div>
 
           {/* KANAN: Harga, Pergerakan, 52W High/Low, & Quick Actions diatur Sejajar dengan Rapi */}
@@ -2673,6 +2756,22 @@ export default function EmitenDashboardView({
                         </button>
                       </div>
 
+                      {chartType === "native" && (
+                        <button
+                          type="button"
+                          onClick={() => setShowFibonacci(prev => !prev)}
+                          className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg transition-all font-bold text-[10px] uppercase cursor-pointer active:scale-95 ${
+                            showFibonacci 
+                              ? "bg-cyan-950/60 text-cyan-300 border-cyan-500/25 font-extrabold shadow-[0_0_12px_rgba(34,211,238,0.1)] hover:bg-cyan-900/50" 
+                              : "bg-[#020b12] hover:bg-slate-900 text-slate-450 border-slate-900/60"
+                          }`}
+                          title="Tampilkan Level Fibonacci Retracement Otomatis"
+                        >
+                          <SlidersHorizontal className="w-3.5 h-3.5" />
+                          <span>Fibo: {showFibonacci ? "ON" : "OFF"}</span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => setIsFullscreenChartOpen(true)}
@@ -2835,6 +2934,109 @@ export default function EmitenDashboardView({
                               animate={{ d: nativeLinePath }}
                               transition={{ type: "spring", stiffness: 60, damping: 15 }}
                             />
+
+                            {/* Fibonacci Retracement Auto Levels */}
+                            {showFibonacci && fibonacciLevels.map((lvl, idx) => {
+                              const isKeyLevel = lvl.ratio === 0.382 || lvl.ratio === 0.5 || lvl.ratio === 0.618;
+                              const strokeColor = lvl.ratio === 0.5 ? "rgba(245, 158, 11, 0.45)" : // Amber for 50%
+                                                  lvl.ratio === 0.618 ? "rgba(34, 211, 238, 0.55)" : // Cyan for Golden Ratio
+                                                  isKeyLevel ? "rgba(168, 85, 247, 0.45)" : // Purple for 38.2%
+                                                  "rgba(148, 163, 184, 0.25)"; // Slate otherwise
+                              
+                              const labelColor = lvl.ratio === 0.5 ? "#fbbf24" :
+                                                 lvl.ratio === 0.618 ? "#22d3ee" :
+                                                 isKeyLevel ? "#c084fc" :
+                                                 "#94a3b8";
+
+                              return (
+                                <g key={`fibo-line-${idx}`} className="transition-all duration-300">
+                                  {/* Guideline */}
+                                  <line 
+                                    x1={30} 
+                                    y1={lvl.y} 
+                                    x2={svgWidth - 65} 
+                                    y2={lvl.y} 
+                                    stroke={strokeColor} 
+                                    strokeWidth={isKeyLevel ? 1.2 : 0.8} 
+                                    strokeDasharray={lvl.ratio === 0.0 || lvl.ratio === 1.0 ? "0" : "4 3"} 
+                                  />
+                                  {/* Left ratio label badge backing */}
+                                  <rect 
+                                    x={5} 
+                                    y={lvl.y - 7} 
+                                    width={28} 
+                                    height={14} 
+                                    rx={2} 
+                                    fill="rgba(1, 9, 18, 0.85)" 
+                                    stroke={strokeColor}
+                                    strokeWidth={0.5}
+                                  />
+                                  <text 
+                                    x={19} 
+                                    y={lvl.y + 3} 
+                                    fill={labelColor} 
+                                    fontSize="7" 
+                                    fontWeight={isKeyLevel ? "bold" : "normal"}
+                                    className="font-mono"
+                                    textAnchor="middle"
+                                  >
+                                    {lvl.label}
+                                  </text>
+                                  {/* Right side Price tag */}
+                                  <text 
+                                    x={svgWidth - 62} 
+                                    y={lvl.y + 3.5} 
+                                    fill={labelColor} 
+                                    fontSize="7.5" 
+                                    fontWeight="bold"
+                                    className="font-mono"
+                                    textAnchor="start"
+                                  >
+                                    Rp{Math.round(lvl.price).toLocaleString("id-ID")}
+                                  </text>
+                                </g>
+                              );
+                            })}
+
+                            {/* Fibonacci Swing Radar Highlights */}
+                            {showFibonacci && (
+                              <>
+                                {(() => {
+                                  const swingHigh = Math.max(...prices);
+                                  const hIdx = prices.indexOf(swingHigh);
+                                  if (hIdx !== -1 && nativeChartPoints[hIdx]) {
+                                    const pt = nativeChartPoints[hIdx];
+                                    return (
+                                      <g key="swing-high-radar">
+                                        <circle cx={pt.x} cy={pt.y} r={9} fill="none" stroke="#ef4444" strokeWidth={1} className="animate-ping" style={{ animationDuration: "3s" }} />
+                                        <circle cx={pt.x} cy={pt.y} r={3.5} fill="#ef4444" stroke="#fff" strokeWidth={1} />
+                                        <text x={pt.x} y={pt.y - 10} fill="#ef4444" fontSize="7" fontWeight="black" className="font-mono" textAnchor="middle">
+                                          SWING HIGH
+                                        </text>
+                                      </g>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {(() => {
+                                  const swingLow = Math.min(...prices);
+                                  const lIdx = prices.indexOf(swingLow);
+                                  if (lIdx !== -1 && nativeChartPoints[lIdx]) {
+                                    const pt = nativeChartPoints[lIdx];
+                                    return (
+                                      <g key="swing-low-radar">
+                                        <circle cx={pt.x} cy={pt.y} r={9} fill="none" stroke="#22c55e" strokeWidth={1} className="animate-ping" style={{ animationDuration: "3s" }} />
+                                        <circle cx={pt.x} cy={pt.y} r={3.5} fill="#22c55e" stroke="#fff" strokeWidth={1} />
+                                        <text x={pt.x} y={pt.y + 11} fill="#22c55e" fontSize="7" fontWeight="black" className="font-mono" textAnchor="middle">
+                                          SWING LOW
+                                        </text>
+                                      </g>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </>
+                            )}
 
                             {/* Crosshair Cursor Markers */}
                             {hoveredPointIndex !== null && nativeChartPoints[hoveredPointIndex] && (
@@ -3025,7 +3227,7 @@ export default function EmitenDashboardView({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Indicator 1: Relative Strength Index (RSI) */}
                   <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between space-y-4">
                     <div className="flex justify-between items-start">
@@ -3255,6 +3457,94 @@ export default function EmitenDashboardView({
 
                     <p className="text-[9.5px] text-slate-500 leading-normal border-t border-white/[0.02] pt-2">
                       MACD adalah indikator momentum berbasis tren yang menunjukkan hubungan antara dua rata-rata bergerak exponential moving average (EMA) harga saham.
+                    </p>
+                  </div>
+
+                  {/* Indicator 4: Fibonacci retracement Auto-levels */}
+                  <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-900 flex flex-col justify-between space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Fibonacci Auto (Live)</span>
+                        <span className="text-[10px] text-slate-500 mt-0.5">Dynamic Support & Resistance Support Zones</span>
+                      </div>
+                      {(() => {
+                        const hasFibo = fibonacciLevels.length > 0;
+                        if (!hasFibo) return null;
+                        const firstLvl = fibonacciLevels[0];
+                        const direction = firstLvl.isUptrend ? "BULLISH/UPTREND" : "BEARISH/DOWNTREND";
+                        return (
+                          <span className={`text-[8.5px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                            firstLvl.isUptrend 
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                              : "bg-rose-500/10 text-rose-450 border border-rose-500/20"
+                          }`}>
+                            {direction}
+                          </span>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Swing details info banner */}
+                    {(() => {
+                      if (fibonacciLevels.length === 0) {
+                        return (
+                          <div className="text-center font-mono text-slate-500 text-[10px]">
+                            Menghitung Fibonacci retracement...
+                          </div>
+                        );
+                      }
+                      const firstLvl = fibonacciLevels[0];
+                      const highVal = firstLvl.swingHigh;
+                      const lowVal = firstLvl.swingLow;
+                      return (
+                        <div className="space-y-2 text-[10px] font-mono">
+                          <div className="flex justify-between border-b border-white/[0.02] pb-1.5 text-[9px] uppercase tracking-wider text-slate-450">
+                            <span>Swing Point</span>
+                            <span>Value</span>
+                          </div>
+                          <div className="flex justify-between text-white font-extrabold pb-0.5">
+                            <span className="text-rose-400 flex items-center gap-1">🔴 SWING HIGH</span>
+                            <span>Rp {Math.round(highVal).toLocaleString("id-ID")}</span>
+                          </div>
+                          <div className="flex justify-between text-white font-extrabold border-b border-white/[0.02] pb-1.5">
+                            <span className="text-emerald-400 flex items-center gap-1">🟢 SWING LOW</span>
+                            <span>Rp {Math.round(lowVal).toLocaleString("id-ID")}</span>
+                          </div>
+
+                          <div className="space-y-1 pt-1 overflow-y-auto max-h-[140px] scrollbar-thin">
+                            {fibonacciLevels.map((lvl, index) => {
+                              const isKeyLevel = lvl.ratio === 0.382 || lvl.ratio === 0.5 || lvl.ratio === 0.618;
+                              const rowBg = index % 2 === 0 ? "bg-slate-900/20" : "";
+                              const badgeColor = lvl.ratio === 0.5 ? "text-amber-400" :
+                                                 lvl.ratio === 0.618 ? "text-cyan-400" :
+                                                 isKeyLevel ? "text-purple-400" :
+                                                 "text-slate-450";
+                              
+                              let zoneLabel = "Pivotal";
+                              if (lvl.ratio === 0.0 || lvl.ratio === 1.0) zoneLabel = "Boundaries";
+                              else if (lvl.ratio === 0.618) zoneLabel = "Major Golden Level";
+                              else if (isKeyLevel) zoneLabel = "Strong Zone";
+
+                              return (
+                                <div key={index} className={`flex justify-between items-center py-1 px-1 rounded ${rowBg}`}>
+                                  <div className="flex items-center gap-1">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                      lvl.ratio === 0.618 ? "bg-cyan-500" : lvl.ratio === 0.5 ? "bg-amber-500" : isKeyLevel ? "bg-purple-500" : "bg-slate-500"
+                                    }`} />
+                                    <span className={`font-extrabold ${badgeColor}`}>{lvl.label}</span>
+                                    <span className="text-[8px] text-slate-500 uppercase">({zoneLabel})</span>
+                                  </div>
+                                  <span className="text-white font-black">Rp {Math.round(lvl.price).toLocaleString("id-ID")}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <p className="text-[9.5px] text-slate-500 leading-normal border-t border-white/[0.02] pt-2">
+                      Level Fibonacci Retracement secara otomatis ditarik dari swing high & swing low historis sesi BEI, berguna untuk memitigasi risiko & menetapkan titik target keuntungan.
                     </p>
                   </div>
                 </div>
@@ -5544,6 +5834,22 @@ export default function EmitenDashboardView({
                     </button>
                   </div>
 
+                  {chartType === "native" && (
+                    <button
+                      type="button"
+                      onClick={() => setShowFibonacci(prev => !prev)}
+                      className={`flex items-center gap-1.5 px-3 py-2 border rounded-xl transition-all font-bold text-[10px] uppercase cursor-pointer active:scale-95 ${
+                        showFibonacci 
+                          ? "bg-cyan-950/60 text-cyan-300 border-cyan-500/25 font-extrabold shadow-[0_0_12px_rgba(34,211,238,0.1)] hover:bg-cyan-900/50" 
+                          : "bg-[#020b12] hover:bg-slate-900 text-slate-450 border-slate-900/60"
+                      }`}
+                      title="Tampilkan Level Fibonacci Retracement Otomatis"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      <span>Fibo: {showFibonacci ? "ON" : "OFF"}</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => setIsFullscreenChartOpen(false)}
@@ -5654,6 +5960,30 @@ export default function EmitenDashboardView({
                             fillOpacity={1} 
                             fill="url(#fullscreenGrad)" 
                           />
+
+                          {showFibonacci && fibonacciLevels.map((lvl, index) => {
+                            const isKeyLevel = lvl.ratio === 0.382 || lvl.ratio === 0.5 || lvl.ratio === 0.618;
+                            const strokeColor = lvl.ratio === 0.5 ? "rgba(245, 158, 11, 0.7)" : // Amber
+                                                lvl.ratio === 0.618 ? "rgba(34, 211, 238, 0.85)" : // Cyan
+                                                isKeyLevel ? "rgba(168, 85, 247, 0.7)" : // Purple
+                                                "rgba(148, 163, 184, 0.45)"; // Slate
+                            return (
+                              <ReferenceLine 
+                                key={`fibo-recharts-${index}`}
+                                y={lvl.price} 
+                                stroke={strokeColor} 
+                                strokeWidth={isKeyLevel ? 1.5 : 0.8}
+                                strokeDasharray={lvl.ratio === 0.0 || lvl.ratio === 1.0 ? "0" : "3 3"}
+                              >
+                                <Label 
+                                  value={`FIBO ${lvl.label}: Rp ${Math.round(lvl.price).toLocaleString("id-ID")}`} 
+                                  position="insideLeft" 
+                                  fill={lvl.ratio === 0.618 ? "#22d3ee" : lvl.ratio === 0.5 ? "#fbbf24" : "#94a3b8"}
+                                  style={{ fontSize: "8.5px", fontFamily: "monospace", fontWeight: isKeyLevel ? "bold" : "normal" }}
+                                />
+                              </ReferenceLine>
+                            );
+                          })}
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>

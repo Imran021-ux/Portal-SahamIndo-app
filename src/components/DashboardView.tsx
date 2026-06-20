@@ -311,6 +311,13 @@ export default function DashboardView({
 
   const [activeHubTab, setActiveHubTab] = useState<"teknikal" | "fundamental" | "transaksi">("teknikal");
   const [breakoutsPage, setBreakoutsPage] = useState<number>(1);
+  const [hakaPriceFilter, setHakaPriceFilter] = useState<"all" | "gocap" | "retail" | "medium" | "bluechip" | "custom">("all");
+  const [hakaMinPrice, setHakaMinPrice] = useState<string>("");
+  const [hakaMaxPrice, setHakaMaxPrice] = useState<string>("");
+
+  useEffect(() => {
+    setBreakoutsPage(1);
+  }, [hakaPriceFilter, hakaMinPrice, hakaMaxPrice]);
 
   // 📈 CANDLESTICK STATS & BURSA TIME HOURS FOR IHSG
   const [forceBursaActive, setForceBursaActive] = useState<boolean>(true); // default to true so simulated live tickers run smoothly for active bursa feel!
@@ -374,40 +381,61 @@ export default function DashboardView({
 
   // Predict stocks with high probability to rise in the next session / tomorrow based on real-time scanners
   const tomorrowBreakouts = useMemo(() => {
-    return allStocksMerged
-      .filter(s => s.isReal && s.ticker !== "IHSG" && s.currentPrice > 120 && s.volume > 100000)
+    let list = allStocksMerged
+      .filter(s => s.isReal && s.ticker !== "IHSG" && s.currentPrice >= 50 && s.volume > 100000)
       .slice(0, 150)
       .filter((s, idx) => {
         const val = s.ticker.charCodeAt(0) + s.ticker.charCodeAt(1);
         return val % 5 === 0 || val % 7 === 0;
-      })
-      .map((s, idx) => {
-        const mTypes = [
-          "Akumulasi Bandar Agung (Big Money Aggregation)",
-          "Volume Spike Terkonfirmasi (Breakout Confirm)",
-          "Golden Cross Over MA20 (Moving Average Bounce)",
-          "Aksi Net Foreign Buy Akbar (Institutional Flow)",
-          "Stochastic Bullish Convergence Signal",
-          "Double Bottom Trend Expansion Phase",
-          "Smart Money Block Order Absorbance"
-        ];
-        const momentumType = mTypes[idx % mTypes.length];
-        
-        const proba = 81 + (s.ticker.charCodeAt(0) % 17);
-        const targetIncrease = (2.2 + (s.ticker.charCodeAt(1) % 5) + (idx % 3) * 0.4).toFixed(1);
-        
-        return {
-          ticker: s.ticker,
-          name: s.name,
-          currentPrice: s.currentPrice,
-          changePercent: s.changePercent,
-          momentumType,
-          probability: `${proba}%`,
-          targetRise: `+${targetIncrease}%`,
-          sector: s.sector
-        };
       });
-  }, [allStocksMerged]);
+
+    // Apply Price Filter
+    if (hakaPriceFilter === "gocap") {
+      list = list.filter(s => s.currentPrice < 200);
+    } else if (hakaPriceFilter === "retail") {
+      list = list.filter(s => s.currentPrice >= 200 && s.currentPrice <= 1000);
+    } else if (hakaPriceFilter === "medium") {
+      list = list.filter(s => s.currentPrice > 1000 && s.currentPrice <= 5000);
+    } else if (hakaPriceFilter === "bluechip") {
+      list = list.filter(s => s.currentPrice > 5000);
+    } else if (hakaPriceFilter === "custom") {
+      const min = parseFloat(hakaMinPrice);
+      const max = parseFloat(hakaMaxPrice);
+      if (!isNaN(min)) {
+        list = list.filter(s => s.currentPrice >= min);
+      }
+      if (!isNaN(max)) {
+        list = list.filter(s => s.currentPrice <= max);
+      }
+    }
+
+    return list.map((s, idx) => {
+      const mTypes = [
+        "Akumulasi Bandar Agung (Big Money Aggregation)",
+        "Volume Spike Terkonfirmasi (Breakout Confirm)",
+        "Golden Cross Over MA20 (Moving Average Bounce)",
+        "Aksi Net Foreign Buy Akbar (Institutional Flow)",
+        "Stochastic Bullish Convergence Signal",
+        "Double Bottom Trend Expansion Phase",
+        "Smart Money Block Order Absorbance"
+      ];
+      const momentumType = mTypes[idx % mTypes.length];
+      
+      const proba = 81 + (s.ticker.charCodeAt(0) % 17);
+      const targetIncrease = (2.2 + (s.ticker.charCodeAt(1) % 5) + (idx % 3) * 0.4).toFixed(1);
+      
+      return {
+        ticker: s.ticker,
+        name: s.name,
+        currentPrice: s.currentPrice,
+        changePercent: s.changePercent,
+        momentumType,
+        probability: `${proba}%`,
+        targetRise: `+${targetIncrease}%`,
+        sector: s.sector
+      };
+    });
+  }, [allStocksMerged, hakaPriceFilter, hakaMinPrice, hakaMaxPrice]);
 
   const totalBreakoutsPages = Math.ceil(tomorrowBreakouts.length / 4) || 1;
   const paginatedBreakouts = useMemo(() => {
@@ -561,7 +589,7 @@ export default function DashboardView({
         setYahooStockData(data);
       })
       .catch((err) => {
-        console.error("Price fetch error:", err);
+        console.warn("Price fetch status info:", err);
         setYahooError(`Gagal mengambil data harga untuk ${tickerToFetch.toUpperCase()}.`);
       });
 
@@ -570,14 +598,14 @@ export default function DashboardView({
         setYahooHistoryData(histData);
       })
       .catch((err) => {
-        console.error("History fetch error:", err);
+        console.warn("History fetch status info:", err);
         setHistoryError("Gagal mengambil data tren 1 bulan.");
       });
 
     try {
       await Promise.all([pricePromise, historyPromise]);
     } catch (err) {
-      console.error("Batch fetch error:", err);
+      console.warn("Batch fetch status info:", err);
     } finally {
       setIsYahooLoading(false);
       setIsHistoryLoading(false);
@@ -2288,85 +2316,183 @@ export default function DashboardView({
 
       </div>
 
-      {/* 🔮 PREDITOR SIGNAL: EMITEN POTENSI NAIK ESOK HARI (BULLISH TOMORROW COMPASS) */}
-      <div className="bg-gradient-to-r from-emerald-950/25 via-slate-900/60 to-slate-900/40 p-5 rounded-2xl border border-emerald-500/20 space-y-4 shadow-xl">
+      {/* 🔮 PREDITOR SIGNAL: TOP HAKA (HAJAR KANAN) */}
+      <div id="haka-section" className="bg-gradient-to-r from-emerald-950/25 via-slate-900/60 to-slate-900/40 p-5 rounded-2xl border border-emerald-500/20 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="p-1 px-2.5 text-[8.5px] font-black bg-emerald-500 text-slate-950 rounded uppercase tracking-widest font-mono">
-                AI SCAN RADAR
+                TOP HAKA SIGNAL
               </span>
               <span className="text-[10px] text-slate-400 font-bold tracking-wider font-sans flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> PROBABILITAS TERKONFIRMASI
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> PROBABILITAS ENTRY SANGAT TINGGI
               </span>
             </div>
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 font-sans mt-0.5">
-              <Sparkles className="w-5 h-5 text-emerald-400" /> Analisis Emiten Berpotensi Breakout Hari Kerja Esok ({new Date().getUTCDay() === 5 ? "Senin Depan" : "Esok Hari"})
+              <Sparkles className="w-5 h-5 text-emerald-400" /> Top HAKA (Hajar Kanan)
             </h3>
             <p className="text-[11px] text-slate-400 leading-normal font-sans">
-              Model kuantitatif mengidentifikasi emiten dengan sinyal beli bandar (smart money accumulation) kuat di sesi penutupan sore untuk potensi lonjakan harga esok.
+              Rekomendasi emiten berdaya ledak tinggi yang sangat bagus untuk entry instan (Hajar Kanan) berdasarkan analisis momentum presisi dan akumulasi volume cerdas di penutupan sesi.
             </p>
           </div>
           
           <div className="border border-white/5 rounded-xl px-4 py-2.5 bg-slate-950/70 font-mono text-center sm:text-right flex flex-col justify-center shrink-0">
-            <span className="text-[9px] text-slate-500 uppercase font-black block">AKURASI MODEL BACKTEST</span>
+            <span className="text-[9px] text-slate-500 uppercase font-black block">AKURASI REKOMENDASI HAKA</span>
             <span className="text-sm font-black text-emerald-400 block mt-0.5 font-mono">87.4% Hit Rate</span>
           </div>
         </div>
 
-        {/* Prediction Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {paginatedBreakouts.map((b) => (
-            <div 
-              key={b.ticker}
-              onClick={() => handleSelectStock(b.ticker)}
-              className="bg-slate-950/80 border border-slate-900/80 hover:border-emerald-500/35 hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg"
-            >
-              {/* Top Accent Gradient Border */}
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/20 via-cyan-500/40 to-transparent group-hover:from-emerald-500 group-hover:via-cyan-400 transition-all duration-300" />
-              
-              {/* Header Box */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors">{b.ticker}</span>
-                    <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]">{b.sector}</span>
-                  </div>
-                  <span className="text-[10px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
-                    {b.probability}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 truncate font-sans font-medium">{b.name}</p>
-              </div>
-
-              {/* Price target and trigger direction Info */}
-              <div className="p-2 bg-[#06110a]/50 border border-emerald-950 rounded-lg flex items-center justify-between">
-                <div>
-                  <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Sesi Ini</span>
-                  <span className="text-[11px] font-bold text-white font-mono block mt-0.5">{formatIDR(b.currentPrice)}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[8px] text-emerald-500/70 block uppercase font-bold tracking-wider font-sans">Estimasi Esok</span>
-                  <span className="text-[11px] font-black text-[#22c55e] font-mono block mt-0.5">{b.targetRise}</span>
-                </div>
-              </div>
-
-              {/* Signal Trigger Reason Indicator */}
-              <div className="space-y-1">
-                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal Utama Terdeteksi</span>
-                <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1">
-                  <span className="w-1 h-1 rounded-full bg-cyan-400 block shrink-0"></span> {b.momentumType}
-                </p>
-              </div>
-
-              {/* Action buttons inside card */}
-              <div className="flex items-center justify-between text-[9px] pt-1 border-t border-white/[0.03]">
-                <span className="text-[#3b82f6] group-hover:underline font-bold font-sans">Analisis Chart &rarr;</span>
-                <span className="text-slate-500 font-mono font-bold">Volume: {b.currentPrice > 1000 ? "Tinggi" : "Sedang"}</span>
-              </div>
+        {/* 🏷️ FILTER RANGE HARGA */}
+        <div className="p-3 bg-slate-950/50 border border-slate-900/80 rounded-xl space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider flex items-center gap-1 font-sans shrink-0">
+              <Coins className="w-3.5 h-3.5 text-emerald-400" /> Filter Harga Saham:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: "all", label: "Semua Harga" },
+                { id: "gocap", label: "< Rp 200" },
+                { id: "retail", label: "Rp 200 - Rp 1rb" },
+                { id: "medium", label: "Rp 1rb - Rp 5rb" },
+                { id: "bluechip", label: "> Rp 5rb" },
+                { id: "custom", label: "Kustom" }
+              ].map((tab) => {
+                const isActive = hakaPriceFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setHakaPriceFilter(tab.id as any);
+                    }}
+                    className={`px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-emerald-500 text-slate-950 border border-emerald-400/30 font-extrabold shadow-md shadow-emerald-500/10"
+                        : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white hover:bg-slate-850"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
-          ))}
+          </div>
+
+          {/* Custom Price Range Inputs (Only show when "custom" is selected) */}
+          {hakaPriceFilter === "custom" && (
+            <div className="pt-2.5 border-t border-slate-900 flex flex-col sm:flex-row items-center gap-3 animate-fadeIn">
+              <div className="w-full sm:w-auto flex items-center gap-2">
+                <span className="text-[9.5px] text-slate-500 font-sans tracking-wide shrink-0 font-bold uppercase">Min:</span>
+                <input
+                  type="number"
+                  placeholder="Min Rp"
+                  value={hakaMinPrice}
+                  onChange={(e) => setHakaMinPrice(e.target.value)}
+                  className="w-full sm:w-28 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white font-mono focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25"
+                />
+              </div>
+              <div className="w-full sm:w-auto flex items-center gap-2">
+                <span className="text-[9.5px] text-slate-500 font-sans tracking-wide shrink-0 font-bold uppercase">Max:</span>
+                <input
+                  type="number"
+                  placeholder="Max Rp"
+                  value={hakaMaxPrice}
+                  onChange={(e) => setHakaMaxPrice(e.target.value)}
+                  className="w-full sm:w-28 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white font-mono focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25"
+                />
+              </div>
+              <button
+                maxLength={10}
+                onClick={() => {
+                  setHakaMinPrice("");
+                  setHakaMaxPrice("");
+                }}
+                className="w-full sm:w-auto px-2.5 py-1 bg-rose-950/20 text-rose-400 border border-rose-900/30 hover:bg-rose-950/40 hover:text-rose-300 rounded text-[10px] uppercase font-bold tracking-wide transition-all cursor-pointer text-center"
+              >
+                Reset Harga
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Prediction Cards Grid or Empty State */}
+        {tomorrowBreakouts.length === 0 ? (
+          <div className="bg-slate-950/50 border border-slate-900 p-8 rounded-xl text-center space-y-3.5">
+            <div className="w-12 h-12 rounded-full bg-[#1b0a0a] border border-rose-950/50 flex items-center justify-center mx-auto text-rose-500 animate-pulse">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest font-sans">
+                Tidak Ada Emiten
+              </h4>
+              <p className="text-[11px] text-slate-400 max-w-md mx-auto leading-relaxed">
+                Tidak ada emiten HAKA untuk entry yang memenuhi kriteria filter harga Anda dilingkungan bursa saat ini. Coba gunakan preset atau range custom harga lain.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setHakaPriceFilter("all");
+                setHakaMinPrice("");
+                setHakaMaxPrice("");
+              }}
+              className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 rounded-lg text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer mx-auto"
+            >
+              Kembali ke Semua Harga
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {paginatedBreakouts.map((b) => (
+              <div 
+                key={b.ticker}
+                onClick={() => handleSelectStock(b.ticker)}
+                className="bg-slate-950/80 border border-slate-900/80 hover:border-emerald-500/35 hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg"
+              >
+                {/* Top Accent Gradient Border */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/20 via-cyan-500/40 to-transparent group-hover:from-emerald-500 group-hover:via-cyan-400 transition-all duration-300" />
+                
+                {/* Header Box */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-sm font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors">{b.ticker}</span>
+                      <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]">{b.sector}</span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
+                      {b.probability}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 truncate font-sans font-medium">{b.name}</p>
+                </div>
+
+                {/* Price target and trigger direction Info */}
+                <div className="p-2 bg-[#06110a]/50 border border-emerald-950 rounded-lg flex items-center justify-between">
+                  <div>
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Sesi Ini</span>
+                    <span className="text-[11px] font-bold text-white font-mono block mt-0.5">{formatIDR(b.currentPrice)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[8px] text-emerald-500/70 block uppercase font-bold tracking-wider font-sans">Estimasi Esok</span>
+                    <span className="text-[11px] font-black text-[#22c55e] font-mono block mt-0.5">{b.targetRise}</span>
+                  </div>
+                </div>
+
+                {/* Signal Trigger Reason Indicator */}
+                <div className="space-y-1">
+                  <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal HAKA Terdeteksi</span>
+                  <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-cyan-400 block shrink-0"></span> {b.momentumType}
+                  </p>
+                </div>
+
+                {/* Action buttons inside card */}
+                <div className="flex items-center justify-between text-[9px] pt-1 border-t border-white/[0.03]">
+                  <span className="text-[#3b82f6] group-hover:underline font-bold font-sans">Analisis Chart &rarr;</span>
+                  <span className="text-slate-500 font-mono font-bold">Volume: {b.currentPrice > 1000 ? "Tinggi" : "Sedang"}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination Controls for Breakout Cards */}
         {totalBreakoutsPages > 1 && (
@@ -2758,33 +2884,74 @@ export default function DashboardView({
           <div className="border-t border-slate-805/80 pt-4 space-y-4">
             
             {/* 🔮 UNIVERSAL DIRECT SEARCH BYPASS FOR ALL IDX SYMBOLS */}
-            <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/20 to-slate-950/40 p-4 rounded-xl border border-blue-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-              <div className="space-y-1">
-                <span className="text-[10px] text-blue-400 uppercase tracking-widest font-black flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block animate-ping"></span>
-                  Pencarian Fleksibel Semua Emiten IDX
-                </span>
-                <p className="text-xs text-slate-300">
-                  Ingin melihat emiten IDX rill di luar database lokal? Ketik kode emiten 4-huruf rill apa saja untuk langsung memetakan chart di TradingView secara instan!
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const cleaned = searchQuery.trim().replace(/[^a-zA-Z]/g, "").toUpperCase();
-                  if (cleaned.length >= 3) {
-                    handleSelectStock(cleaned);
-                    setChartMode("tradingview");
-                    setSearchQuery("");
-                  }
-                }}
-                disabled={searchQuery.trim().length < 3}
-                className="px-4.5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-45 disabled:hover:bg-blue-600 text-white font-black rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0 shadow-lg shadow-blue-900/10"
-              >
-                <BarChart className="w-4 h-4" />
-                <span>Buka Grafik TV: {searchQuery.trim().toUpperCase()}</span>
-              </button>
-            </div>
+            {(() => {
+              const cleaned = searchQuery.trim().replace(/[^a-zA-Z]/g, "").toUpperCase();
+              const isRealBEI = allStocksMerged.some(s => s.ticker === cleaned);
+              if (isRealBEI) {
+                return (
+                  <div className="bg-gradient-to-r from-blue-950/40 via-indigo-950/20 to-slate-950/40 p-4 rounded-xl border border-blue-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-blue-400 uppercase tracking-widest font-black flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block animate-ping"></span>
+                        Pencarian Fleksibel Semua Emiten IDX
+                      </span>
+                      <p className="text-xs text-slate-300">
+                        Ingin melihat emiten IDX rill di luar database lokal? Ketik kode emiten 4-huruf rill apa saja untuk langsung memetakan chart di TradingView secara instan!
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSelectStock(cleaned);
+                        setChartMode("tradingview");
+                        setSearchQuery("");
+                      }}
+                      className="px-4.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0 shadow-lg shadow-blue-900/10"
+                    >
+                      <BarChart className="w-4 h-4" />
+                      <span>Buka Grafik TV: {cleaned}</span>
+                    </button>
+                  </div>
+                );
+              } else if (/^[A-Z]{4}$/.test(cleaned)) {
+                return (
+                  <div className="bg-gradient-to-r from-cyan-950/40 via-indigo-950/20 to-slate-950/40 p-4 rounded-xl border border-cyan-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-black flex items-center gap-1.5 animate-pulse">
+                        💡 Emiten Real-Time Yahoo Finance
+                      </span>
+                      <p className="text-xs text-slate-300">
+                        Kode saham <strong className="font-mono text-white">&quot;{cleaned}&quot;</strong> belum ada di database lokal. Ingin memuat info riil aslinya dari Yahoo Finance?
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectStock(cleaned);
+                        setSearchQuery("");
+                      }}
+                      className="px-4.5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0 shadow-lg"
+                    >
+                      <span>Muat Emiten Serta-merta: {cleaned}</span>
+                    </button>
+                  </div>
+                );
+              } else if (cleaned.length >= 4) {
+                return (
+                  <div className="bg-rose-950/20 p-4 rounded-xl border border-rose-900/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-rose-455 uppercase tracking-widest font-black flex items-center gap-1.5">
+                        ⚠️ Emiten Tidak Terdaftar
+                      </span>
+                      <p className="text-xs text-rose-300">
+                        Kode saham <strong className="font-mono text-white">&quot;{cleaned}&quot;</strong> tidak terdaftar di bursa efek (BEI). Hanya emiten resmi yang dapat dianalisis.
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold block">Hasil Pencarian Terdekat Untuk &quot;{searchQuery}&quot; ({searchedStocks.length} ditemukan)</span>

@@ -346,301 +346,120 @@ export const REAL_PRICE_LOOKUP: Record<string, number> = {
   "SOCI": 185, "ELSA": 450, "WINS": 380, "SMDR": 290, "TMAS": 160, "ASSA": 750, "BIRD": 1850, "BLUE": 210,
   "TAXI": 50, "COAL": 60, "BESS": 120, "TCPI": 8400, "ESSA": 850, "AKRA": 1440, "PTBA": 2560, "WSKT": 150,
   "PGAS": 1475, "ISAT": 2200, "EXCL": 2190, "BUKA": 118, "SCMA": 125, "HEAL": 1390, "MIKA": 2810, "SILO": 2650,
-  "AUTO": 2040, "MAIN": 680, "MDIA": 50, "KLBF": 1440, "SRIL": 50, "KIJA": 140, "SSIA": 950, "ADHI-R": 20
+  "AUTO": 2040, "MAIN": 680, "MDIA": 50, "KLBF": 1440, "SRIL": 50, "KIJA": 140, "SSIA": 950
 };
 
 function generate989Stocks(): Stock[] {
-  const result = [...POPULAR_STOCKS_BASE];
-  const desiredTotal = 989;
-  const tickersSet = new Set(result.map(s => s.ticker));
-
-  // Genuine authentic-sounding Indonesian public tickers
-  const popularAdditionalTickers = [
-    "BREN", "CUAN", "PANI", "TPIA", "BYAN", "AMMN", "ADMR", "INCO", "HRUM", "MBMA",
-    "BRMS", "DSSA", "SMGR", "INTP", "INDF", "MYOR", "SIDO", "ACES", "MAPI", "MAPA",
-    "ERAA", "CPIN", "JPFA", "DEWA", "MEDC", "ENRG", "PGEO", "KEEN", "ADHI", "WIKA",
-    "PTPP", "WTON", "JSMR", "OASA", "MIDI", "ALTO", "ADES", "MLBI", "SILO", "MIKA",
-    "HEAL", "SAME", "PRIM", "BULL", "ELSA", "WINS", "SMDR", "TMAS", "ASSA", "BIRD",
-    "BLUE", "TAXI", "COAL", "BESS", "TCPI", "ESSA", "AKRA", "PGUN", "PTRO", "MBAP",
-    "ITMG", "KKGI", "INDY", "DOID", "TOBA", "ABMM", "PTIS", "ARTO", "BBTN", "BDMN",
-    "PNBN", "BJBR", "BJTM", "MEGA", "BANK", "AGRO", "MAYA", "BABP", "BBYB", "BCIC",
-    "DNAR", "NOBU", "INPC", "BACA", "BCIP", "BVIC", "MCOR", "AMAR", "BBKP", "BSIM",
-    "BSWD", "BNGA", "BNLI", "PNBS", "BTPS", "WMPG", "WOOD", "GTRA", "MEJA"
-  ];
-
-  const tickerToRealInfo: Record<string, { name: string; sector: string }> = {
-    "BREN": { name: "Barito Renewables Energy Tbk.", sector: "Infrastruktur" },
-    "CUAN": { name: "Petrindo Jaya Kreasi Tbk.", sector: "Energi" },
-    "PANI": { name: "Pantai Indah Kapuk Dua Tbk.", sector: "Properti" },
-    "TPIA": { name: "Chandra Asri Pacific Tbk.", sector: "Industri" },
-    "BYAN": { name: "Bayan Resources Tbk.", sector: "Energi" },
-    "AMMN": { name: "Amman Mineral Internasional Tbk.", sector: "Pertambangan" },
-    "ADMR": { name: "Adaro Minerals Indonesia Tbk.", sector: "Pertambangan" },
-    "INCO": { name: "Vale Indonesia Tbk.", sector: "Pertambangan" },
-    "HRUM": { name: "Harum Energy Tbk.", sector: "Energi" },
-    "MBMA": { name: "Merdeka Battery Materials Tbk.", sector: "Pertambangan" },
-    "BRMS": { name: "Bumi Resources Minerals Tbk.", sector: "Pertambangan" },
-    "DSSA": { name: "Dian Swastatika Sentosa Tbk.", sector: "Infrastruktur" },
-    "SMGR": { name: "Semen Indonesia (Persero) Tbk.", sector: "Industri" },
-    "INTP": { name: "Indocement Tunggal Prakarsa Tbk.", sector: "Industri" },
-    "INDF": { name: "Indofood Sukses Makmur Tbk.", sector: "Konsumer" },
-    "MYOR": { name: "Mayora Indah Tbk.", sector: "Konsumer" },
-    "SIDO": { name: "Industri Jamu dan Farmasi Sido Muncul Tbk.", sector: "Kesehatan" },
-    "ACES": { name: "Aspirasi Hidup Indonesia Tbk.", sector: "Konsumer" },
-    "MAPI": { name: "Mitra Adiperkasa Tbk.", sector: "Konsumer" },
-    "MAPA": { name: "MAP Aktif Adiperkasa Tbk.", sector: "Konsumer" },
-    "ERAA": { name: "Erajaya Swasembada Tbk.", sector: "Konsumer" },
-    "CPIN": { name: "Charoen Pokphand Indonesia Tbk.", sector: "Agrikultur" },
-    "JPFA": { name: "Japfa Comfeed Indonesia Tbk.", sector: "Agrikultur" },
-    "DEWA": { name: "Darma Henwa Tbk.", sector: "Pertambangan" },
-    "MEDC": { name: "Medco Energi Internasional Tbk.", sector: "Energi" },
-    "ENRG": { name: "Energi Mega Persada Tbk.", sector: "Energi" },
-    "PGEO": { name: "Pertamina Geothermal Energy Tbk.", sector: "Infrastruktur" },
-    "KEEN": { name: "Kencana Energi Lestari Tbk.", sector: "Infrastruktur" },
-    "ADHI": { name: "Adhi Karya (Persero) Tbk.", sector: "Infrastruktur" },
-    "WIKA": { name: "Wijaya Karya (Persero) Tbk.", sector: "Infrastruktur" },
-    "PTPP": { name: "PP (Persero) Tbk.", sector: "Infrastruktur" },
-    "WTON": { name: "Wijaya Karya Beton Tbk.", sector: "Industri" },
-    "JSMR": { name: "Jasa Marga (Persero) Tbk.", sector: "Infrastruktur" },
-    "OASA": { name: "Maharaksa Biru Energi Tbk.", sector: "Energi" },
-    "MIDI": { name: "Midi Utama Indonesia Tbk.", sector: "Konsumer" },
-    "ALTO": { name: "Tri Banyan Tirta Tbk.", sector: "Konsumer" },
-    "ADES": { name: "Akasha Wira International Tbk.", sector: "Konsumer" },
-    "MLBI": { name: "Multi Bintang Indonesia Tbk.", sector: "Konsumer" },
-    "SILO": { name: "Siloam International Hospitals Tbk.", sector: "Kesehatan" },
-    "MIKA": { name: "Mitra Keluarga Karyasehat Tbk.", sector: "Kesehatan" },
-    "HEAL": { name: "Medikaloka Hermina Tbk.", sector: "Kesehatan" },
-    "SAME": { name: "Sarana Meditama Metropolitan Tbk.", sector: "Kesehatan" },
-    "PRIM": { name: "Royal Prima Tbk.", sector: "Kesehatan" },
-    "BULL": { name: "Buana Lintas Lautan Tbk.", sector: "Logistik" },
-    "ELSA": { name: "Elnusa Tbk.", sector: "Energi" },
-    "WINS": { name: "Wintermar Offshore Marine Tbk.", sector: "Logistik" },
-    "SMDR": { name: "Samudera Indonesia Tbk.", sector: "Logistik" },
-    "TMAS": { name: "Temas Tbk.", sector: "Logistik" },
-    "ASSA": { name: "Adi Sarana Armada Tbk.", sector: "Logistik" },
-    "BIRD": { name: "Blue Bird Tbk.", sector: "Logistik" },
-    "BLUE": { name: "Berkah Beton Sadaya Tbk.", sector: "Industri" },
-    "TAXI": { name: "Express Transindo Utama Tbk.", sector: "Logistik" },
-    "COAL": { name: "Black Diamond Resources Tbk.", sector: "Energi" },
-    "BESS": { name: "Batulicin Nusantara Maritim Tbk.", sector: "Logistik" },
-    "TCPI": { name: "Transcoal Pacific Tbk.", sector: "Logistik" },
-    "ESSA": { name: "Essa Industri Indonesia Tbk.", sector: "Energi" },
-    "AKRA": { name: "AKR Corporindo Tbk.", sector: "Logistik" },
-    "PGUN": { name: "Pradiksi Gunatama Tbk.", sector: "Agrikultur" },
-    "PTRO": { name: "Petrosea Tbk.", sector: "Pertambangan" },
-    "MBAP": { name: "Mitrabara Adiperdana Tbk.", sector: "Energi" },
-    "ITMG": { name: "Indo Tambangraya Megah Tbk.", sector: "Energi" },
-    "KKGI": { name: "Resource Alam Indonesia Tbk.", sector: "Energi" },
-    "INDY": { name: "Indika Energy Tbk.", sector: "Energi" },
-    "DOID": { name: "Delta Dunia Makmur Tbk.", sector: "Pertambangan" },
-    "TOBA": { name: "TBS Energi Utama Tbk.", sector: "Energi" },
-    "ABMM": { name: "ABM Investama Tbk.", sector: "Energi" },
-    "PTIS": { name: "Indo Straits Tbk.", sector: "Logistik" },
-    "ARTO": { name: "Bank Jago Tbk.", sector: "Finansial" },
-    "BBTN": { name: "Bank Tabungan Negara (Persero) Tbk.", sector: "Finansial" },
-    "BDMN": { name: "Bank Danamon Indonesia Tbk.", sector: "Finansial" },
-    "PNBN": { name: "Bank Pan Indonesia Tbk.", sector: "Finansial" },
-    "BJBR": { name: "Bank Pembangunan Daerah Jawa Barat dan Banten Tbk.", sector: "Finansial" },
-    "BJTM": { name: "Bank Pembangunan Daerah Jawa Timur Tbk.", sector: "Finansial" },
-    "MEGA": { name: "Bank Mega Tbk.", sector: "Finansial" },
-    "BANK": { name: "Bank Aladin Syariah Tbk.", sector: "Finansial" },
-    "AGRO": { name: "Bank Raya Indonesia Tbk.", sector: "Finansial" },
-    "MAYA": { name: "Bank Mayapada Internasional Tbk.", sector: "Finansial" },
-    "BABP": { name: "Bank MNC Internasional Tbk.", sector: "Finansial" },
-    "BBYB": { name: "Bank Neo Commerce Tbk.", sector: "Finansial" },
-    "BCIC": { name: "Bank JTrust Indonesia Tbk.", sector: "Finansial" },
-    "DNAR": { name: "Bank Oke Indonesia Tbk.", sector: "Finansial" },
-    "NOBU": { name: "Bank Nationalnobu Tbk.", sector: "Finansial" },
-    "INPC": { name: "Bank Artha Graha Internasional Tbk.", sector: "Finansial" },
-    "BACA": { name: "Bank Capital Indonesia Tbk.", sector: "Finansial" },
-    "BCIP": { name: "Bumi Citra Permai Tbk.", sector: "Properti" },
-    "BVIC": { name: "Bank Victoria International Tbk.", sector: "Finansial" },
-    "MCOR": { name: "Bank China Construction Bank Indonesia Tbk.", sector: "Finansial" },
-    "AMAR": { name: "Bank Amar Indonesia Tbk.", sector: "Finansial" },
-    "BBKP": { name: "Bank KB Bukopin Tbk.", sector: "Finansial" },
-    "BSIM": { name: "Bank Sinarmas Tbk.", sector: "Finansial" },
-    "BSWD": { name: "Bank of India Indonesia Tbk.", sector: "Finansial" },
-    "BNGA": { name: "Bank CIMB Niaga Tbk.", sector: "Finansial" },
-    "BNLI": { name: "Bank Permata Tbk.", sector: "Finansial" },
-    "PNBS": { name: "Bank Panin Dubai Syariah Tbk.", sector: "Finansial" },
-    "BTPS": { name: "Bank BTPN Syariah Tbk.", sector: "Finansial" },
-    "WMPG": { name: "Wira Global Solusindo Tbk.", sector: "Teknologi" },
-    "WOOD": { name: "Integra Indocabinet Tbk.", sector: "Industri" },
-    "GTRA": { name: "Grahaprima Suksesmandiri Tbk.", sector: "Logistik" },
-    "MEJA": { name: "Meja Nusantara Indonesia Tbk.", sector: "Industri" },
-    "AALI": { name: "Astra Agro Lestari Tbk.", sector: "Agrikultur" },
-    "BRIS": { name: "Bank Syariah Indonesia Tbk.", sector: "Finansial" },
-    "BRPT": { name: "Barito Pacific Tbk.", sector: "Industri" },
-    "BSDE": { name: "Bumi Serpong Damai Tbk.", sector: "Properti" },
-    "CTRA": { name: "Ciputra Development Tbk.", sector: "Properti" },
-    "EMTK": { name: "Elang Mahkota Teknologi Tbk.", sector: "Teknologi" },
-    "EXCL": { name: "XL Axiata Tbk.", sector: "Telekomunikasi" },
-    "GIAA": { name: "Garuda Indonesia (Persero) Tbk.", sector: "Logistik" },
-    "ICBP": { name: "Indofood CBP Sukses Makmur Tbk.", sector: "Konsumer" },
-    "INKP": { name: "Indah Kiat Pulp & Paper Tbk.", sector: "Industri" },
-    "ISAT": { name: "Indosat Ooredoo Hutchison Tbk.", sector: "Telekomunikasi" },
-    "KPIG": { name: "MNC Land Tbk.", sector: "Properti" },
-    "LPKR": { name: "Lippo Karawaci Tbk.", sector: "Properti" },
-    "LPPF": { name: "Matahari Department Store Tbk.", sector: "Konsumer" },
-    "MDKA": { name: "Merdeka Copper Gold Tbk.", sector: "Pertambangan" },
-    "PGAS": { name: "Perusahaan Gas Negara Tbk.", sector: "Infrastruktur" },
-    "PTBA": { name: "Bukit Asam Tbk.", sector: "Energi" },
-    "PWON": { name: "Pakuwon Jati Tbk.", sector: "Properti" },
-    "SGER": { name: "Sumber Global Energy Tbk.", sector: "Energi" },
-    "SMRA": { name: "Summarecon Agung Tbk.", sector: "Properti" },
-    "TINS": { name: "Timah Tbk.", sector: "Pertambangan" },
-    "TKIM": { name: "Pabrik Kertas Tjiwi Kimia Tbk.", sector: "Industri" },
-    "UNTR": { name: "United Tractors Tbk.", sector: "Pertambangan" },
-    "WIFI": { name: "Solusi Sinergi Digital Tbk.", sector: "Teknologi" }
+  // Hash function helper to get deterministic values for each stock
+  const getHash = (ticker: string) => {
+    let h = 0;
+    for (let i = 0; i < ticker.length; i++) {
+      h = ticker.charCodeAt(i) + ((h << 5) - h);
+    }
+    return Math.abs(h);
   };
 
-  const firstNames = [
-    "Sinar", "Maju", "Nusantara", "Karya", "Lestari", "Makmur", "Wijaya", "Persada",
-    "Utama", "Indo", "Multi", "Artha", "Sentosa", "Bumi", "Global", "Cipta", "Daya",
-    "Guna", "Abadi", "Sejahtera", "Jaya", "Pembangunan", "Aneka", "Samudra", "Eka",
-    "Tri", "Agung", "Kencana", "Bintang", "Surya", "Prima", "Anugerah", "Pratama"
-  ];
+  const normalizeSector = (sec: string): string => {
+    if (!sec) return "Industri";
+    const s = sec.toLowerCase();
+    if (s.includes("keuangan") || s.includes("finansial")) return "Finansial";
+    if (s.includes("infra")) return "Infrastruktur";
+    if (s.includes("tekno")) return "Teknologi";
+    if (s.includes("konsum") || s.includes("consumer") || s.includes("primer")) return "Konsumer";
+    if (s.includes("energi") || s.includes("energy")) return "Energi";
+    if (s.includes("tambang") || s.includes("mineral") || s.includes("baku") || s.includes("metal")) return "Pertambangan";
+    if (s.includes("sehat") || s.includes("health")) return "Kesehatan";
+    if (s.includes("industri") || s.includes("perind")) return "Industri";
+    if (s.includes("prop") || s.includes("estate") || s.includes("gedung")) return "Properti";
+    if (s.includes("trans") || s.includes("logis") || s.includes("kapal")) return "Logistik";
+    if (s.includes("telek") || s.includes("komunikasi")) return "Telekomunikasi";
+    if (s.includes("tani") || s.includes("agri") || s.includes("perkebunan")) return "Agrikultur";
+    return "Industri";
+  };
 
-  const secondNames = [
-    "Energi", "Investama", "Resources", "Corporation", "Lestari", "Makmur", "Sentosa",
-    "Wijaya", "Jaya", "Sejahtera", "Abadi", "Mandiri", "Inti", "Karya", "Niaga", "Perkasa",
-    "Agro", "Cemerlang", "Pratama", "Sinergi", "Maju", "Tunggal", "Medika", "Artha",
-    "Nusantara", "Pangan", "Mineral", "Chemical", "Digital", "Tech", "Infrastructure"
-  ];
+  const result: Stock[] = [];
+  const tickersSet = new Set<string>();
 
-  const sectors = [
-    "Finansial", "Infrastruktur", "Teknologi", "Konsumer", "Energi",
-    "Pertambangan", "Kesehatan", "Industri", "Properti", "Logistik",
-    "Telekomunikasi", "Agrikultur"
-  ];
-
-  // Seed popular ones first to make search extremely authentic
-  for (const ticker of popularAdditionalTickers) {
-    if (result.length >= desiredTotal) break;
-    if (!tickersSet.has(ticker)) {
-      tickersSet.add(ticker);
-      const realInfo = tickerToRealInfo[ticker];
-      const sector = realInfo ? realInfo.sector : sectors[Math.floor(Math.random() * sectors.length)];
-      const currentPrice = REAL_PRICE_LOOKUP[ticker] || (Math.floor(100 + (ticker.charCodeAt(0) % 15) * 200 + (ticker.charCodeAt(1) % 10) * 50));
-      // Highly realistic daily changes (within 0.5% - 1.5% max dev of actual price)
-      const changePercentRaw = ((ticker.charCodeAt(0) % 7) - 3) * 0.4 + (Math.random() - 0.5) * 0.3; // deterministic + tiny random
-      const change = Math.round(currentPrice * (changePercentRaw / 100));
-      const previousPrice = Math.max(10, currentPrice - change);
-      const changePercent = Number(((change / previousPrice) * 100).toFixed(2));
-      const volume = Math.floor(500000 + Math.random() * 50000000);
-      const marketCap = Math.floor(50 + Math.random() * 50000);
-      const peRatio = Number((5 + Math.random() * 35).toFixed(1));
-      const dividendYield = Number((Math.random() * 8).toFixed(1));
-      const name = realInfo ? realInfo.name : `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${secondNames[Math.floor(Math.random() * secondNames.length)]} Tbk.`;
-
-      const prices = [];
-      let basePrice = previousPrice;
-      for (let k = 0; k < 10; k++) {
-        basePrice = Math.round(basePrice * (1 + (Math.random() - 0.5) * 0.02));
-        prices.push(Math.max(50, basePrice));
-      }
-      prices[9] = currentPrice;
-
-      result.push({
-        ticker,
-        name,
-        currentPrice,
-        previousPrice,
-        change,
-        changePercent,
-        volume,
-        marketCap,
-        peRatio,
-        dividendYield,
-        sector,
-        history: prices,
-        bid: currentPrice - Math.max(1, Math.round(currentPrice * 0.002)),
-        ask: currentPrice + Math.max(1, Math.round(currentPrice * 0.002)),
-        low: Math.round(currentPrice * 0.95),
-        high: Math.round(currentPrice * 1.05)
-      });
-    }
-  }
-
-  // Fallback deterministic random number generator to yield authentic-sounding Indonesian pseudo-tickers
-  const REAL_IDX_TICKERS = [
-    "AALI", "ABBA", "ABMM", "ACES", "ACST", "ADES", "ADHI", "ADMF", "ADMR", "ADRO", "AERO", "AGRO", "AGRS", "AHAP", "AIMS", "AISA", "AKKU", "AKPI", "AKRA", "ALDO", "ALKA", "ALMI", "ALTO", "AMAG", "AMAN", "AMAR", "AMFG", "AMIN", "AMMN", "AMOR", "AMRT", "ANDI", "ANTM", "APEX", "APIC", "APII", "APLN", "APOP", "APRI", "ARCI", "ARGO", "ARII", "ARKA", "ARKO", "ARNA", "ARTA", "ARTO", "ASGR", "ASII", "ASJT", "ASMI", "ASPI", "ASSA", "ASTA", "ATIC", "AUTO", "AVIA", "AXIO", "AYAM", "BABP", "BACA", "BACK", "BADI", "BAJA", "BALI", "BAMU", "BANK", "BAPA", "BAPI", "BATA", "BOGA", "BAYU", "BBCA", "BBGI", "BBKP", "BBLD", "BBMD", "BBNI", "BBRI", "BBSI", "BBTN", "BBYB", "BCIC", "BCIP", "BDKR", "BDMN", "BEEF", "BEKS", "BELI", "BESS", "BEST", "BFIN", "BGTG", "BHIT", "BIID", "BIKA", "BINA", "BINK", "BIPP", "BIRD", "BISI", "BJBR", "BJTM", "BKDP", "BKSL", "BKSW", "BLUE", "BMAS", "BMSR", "BMTR", "BNDS", "BNGA", "BNII", "BNLI", "BPFI", "BREN", "BRIS", "BRMS", "BRNA", "BRPT", "BSDE", "BSIM", "BSMT", "BSSR", "BSUD", "BTPS", "BTRS", "BUKA", "BUKI", "BUKK", "BULL", "BUMI", "BUVA", "BVIC", "BYAN", "CARS", "CASA", "CASH", "CAST", "CEKA", "CENT", "CFIN", "CINT", "CITA", "CITY", "CLAY", "CLEO", "CLPI", "CMNP", "CMPD", "CNTX", "COAL", "COCO", "CPIN", "CNMA", "CPRO", "CSAP", "CSDP", "CSIS", "CSRA", "CTRA", "CTTH", "CUAN", "DATA", "DAYA", "DCII", "DEAL", "DEFI", "DEWA", "DFAM", "DGIK", "DIBI", "DIGI", "DILD", "DIVA", "DKFT", "DLTA", "DMAS", "DMDD", "DMND", "DNAR", "DOID", "DPNS", "DPUM", "DRMA", "DSFI", "DSNG", "DSSA", "DMMX", "DUFI", "DUTI", "DVLA", "DWGL", "DYAN", "EAST", "ECIP", "EDII", "EKAD", "ELSA", "ELTY", "EMAS", "EMTK", "ENRG", "EPAC", "EPMT", "ERTX", "ERAA", "ESIP", "ESSA", "ESTA", "ESTI", "ETWA", "EXCL", "FAST", "FASW", "FICO", "FILL", "FINO", "FIRE", "FISH", "FMII", "FORU", "FPNI", "FREN", "GAMA", "GDST", "GDYR", "GEMA", "GEMS", "GOLF", "GGRP", "GHON", "GIAA", "GJTL", "GLOB", "GMFI", "GMPU", "GAMA", "GMTD", "GOLD", "GOLL", "GOTO", "GPRA", "GPSO", "GRHA", "GRID", "GRIA", "GRNY", "GSMF", "GTBO", "GTGA", "GTIC", "GTID", "GTSI", "GULA", "GWSA", "GZCO", "HAIS", "HART", "HASI", "HDFA", "HDIT", "HDTX", "HEAL", "HELI", "HERO", "HEXA", "HILL", "HITS", "HKMU", "HLST", "HMSP", "HOKI", "HOME", "HOPE", "HOTL", "HRTA", "HRUM", "IATA", "IBST", "ICBP", "ICON", "IDPR", "IFII", "IGAR", "IIKP", "IKAI", "IKAN", "IKBI", "INAF", "INAI", "INCF", "INCO", "INDF", "INDO", "INDR", "INDX", "INDY", "INFC", "INGB", "INGP", "INIK", "INKP", "INOV", "INPC", "INPS", "INRU", "INTD", "INTF", "INTP", "IPAC", "IPCC", "IPOL", "IPSP", "IRRA", "ISAP", "ISAT", "ISIT", "ISSP", "ITIC", "ITMA", "ITMG", "JECC", "JESS", "JAST", "JAYA", "JGLE", "JIHD", "JKON", "JKSW", "JSPT", "JSMR", "JTPE", "KAEF", "KAIC", "KARW", "KAST", "KAYU", "KBRI", "KDSI", "KEJU", "KEEN", "KENO", "KICI", "KICO", "KIAS", "KIDI", "KIJA", "KINO", "KIOS", "KJEN", "KKGI", "KLBF", "KLAS", "KOBX", "KOIN", "KOKA", "KOLT", "KOMI", "KONS", "KOPI", "KOTA", "KPAL", "KPAS", "KPGD", "KPIG", "KRAH", "KRAS", "KREN", "KRIC", "KRST", "KTAS", "KTID", "LCGP", "LCKM", "LCON", "LEAD", "LIFE", "LINK", "LION", "LPIN", "LPKR", "LPLI", "LPPF", "LPPS", "LPXN", "LRSP", "LSHI", "LSIP", "LSPC", "LTLS", "LUCK", "LUGU", "MABA", "MADA", "MAHA", "MAIN", "MAJA", "MAMI", "MAPA", "MAPI", "MAPP", "MARI", "MARK", "MASB", "MASH", "MASA", "MBAP", "MBMA", "MBSS", "MBTO", "MCAS", "MCOR", "MCOL", "MDIA", "MDKA", "MDKI", "MDLD", "MDRN", "MEDC", "MEGA", "MERK", "META", "METR", "MFEC", "MFGP", "MFIN", "MFMI", "MGNA", "MGLV", "MICE", "MIDI", "MIKA", "MINA", "MIND", "MINS", "MIRA", "MITI", "MJWA", "MKNT", "MKPI", "MLAI", "MLBI", "MLIA", "MLPL", "MLPT", "MMUD", "MNCN", "MOLI", "MOIN", "MONO", "MPIX", "MPMX", "MREI", "MSIN", "MSKY", "MTDL", "MTFN", "MTLA", "MTPS", "MTRA", "MTSM", "MUAR", "MULT", "MUTU", "MYOH", "MYOR", "MYPZ", "MYRX", "MYTX", "NANO", "NASA", "NAST", "NATC", "NATO", "NELY", "NEXX", "NFCX", "NIBE", "NICK", "NICL", "NIKL", "NIPS", "NISB", "NJSG", "NKRI", "NMGE", "NOBU", "NPGF", "NRCA", "NSDP", "NSFI", "NTBK", "NUSA", "NVBA", "NZXA", "OASA", "OBAP", "OBBI", "OBDA", "ODIC", "OKAS", "OLYM", "OMRE", "ONIC", "OPMS", "OREN", "ONEE", "OUKA", "PACI", "PACK", "PADI", "PBSA", "PALM", "PAMG", "PANI", "PANR", "PANS", "PAPS", "PBID", "PBRX", "PCCX", "PCAR", "PEGE", "PEHA", "PGLI", "PGAS", "PGEO", "PGSP", "PGUN", "PIBI", "PICO", "PIDC", "PIJI", "PILA", "PINR", "PKPK", "PLIN", "PLJN", "PLAS", "PMJS", "PMMP", "PNBN", "PNBS", "PNIN", "PNLI", "PNSE", "POLI", "POLL", "POLA", "POLY", "POOL", "PORT", "PRAS", "PRIM", "PRDA", "PRHA", "PSAB", "PSAS", "PSDN", "PSSI", "PSTG", "PTAZ", "PTBA", "PTDU", "PTIS", "PTMP", "PTPP", "PTRA", "PTRO", "PTSN", "PTSP", "PUAD", "PUDP", "PURA", "PURI", "PWON", "PYFA", "PZZA", "RAAM", "RABX", "RICY", "RIGS", "RIMO", "RINA", "RIOS", "RUIS", "RONY", "SAAF", "SABX", "SAFE", "SGER", "SGRO", "SHID", "SIDO", "SILO", "SIMP", "SINI", "SIPD", "SISD", "SITI", "SKBM", "SKLT", "SKYB", "SLAC", "SLIS", "SLJT", "SMBR", "SMDM", "SMDR", "SMGR", "SMIP", "SMKL", "SMMA", "SMMT", "SMRA", "SMST", "SMSM", "SNLK", "SOBI", "SODE", "SOFE", "SOHO", "SONA", "SPMA", "SPOT", "SPTO", "SQMI", "SQRE", "SREI", "SRIL", "SRTG", "SSIA", "SSMS", "SSTM", "STAR", "STTP", "SUBA", "SUDI", "SUGI", "SULI", "SUMI", "SUNR", "SUPR", "SURE", "TACO", "TAFI", "TAMU", "TARA", "TART", "TASP", "TAWG", "TAXI", "TBIG", "TBMS", "TBP", "TCID", "TCPI", "TDPM", "TEBE", "TECH", "TELE", "TFAS", "TFCO", "TGKA", "TGRA", "TINS", "TIRT", "TKIM", "TLDN", "TLKM", "TMAS", "TMPO", "TNCA", "TOBA", "TOCO", "TOKO", "TOTAL", "TPMA", "TPIA", "TPSS", "TRAC", "TREG", "TRIL", "TRIM", "TRIN", "TRIS", "TRJA", "TRST", "TRUB", "TRUK", "TSUD", "TSPC", "TUGU", "TUNA", "TURI", "TYRE", "UCID", "ULTRA", "UNIC", "UNIQ", "UNIT", "UNTR", "UNVR", "URBN", "USIP", "UTAM", "UTAR", "VCID", "VCON", "VICO", "VIVA", "VIPT", "VOKS", "VOSS", "VPAC", "VRIV", "VSGP", "VSTE", "WAPB", "WAPO", "WEGE", "WEHA", "WICO", "WIDI", "WIFI", "WIKA", "WIKB", "WIKI", "WIMB", "WINS", "WMPG", "WMPX", "WOOD", "WIRG", "WRID", "WSBP", "WSKT", "WTON", "WIIM", "VKTR", "VAST", "VOTE", "VISI", "UVCR", "WGSH", "NISP", "YADO", "YAKU", "YALF", "YASA", "YPAS", "YUDH", "YULI", "ZATA", "ZEAL", "ZELC", "ZINC", "ZONE", "ZYRX"
-  ];
-
-  let seedVal = 707;
-  function seededRandom() {
-    const x = Math.sin(seedVal++) * 10000;
-    return x - Math.floor(x);
-  }
-
-  for (const t of REAL_IDX_TICKERS) {
-    if (result.length >= desiredTotal) break;
-    if (!tickersSet.has(t)) {
-      tickersSet.add(t);
-      const sector = sectors[Math.floor(seededRandom() * sectors.length)];
-      const currentPrice = Math.floor(50 + seededRandom() * 12000);
-      const change = Math.floor((seededRandom() - 0.49) * (currentPrice * 0.04));
-      const previousPrice = Math.max(50, currentPrice - change);
-      const changePercent = Number(((change / previousPrice) * 100).toFixed(2));
-      const volume = Math.floor(100000 + seededRandom() * 8000000);
-      const marketCap = Math.floor(10 + seededRandom() * 25000);
-      const peRatio = Number((3 + seededRandom() * 50).toFixed(1));
-      const dividendYield = Number((seededRandom() * 10).toFixed(1));
-      const name = `${firstNames[Math.floor(seededRandom() * firstNames.length)]} ${secondNames[Math.floor(seededRandom() * secondNames.length)]} Tbk.`;
-
-      const prices = [];
-      let basePrice = previousPrice;
-      for (let k = 0; k < 10; k++) {
-        basePrice = Math.round(basePrice * (1 + (seededRandom() - 0.5) * 0.02));
-        prices.push(Math.max(50, basePrice));
-      }
-      prices[9] = currentPrice;
-
-      result.push({
-        ticker: t,
-        name,
-        currentPrice,
-        previousPrice,
-        change,
-        changePercent,
-        volume,
-        marketCap,
-        peRatio,
-        dividendYield,
-        sector,
-        history: prices,
-        bid: currentPrice - Math.max(1, Math.round(currentPrice * 0.002)),
-        ask: currentPrice + Math.max(1, Math.round(currentPrice * 0.002)),
-        low: Math.round(currentPrice * 0.96),
-        high: Math.round(currentPrice * 1.04)
-      });
-    }
-  }
-
-  const realSet = new Set([
-    ...POPULAR_STOCKS_BASE.map(s => s.ticker),
-    ...popularAdditionalTickers,
-    ...Object.keys(REAL_PRICE_LOOKUP)
-  ]);
-
-  // Create lookup map for real emiten names/sectors
-  const emitenMap = new Map<string, { company_name: string; sector: string }>();
-  fullEmitenList.forEach((e: any) => {
-    emitenMap.set(e.ticker.toUpperCase().trim(), {
-      company_name: e.company_name,
-      sector: e.sector
-    });
+  // Use POPULAR_STOCKS_BASE as pre-seeded stocks to retain high fidelity values
+  const popularBaseMap = new Map<string, Stock>();
+  POPULAR_STOCKS_BASE.forEach(s => {
+    popularBaseMap.set(s.ticker.toUpperCase().trim(), s);
   });
 
-  return result.map(stock => {
-    const uppercaseTicker = stock.ticker.toUpperCase().trim();
-    const realEmiten = emitenMap.get(uppercaseTicker);
-    let name = stock.name;
-    let sector = stock.sector;
-    if (realEmiten) {
-      name = realEmiten.company_name;
-      sector = realEmiten.sector;
+  // Filter fullEmitenList to preserve real-world IDX active stocks only
+  fullEmitenList.forEach((e: any) => {
+    const rawTicker = e.ticker?.toUpperCase().trim();
+    if (!rawTicker) return;
+
+    // Reject non-standard/anomalous stock codes (e.g. rights "-R", warrants, or non-alphabetics)
+    if (!/^[A-Z]{4}$/.test(rawTicker)) return;
+
+    if (tickersSet.has(rawTicker)) return;
+    tickersSet.add(rawTicker);
+
+    const name = e.company_name || `${rawTicker} Tbk.`;
+    const sector = normalizeSector(e.sector);
+    
+    // Check if we have a pre-seeded popular stock for this ticker
+    const seed = popularBaseMap.get(rawTicker);
+    if (seed) {
+      // Retain highly hand-crafted POPULAR_STOCKS_BASE metrics but align company name and sector with the official listing
+      result.push({
+        ...seed,
+        name,
+        sector,
+        isSyariah: seed.isSyariah ?? (sector === "Finansial" ? (name.toLowerCase().includes("syariah") || name.toLowerCase().includes("sharia") || rawTicker === "PNBS" || rawTicker === "BTPS" || rawTicker === "BRIS" || rawTicker === "BANK") : (rawTicker !== "DLTA" && rawTicker !== "MLBI")),
+        isReal: true
+      });
+      return;
     }
+
+    // Otherwise, generate high-fidelity realistic parameters deterministically
+    const hash = getHash(rawTicker);
+    const lookupPrice = e.price || REAL_PRICE_LOOKUP[rawTicker];
+    
+    let currentPrice = 500;
+    if (lookupPrice) {
+      currentPrice = lookupPrice;
+    } else {
+      const tier = hash % 3;
+      if (tier === 0) {
+        currentPrice = 50 + (hash % 9) * 50; // 50 - 450
+      } else if (tier === 1) {
+        currentPrice = 500 + (hash % 15) * 300; // 500 - 4700
+      } else {
+        currentPrice = 5000 + (hash % 20) * 1500; // 5000 - 33500
+      }
+    }
+
+    const changePercentRaw = e.changePercent !== undefined ? e.changePercent : (((hash % 11) - 5) * 0.4); // -2.0% to +2.0%
+    const change = e.change !== undefined ? e.change : Math.round(currentPrice * (changePercentRaw / 100));
+    const previousPrice = e.previousPrice !== undefined ? e.previousPrice : Math.max(50, currentPrice - change);
+    const changePercent = e.changePercent !== undefined ? e.changePercent : Number(((change / previousPrice) * 100).toFixed(2));
+    
+    const volume = e.volume !== undefined ? e.volume : Math.floor(100000 + (hash % 99) * 500000);
+    const marketCap = e.marketCap !== undefined ? e.marketCap : (Math.max(10, Math.round((currentPrice * 100000000) / 1000000000)) || 500); // in Billion IDR
+    const peRatio = e.peRatio !== undefined ? e.peRatio : Number((5 + (hash % 40) * 0.6).toFixed(1));
+    const dividendYield = e.dividendYield !== undefined ? e.dividendYield : Number(((hash % 8) === 0 ? (hash % 10) * 0.7 : 0).toFixed(1));
+
+    // Determine 10-day price history
+    let history: number[] = [];
+    if (e.history && Array.isArray(e.history) && e.history.length > 0) {
+      history = [...e.history];
+    } else {
+      let basePrice = previousPrice;
+      for (let k = 0; k < 10; k++) {
+        const factor = 1 + (((hash + k) % 9) - 4) * 0.005; // -2.0% to +2.0% variation
+        basePrice = Math.round(basePrice * factor);
+        history.push(Math.max(50, basePrice));
+      }
+      history[9] = currentPrice;
+    }
+
+    const bid = e.bid !== undefined ? e.bid : (currentPrice - Math.max(1, Math.round(currentPrice * 0.002)));
+    const ask = e.ask !== undefined ? e.ask : (currentPrice + Math.max(1, Math.round(currentPrice * 0.002)));
+    const low = e.low !== undefined ? e.low : Math.round(currentPrice * 0.96);
+    const high = e.high !== undefined ? e.high : Math.round(currentPrice * 1.04);
 
     let isSyariah = true;
     if (sector === "Finansial") {
@@ -648,25 +467,42 @@ function generate989Stocks(): Stock[] {
       if (
         nameLower.includes("syariah") || 
         nameLower.includes("sharia") || 
-        stock.ticker === "PNBS" || 
-        stock.ticker === "BTPS" || 
-        stock.ticker === "BANK"
+        rawTicker === "PNBS" || 
+        rawTicker === "BTPS" || 
+        rawTicker === "BANK" ||
+        rawTicker === "BRIS"
       ) {
         isSyariah = true;
       } else {
         isSyariah = false;
       }
-    } else if (stock.ticker === "DLTA" || stock.ticker === "MLBI") {
+    } else if (rawTicker === "DLTA" || rawTicker === "MLBI") {
       isSyariah = false;
     }
-    return {
-      ...stock,
+
+    result.push({
+      ticker: rawTicker,
       name,
+      currentPrice,
+      previousPrice,
+      change,
+      changePercent,
+      volume,
+      marketCap,
+      peRatio,
+      dividendYield,
       sector,
+      history,
+      bid,
+      ask,
+      low,
+      high,
       isSyariah,
       isReal: true
-    };
+    });
   });
+
+  return result;
 }
 
 export const INITIAL_STOCKS: Stock[] = generate989Stocks();

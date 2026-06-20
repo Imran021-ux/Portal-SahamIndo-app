@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { UserSession, Stock, PriceAlert } from "./types";
-import { INITIAL_STOCKS, tickStockPrices } from "./data";
+import { INITIAL_STOCKS, tickStockPrices, REAL_PRICE_LOOKUP } from "./data";
 import PriceAlertsManager from "./components/PriceAlertsManager";
 import { getFormattedDateIndo } from "./utils/date";
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
@@ -201,6 +201,12 @@ export default function App() {
   // Recommendations popup state
   const [isRecommendationsOpen, setIsRecommendationsOpen] = useState(false);
 
+  // Synchronized time state for Accumulation & Distribution data
+  const [lastSyncTime, setLastSyncTime] = useState<string>(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
+
   const ihsgSparkData = [
     { name: "09:00", value: ihsgPrevClose },
     { name: "10:00", value: ihsgPrevClose * 1.0012 },
@@ -301,7 +307,8 @@ export default function App() {
           neabyteList.forEach((item: any) => {
             const ticker = (item.ticker || item.symbol || "").toUpperCase();
             if (ticker) {
-              const currentPrice = parseFloat(item.price ?? item.currentPrice ?? item.current_price ?? item.close ?? 500);
+              const defaultFallbackPrice = REAL_PRICE_LOOKUP[ticker] || (Math.floor(100 + (ticker.charCodeAt(0) % 15) * 200 + (ticker.charCodeAt(1) % 10) * 50));
+              const currentPrice = parseFloat(item.price ?? item.currentPrice ?? item.current_price ?? item.close ?? defaultFallbackPrice);
               const previousPrice = parseFloat(item.prevClose ?? item.previousPrice ?? item.prev_close ?? item.open ?? currentPrice);
               const change = item.change !== undefined ? parseFloat(item.change) : (currentPrice - previousPrice);
               const changePercent = item.changePercent !== undefined ? parseFloat(item.changePercent) : (previousPrice > 0 ? (change / previousPrice) * 100 : 0);
@@ -398,6 +405,9 @@ export default function App() {
       } catch (e) {
         console.warn("[App Initializer] Gagal melakukan sinkronisasi IHSG awal:", e);
       }
+
+      const d = new Date();
+      setLastSyncTime(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
     };
 
     initializeData();
@@ -454,6 +464,8 @@ export default function App() {
           });
         }
       }
+      const d = new Date();
+      setLastSyncTime(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
     } catch (err) {
       console.warn("Gagal melakukan otomatis sinkronisasi harga live Yahoo Finance:", err);
     }
@@ -981,7 +993,7 @@ export default function App() {
                     setActiveView("accumulation-distribution-hold");
                     if (window.innerWidth < 768) setIsSidebarOpen(false);
                   }}
-                  className={`w-full h-11 px-3.5 rounded-xl font-bold flex items-center space-x-3 transition-all cursor-pointer ${
+                  className={`w-full h-auto py-1.5 min-h-[44px] px-3.5 rounded-xl font-bold flex items-center space-x-3 transition-all cursor-pointer ${
                     activeView === "accumulation-distribution-hold"
                       ? "bg-slate-800 text-white border-l-2 border-emerald-400 shadow-md shadow-emerald-500/10"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
@@ -996,6 +1008,9 @@ export default function App() {
                         <span className="w-1 h-1 rounded-full bg-cyan-400 animate-ping inline-block"></span>
                         Live
                       </span>
+                    </span>
+                    <span className="text-[7.5px] text-slate-500 font-mono mt-0.5 pl-0.5">
+                      Last Sync: {lastSyncTime}
                     </span>
                   </div>
                 </button>
