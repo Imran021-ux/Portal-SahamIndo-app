@@ -353,3 +353,37 @@ function run() {
 }
 
 run();
+
+  // ... (lanjutan dari daftar NOUNS Anda)
+  const generator = () => {
+    const list = { ...PROMINENT };
+    
+    // Generator sederhana untuk menambah hingga 950 emiten
+    for (let i = 1; i <= 900; i++) {
+      const p = PREFIXES[Math.floor(Math.random() * PREFIXES.length)];
+      const n = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+      const symbol = (p[0] + n[0] + i).toUpperCase().slice(0, 4);
+      
+      if (!list[symbol]) {
+        list[symbol] = {
+          name: `PT ${p} ${n} Tbk`,
+          sector: SECTORS[Math.floor(Math.random() * SECTORS.length)],
+          price: Math.floor(Math.random() * 10000) + 50,
+          pe: parseFloat((Math.random() * 30).toFixed(1)),
+          div: parseFloat((Math.random() * 10).toFixed(1)),
+          cap: Math.floor(Math.random() * 500) + 1
+        };
+      }
+    }
+    return list;
+  };
+
+  const finalData = generator();
+  
+  // Menulis file JSON
+  fs.writeFileSync(targetPath, JSON.stringify(finalData, null, 2));
+  console.log(`Berhasil! File tersimpan di: ${targetPath}`);
+}
+
+run();
+
