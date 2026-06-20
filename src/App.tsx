@@ -24,6 +24,7 @@ import BrokerStalkerView from "./components/BrokerStalkerView";
 import WatchlistView from "./components/WatchlistView";
 import ComparisonView from "./components/ComparisonView";
 import AccumulationDistributionView from "./components/AccumulationDistributionView";
+import MarketHeatmap from "./components/MarketHeatmap";
 import ProfileView from "./components/ProfileView";
 import fullEmitenList from "./full_emiten_list.json";
 import { marketData } from "./marketData";
@@ -50,7 +51,7 @@ export default function App() {
   const [stocks, setStocks] = useState<Stock[]>(INITIAL_STOCKS);
 
   // 🗺️ 3. Navigation State Manager
-  const [activeView, setActiveView] = useState<"dashboard" | "emiten-dashboard" | "watchlist" | "broker-stalker" | "screener" | "tracer" | "news" | "recommendations" | "developer" | "premium-strategies" | "comparison" | "accumulation-distribution-hold" | "profile">("dashboard");
+  const [activeView, setActiveView] = useState<"dashboard" | "emiten-dashboard" | "watchlist" | "broker-stalker" | "screener" | "tracer" | "news" | "recommendations" | "developer" | "premium-strategies" | "comparison" | "accumulation-distribution-hold" | "profile" | "market-heatmap">("dashboard");
   const [premiumCategory, setPremiumCategory] = useState<"multibager" | "ara" | "momentum" | "undervalue" | "near_support" | "bull_divergence" | "early_breakout">("multibager");
   const [selectedBrokerCode, setSelectedBrokerCode] = useState<string>("CC");
 
@@ -1016,6 +1017,30 @@ export default function App() {
                 </button>
 
                 <button
+                  id="nav-market-heatmap-tab"
+                  onClick={() => {
+                    setActiveView("market-heatmap");
+                    if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  }}
+                  className={`w-full h-auto py-1.5 min-h-[44px] px-3.5 rounded-xl font-bold flex items-center space-x-3 transition-all cursor-pointer ${
+                    activeView === "market-heatmap"
+                      ? "bg-slate-800 text-white border-l-2 border-cyan-400 shadow-md shadow-cyan-500/10"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50"
+                  }`}
+                >
+                  <Layers className="w-4.5 h-4.5 text-cyan-400 shrink-0" />
+                  <div className="flex flex-col text-left">
+                    <span className="font-veneer text-[20px] tracking-tight antialiased leading-none">Market Heatmap</span>
+                    <span className="text-[8px] text-cyan-400 font-extrabold uppercase leading-none mt-1 pl-0.5 flex items-center gap-1.5">
+                      Sektor &amp; Kapitalisasi
+                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 bg-cyan-950/80 border border-cyan-500/30 rounded text-[7px] text-cyan-400 font-bold tracking-wider animate-pulse normal-case font-mono">
+                        Proporsional
+                      </span>
+                    </span>
+                  </div>
+                </button>
+
+                <button
                   onClick={() => {
                     setActiveView("tracer");
                     if (window.innerWidth < 768) setIsSidebarOpen(false);
@@ -1261,6 +1286,16 @@ export default function App() {
                   onSelectStock={handleNavigateToEmitenDashboard}
                   watchlist={watchlist}
                   onToggleWatchlist={toggleWatchlist}
+                />
+              )}
+
+              {activeView === "market-heatmap" && (
+                <MarketHeatmap
+                  stocks={stocks}
+                  onSelectStock={(stock) => {
+                    const tickerStr = typeof stock === "string" ? stock : stock.ticker;
+                    handleNavigateToEmitenDashboard(tickerStr);
+                  }}
                 />
               )}
 

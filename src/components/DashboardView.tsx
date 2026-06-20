@@ -1961,7 +1961,6 @@ export default function DashboardView({
         </div>
 
       </div>
-
       {/* 🔮 FITUR REKOMENDASI SAHAM • KATEGORI AKUMULASI, DISTRIBUSI & HOLD SEMUA EMITEN IDX */}
       <div id="bsjp-section-header" className="bg-[#010a11] border border-cyan-500/15 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 scroll-mt-20">
         
