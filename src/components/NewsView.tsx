@@ -16,13 +16,34 @@ interface NewsViewProps {
 
 export default function NewsView({ onNavigateToTracer }: NewsViewProps) {
   const [activeSentimentFilter, setActiveSentimentFilter] = useState<string>("Semua");
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("all");
+
+  const categories = useMemo(() => [
+    { id: "all", label: "Semua Kategori" },
+    { id: "msci", label: "MSCI Index" },
+    { id: "akumulasi", label: "Akumulasi Bandar" },
+    { id: "ipo", label: "IPO Perdana" },
+    { id: "merger", label: "Merger & Akuisisi (Mager)" },
+    { id: "makro", label: "Makro Global" }
+  ], []);
 
   const filteredNews = useMemo(() => {
-    if (activeSentimentFilter === "Semua") return INITIAL_NEWS;
-    return INITIAL_NEWS.filter(news => news.sentiment === activeSentimentFilter.toLowerCase());
-  }, [activeSentimentFilter]);
+    let result = INITIAL_NEWS;
+    
+    // Category Filter
+    if (activeCategoryFilter !== "all") {
+      result = result.filter(news => news.category === activeCategoryFilter);
+    }
 
-  // Overall market impact computation
+    // Sentiment Filter
+    if (activeSentimentFilter !== "Semua") {
+      result = result.filter(news => news.sentiment === activeSentimentFilter.toLowerCase());
+    }
+
+    return result;
+  }, [activeCategoryFilter, activeSentimentFilter]);
+
+  // Overall market impact computation based on all news
   const stats = useMemo(() => {
     const total = INITIAL_NEWS.length;
     const bullish = INITIAL_NEWS.filter(n => n.sentiment === "bullish").length;
@@ -36,15 +57,34 @@ export default function NewsView({ onNavigateToTracer }: NewsViewProps) {
     };
   }, []);
 
+  const getCategoryBadge = (category?: string) => {
+    switch (category) {
+      case "msci":
+        return <span className="px-2 py-0.5 bg-purple-950 text-purple-400 border border-purple-500/20 text-[9px] font-black uppercase rounded tracking-wider font-mono">MSCI</span>;
+      case "akumulasi":
+        return <span className="px-2 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase rounded tracking-wider font-mono font-sans">AKUMULASI</span>;
+      case "ipo":
+        return <span className="px-2 py-0.5 bg-amber-950 text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase rounded tracking-wider font-mono">IPO</span>;
+      case "merger":
+        return <span className="px-2 py-0.5 bg-cyan-950 text-cyan-400 border border-cyan-500/20 text-[9px] font-black uppercase rounded tracking-wider font-mono">MERGER</span>;
+      case "makro":
+        return <span className="px-2 py-0.5 bg-blue-950 text-blue-400 border border-blue-500/20 text-[9px] font-black uppercase rounded tracking-wider font-mono">MAKRO GLOBAL</span>;
+      default:
+        return <span className="px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 text-[9px] font-black uppercase rounded tracking-wider font-mono">UMUM</span>;
+    }
+  };
+
   return (
     <div className="space-y-6">
       
       {/* Page Title */}
       <div>
-        <h2 className="text-xl font-bold font-display tracking-tight text-white flex items-center gap-2">
-          <Newspaper className="w-5 h-5 text-emerald-400" /> Berita Sentimen & Aliran Informasi IDX
+        <h2 className="text-xl font-bold font-display tracking-tight text-white flex items-center gap-2 animate-fade-in">
+          <Newspaper className="w-5 h-5 text-emerald-400 animate-pulse" /> Berita Sentimen & Aliran Informasi IDX
         </h2>
-        <p className="text-xs text-slate-400">Liputan berita ekonomi harian Indonesia, aksi korporasi emiten bursa, serta interpretasi sentimen otomatis.</p>
+        <p className="text-xs text-slate-400 leading-relaxed max-w-2xl mt-1">
+          Asimilasi informasi bursa Indonesia mulai dari pergerakan indeks **MSCI**, deteksi **Akumulasi Bandar Agung**, prospek saham **IPO**, aksi korporasi **Merger & Akuisisi (Mager)**, hingga sentimen **Makro Global** dunia.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -52,84 +92,133 @@ export default function NewsView({ onNavigateToTracer }: NewsViewProps) {
         {/* News Feed Grid (8 columns) */}
         <div className="lg:col-span-8 space-y-4">
           
-          {/* Filtering Tab controls */}
-          <div className="flex bg-slate-900/60 p-1 rounded-xl border border-slate-800 self-start max-w-md text-xs">
-            {["Semua", "Bullish", "Bearish", "Neutral"].map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveSentimentFilter(tag)}
-                className={`flex-1 py-1.5 px-4 rounded-lg font-semibold transition-all cursor-pointer ${
-                  activeSentimentFilter === tag 
-                    ? "bg-slate-800 text-white shadow-sm" 
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+          <div className="bg-slate-950/40 p-4 border border-slate-900 rounded-2xl space-y-3.5">
+            {/* Filtering Category controls */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block font-sans">KATEGORI TOPIK BEI</span>
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((cat) => {
+                  const isActive = activeCategoryFilter === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategoryFilter(cat.id)}
+                      className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-emerald-500 text-slate-950 border border-emerald-400/30 font-extrabold shadow-md shadow-emerald-500/10"
+                          : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white hover:bg-slate-850"
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Filtering Sentiment controls */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-900/60">
+              <span className="text-[10px] text-slate-500 uppercase font-black tracking-wider block font-sans">FILTER KECENDERUNGAN SENTIMEN</span>
+              <div className="flex bg-slate-900/40 p-1 rounded-xl border border-slate-900/80 self-start max-w-sm text-[10px]">
+                {["Semua", "Bullish", "Bearish", "Neutral"].map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setActiveSentimentFilter(tag)}
+                    className={`flex-1 py-1 px-3 rounded-lg font-bold transition-all cursor-pointer uppercase ${
+                      activeSentimentFilter === tag 
+                        ? "bg-slate-800 text-white shadow-sm font-extrabold" 
+                        : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-3.5">
-            {filteredNews.map((news) => {
-              const impactTagBg = news.sentiment === "bullish" 
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                : news.sentiment === "bearish"
-                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                  : "bg-slate-500/10 text-slate-400 border-slate-800";
-
-              return (
-                <div 
-                  key={news.id} 
-                  className="glass-card rounded-xl p-5 border border-slate-800/80 hover:border-slate-700 hover:translate-x-0.5 transition-all flex flex-col justify-between"
+            {filteredNews.length === 0 ? (
+              <div className="text-center py-10 bg-slate-950/40 border border-slate-900 rounded-2xl p-6 space-y-3">
+                <p className="text-slate-400 text-xs font-medium font-sans">
+                  Tidak ada berita yang cocok untuk kombinasi kategori & sentimen saat ini.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCategoryFilter("all");
+                    setActiveSentimentFilter("Semua");
+                  }}
+                  className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs font-bold text-white hover:bg-slate-850 animate-pulse transition-colors"
                 >
-                  <div>
-                    {/* Header line */}
-                    <div className="flex justify-between items-center text-[10px] mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 font-semibold rounded uppercase font-mono">{news.source}</span>
-                        <span className="text-slate-500 font-medium">{news.time}</span>
-                      </div>
-                      
-                      <span className={`px-2 py-0.5 border text-[9px] font-black uppercase tracking-wider rounded-sm ${impactTagBg}`}>
-                        {news.sentiment} Impact
-                      </span>
-                    </div>
+                  Reset Filter Berita
+                </button>
+              </div>
+            ) : (
+              filteredNews.map((news) => {
+                const impactTagBg = news.sentiment === "bullish" 
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                  : news.sentiment === "bearish"
+                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    : "bg-slate-500/10 text-slate-400 border-slate-800";
 
-                    {/* Main Title */}
-                    <h4 className="text-sm font-bold text-white leading-snug tracking-tight my-2 block">
-                      {news.title}
-                    </h4>
-                  </div>
-
-                  {/* Foot actions */}
-                  <div className="flex justify-between items-center pt-3 border-t border-slate-900 text-xs mt-3">
+                return (
+                  <div 
+                    key={news.id} 
+                    className="glass-card rounded-xl p-5 border border-slate-800/80 hover:border-slate-700 hover:translate-x-0.5 transition-all flex flex-col justify-between"
+                  >
                     <div>
-                      {news.ticker ? (
-                        <span className="text-[10px] bg-blue-600/10 text-blue-400 font-extrabold border border-blue-500/20 px-2 py-0.5 rounded font-mono">
-                          #{news.ticker}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-slate-500">IHSG Regional</span>
-                      )}
+                      {/* Header line */}
+                      <div className="flex flex-wrap gap-2 items-center justify-between text-[10px] mb-2.5">
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 font-semibold rounded uppercase font-mono">{news.source}</span>
+                          <span className="text-slate-500 font-medium">{news.time}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-1.5">
+                          {getCategoryBadge(news.category)}
+                          <span className={`px-2 py-0.5 border text-[9px] font-black uppercase tracking-wider rounded-sm ${impactTagBg}`}>
+                            {news.sentiment} Impact
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Main Title */}
+                      <h4 className="text-sm font-bold text-white leading-snug tracking-tight my-2 block">
+                        {news.title}
+                      </h4>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      {news.ticker && (
-                        <button
-                          id={`news-analyze-${news.ticker}`}
-                          onClick={() => onNavigateToTracer(news.ticker!)}
-                          className="px-2.5 py-1.5 rounded bg-blue-600/10 text-blue-400 text-[10px] hover:bg-blue-600/20 border border-blue-500/15 inline-flex items-center gap-1.5 cursor-pointer transition-colors"
-                        >
-                          <Compass className="w-3.5 h-3.5" />
-                          <span>Minta Analisis AI</span>
-                        </button>
-                      )}
+                    {/* Foot actions */}
+                    <div className="flex justify-between items-center pt-3 border-t border-slate-900 text-xs mt-3">
+                      <div>
+                        {news.ticker ? (
+                          <span className="text-[10px] bg-blue-600/10 text-blue-400 font-extrabold border border-blue-500/20 px-2 py-0.5 rounded font-mono">
+                            #{news.ticker}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-500">IHSG Regional</span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {news.ticker && (
+                          <button
+                            id={`news-analyze-${news.ticker}`}
+                            onClick={() => onNavigateToTracer(news.ticker!)}
+                            className="px-2.5 py-1.5 rounded bg-blue-600/10 text-blue-400 text-[10px] hover:bg-blue-600/20 border border-blue-500/15 inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                          >
+                            <Compass className="w-3.5 h-3.5" />
+                            <span>Minta Analisis AI</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
+
                   </div>
-
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
 
         </div>

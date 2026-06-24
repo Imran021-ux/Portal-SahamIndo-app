@@ -154,7 +154,19 @@ export const DataService = {
             volume: liveData.volume,
             low: liveData.low,
             high: liveData.high,
-            history: liveData.history
+            history: liveData.history,
+            sector: liveData.sector,
+            marketCap: liveData.marketCap,
+            peRatio: liveData.peRatio,
+            dividendYield: liveData.dividendYield,
+            pbv: liveData.pbv,
+            der: liveData.der,
+            roe: liveData.roe,
+            eps: liveData.eps,
+            freeCashFlow: liveData.freeCashFlow,
+            ocf: liveData.ocf,
+            bid: liveData.bid,
+            ask: liveData.ask
           };
           console.log(`[DataService Yahoo Live] Berhasil memuat data emiten dari Yahoo Finance untuk ${cleanSymbol}: Price=${liveData.currentPrice}`);
         }

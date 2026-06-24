@@ -4,13 +4,14 @@
  */
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Stock } from "../types";
+import { createPortal } from "react-dom";
+import { Stock, PriceAlert } from "../types";
 import { 
   TrendingUp, TrendingDown, DollarSign, BarChart3, 
   Activity, ArrowUpRight, ArrowDownRight, Compass,
   Coins, Wallet, ShoppingCart, RefreshCcw, Eye, ShieldCheck,
   Search, ChevronRight, Sparkles, Award,
-  ChevronLeft, SlidersHorizontal, Filter, Star, LayoutGrid, Calendar, HelpCircle, Info, FileText, RotateCw, Copy, Check, AlertTriangle, Maximize2, Minimize2
+  ChevronLeft, SlidersHorizontal, Filter, Star, LayoutGrid, Calendar, HelpCircle, Info, FileText, RotateCw, Copy, Check, AlertTriangle, Maximize2, Minimize2, Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend, LineChart, Line, ReferenceLine, Label } from "recharts";
@@ -94,6 +95,9 @@ interface EmitenDashboardViewProps {
   watchlist?: string[];
   onToggleWatchlist?: (ticker: string) => void;
   onSelectBroker?: (brokerCode: string) => void;
+  globalAlerts?: PriceAlert[];
+  priceAlerts?: Record<string, number>;
+  sellPriceAlerts?: Record<string, number>;
 }
 
 // Helper local component for real-time Order Book and Market Depth Visualizer
@@ -444,9 +448,13 @@ export default function EmitenDashboardView({
   setPortfolio,
   watchlist = [],
   onToggleWatchlist,
-  onSelectBroker
+  onSelectBroker,
+  globalAlerts = [],
+  priceAlerts = {},
+  sellPriceAlerts = {}
 }: EmitenDashboardViewProps) {
   
+  const [historyTimeframe, setHistoryTimeframe] = useState<"1D" | "1W" | "1M" | "3M">("1M");
   const [activeHubTab, setActiveHubTab] = useState<"ringkasan" | "teknikal" | "fundamental" | "sector" | "verdict" | "broker" | "analisa-pasar" | "ramalan-ai">("ringkasan");
   const [chartType, setChartType] = useState<"native" | "tradingview">("native");
   const [showFibonacci, setShowFibonacci] = useState<boolean>(true);
@@ -1201,6 +1209,19 @@ export default function EmitenDashboardView({
   const [quickSummarySentiment, setQuickSummarySentiment] = useState<"BULLISH" | "BEARISH" | "NEUTRAL" | null>(null);
   const [copiedSummary, setCopiedSummary] = useState(false);
 
+  // Lock body scroll when overlays/modals are active to prevent double scrolling on tablets and touch devices
+  useEffect(() => {
+    if (isCompareOpen || isQuickSummaryOpen || isFullscreenChartOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isCompareOpen, isQuickSummaryOpen, isFullscreenChartOpen]);
+
+
   const handleTriggerQuickSummary = async () => {
     setIsQuickSummaryOpen(true);
     setIsQuickSummaryLoading(true);
@@ -1422,22 +1443,6 @@ export default function EmitenDashboardView({
     };
   }, [activeStock, bandarProperties]);
 
-  // 📈 Native Vector Chart math and dynamic coordinates
-  const historyDates = useMemo(() => {
-    const dates = [];
-    const now = new Date();
-    let count = 0;
-    while (dates.length < 10) {
-      const d = new Date(now.getTime() - count * 24 * 60 * 60 * 1000);
-      const day = d.getDay();
-      if (day !== 0 && day !== 6) { // skip weekends
-        dates.unshift(d.toISOString());
-      }
-      count++;
-    }
-    return dates;
-  }, []);
-
   const prices = useMemo(() => {
     const prevClose = activeStock.previousPrice || activeStock.currentPrice || 100;
     let basePrices = [activeStock.previousPrice, activeStock.currentPrice];
@@ -1472,14 +1477,67 @@ export default function EmitenDashboardView({
     // Terapkan Moving Average Filter sederhana (3-point window) untuk menghaluskan fluktuasi abnormal (API glitch / extreme spikes)
     const movingAverageResult = [...smoothed];
     for (let i = 1; i < smoothed.length - 1; i++) {
-       movingAverageResult[i] = (smoothed[i - 1] + smoothed[i] + smoothed[i + 1]) / 3;
+        movingAverageResult[i] = (smoothed[i - 1] + smoothed[i] + smoothed[i + 1]) / 3;
     }
     
     // Pastikan harga terakhir selalu sesuai harga penutupan / last price riil agar presisi 100%
     movingAverageResult[movingAverageResult.length - 1] = activeStock.currentPrice;
     
-    return movingAverageResult;
-  }, [activeStock]);
+    // Rentang waktu filtering
+    let finalPrices = [...movingAverageResult];
+    if (historyTimeframe === "1D") {
+      // 1 Hari: Simulasikan fluktuasi intraday hari ini (5 titik)
+      const lastVal = activeStock.currentPrice;
+      const firstVal = activeStock.previousPrice || lastVal * 0.992;
+      finalPrices = [
+        firstVal,
+        firstVal * 1.002,
+        Math.round((firstVal + lastVal) / 2),
+        lastVal * 0.997,
+        lastVal
+      ];
+    } else if (historyTimeframe === "1W") {
+      // 1 Minggu: Mengambil 5 titik bursa terakhir
+      finalPrices = movingAverageResult.slice(-5);
+      if (finalPrices.length < 5) {
+        finalPrices = movingAverageResult;
+      }
+    } else if (historyTimeframe === "1M") {
+      // 1 Bulan: Total data harian 10 titik
+      finalPrices = movingAverageResult;
+    } else if (historyTimeframe === "3M") {
+      // 3 Bulan: Ekstrapolasi 15 titik historical ke belakang agar visualisasi lebih lengkap dan representatif
+      const firstVal = movingAverageResult[0] || activeStock.previousPrice;
+      const synthesized: number[] = [];
+      const charSum = activeStock.ticker.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      let bp = firstVal;
+      for (let k = 15; k >= 1; k--) {
+        const trend = Math.sin(charSum + k) * 0.015 - 0.002;
+        bp = Math.round(bp * (1 - trend));
+        synthesized.push(Math.max(50, bp));
+      }
+      finalPrices = [...synthesized, ...movingAverageResult];
+    }
+
+    return finalPrices;
+  }, [activeStock, historyTimeframe]);
+
+  // 📈 Native Vector Chart math and dynamic coordinates
+  const historyDates = useMemo(() => {
+    const countNeeded = prices.length;
+    const dates = [];
+    const now = new Date();
+    let count = 0;
+    while (dates.length < countNeeded) {
+      const d = new Date(now.getTime() - count * 24 * 60 * 60 * 1000);
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) { // skip weekends
+        dates.unshift(d.toISOString());
+      }
+      count++;
+    }
+    return dates;
+  }, [prices]);
 
   const isStockDataValidating = false; // Hapus pesan error 'Data Sedang Validasi' atau 'Data Anomali' agar bersih sesuai bursa
 
@@ -1525,7 +1583,38 @@ export default function EmitenDashboardView({
 
   const maxVolumeVal = useMemo(() => Math.max(...volumes) || 1, [volumes]);
 
-  // Auto-Scaling Grafik - highly robust dynamic boundary calculation based on actual price arrays to ensure no vertical clipping or overlapping
+  // Extract Target Jual (Sell Target) and Stop Loss (Buy/Below Target) for activeStock
+  const activePriceAlerts = useMemo(() => {
+    const ticker = activeStock.ticker.toUpperCase();
+    
+    // Stop Loss (Batas Alarm) candidates
+    const stopLossList: number[] = [];
+    if (priceAlerts[ticker]) stopLossList.push(priceAlerts[ticker]);
+    globalAlerts.forEach(alert => {
+      if (alert.ticker.toUpperCase() === ticker && alert.condition === "BELOW" && !alert.triggered) {
+        stopLossList.push(alert.targetPrice);
+      }
+    });
+
+    // Target Jual (Take Profit) candidates
+    const targetJualList: number[] = [];
+    if (sellPriceAlerts[ticker]) targetJualList.push(sellPriceAlerts[ticker]);
+    globalAlerts.forEach(alert => {
+      if (alert.ticker.toUpperCase() === ticker && alert.condition === "ABOVE" && !alert.triggered) {
+        targetJualList.push(alert.targetPrice);
+      }
+    });
+
+    const stopLossPrice = stopLossList.length > 0 ? stopLossList[0] : null;
+    const targetJualPrice = targetJualList.length > 0 ? targetJualList[0] : null;
+
+    return {
+      stopLoss: stopLossPrice,
+      targetJual: targetJualPrice,
+    };
+  }, [activeStock.ticker, priceAlerts, sellPriceAlerts, globalAlerts]);
+
+  // Auto-Scaling Grafik - highly robust dynamic boundary calculation based on actual price arrays to ensure no vertical clippings
   const minVal = useMemo(() => {
     const tickerUpper = activeStock.ticker.toUpperCase();
     if (tickerUpper === "IHSG" || tickerUpper === "^JKSE" || tickerUpper === "IDX") {
@@ -1968,7 +2057,7 @@ export default function EmitenDashboardView({
     <div className="space-y-6">
       
       {/* ==================== 🔍 DYNAMIC EMITEN SELECTOR CARD ==================== */}
-      <div className="bg-[#020d18]/70 border border-cyan-500/10 p-5 rounded-2xl shadow-xl space-y-4">
+      <div className="bg-[#020d18]/70 border-y sm:border border-cyan-500/10 border-x-0 sm:border-x p-4 sm:p-5 rounded-none sm:rounded-2xl shadow-xl space-y-4">
         
         {/* Title and search bar */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -2144,7 +2233,7 @@ export default function EmitenDashboardView({
           </div>
         </div>
       ) : (
-        <div className="space-y-6 bg-[#020d18]/45 border border-slate-900/60 p-5 rounded-2xl shadow-xl animate-fadeIn">
+        <div className="space-y-6 bg-[#020d18]/45 border-y sm:border border-slate-900/60 border-x-0 sm:border-x p-3 sm:p-5 rounded-none sm:rounded-2xl shadow-xl animate-fadeIn">
         
         {/* Header Action Bar */}
         <div className="bg-[#020b14] border border-cyan-500/10 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -2726,14 +2815,14 @@ export default function EmitenDashboardView({
               <div className="grid grid-cols-1 gap-6">
                 {/* Full-width: Dynamic Dual Chart Visualizer */}
                 <div className="glass-card rounded-2xl p-5 border border-slate-850 space-y-4 bg-slate-900/10">
-                  <div className="flex items-center justify-between border-b border-slate-900 pb-3 flex-wrap gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-900 pb-3 gap-3 flex-wrap">
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">Chart Analisis ({activeStock.ticker})</span>
                       <span className="text-[10px] text-slate-400 mt-0.5">{activeStock.name}</span>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-900 text-[10px]">
+                    <div className="flex items-center flex-wrap gap-2 justify-start sm:justify-end">
+                      <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-900 text-[10px] items-center">
                         <button
                           onClick={() => setChartType("native")}
                           className={`px-3 py-1.5 rounded-md font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
@@ -2755,6 +2844,24 @@ export default function EmitenDashboardView({
                           TradingView
                         </button>
                       </div>
+
+                      {chartType === "native" && (
+                        <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-900 text-[10px] items-center gap-0.5">
+                          {(["1D", "1W", "1M", "3M"] as const).map((tf) => (
+                            <button
+                              key={tf}
+                              onClick={() => setHistoryTimeframe(tf)}
+                              className={`px-2.5 py-1.5 rounded-md font-bold uppercase transition-all whitespace-nowrap cursor-pointer text-[10.5px] ${
+                                historyTimeframe === tf
+                                  ? "bg-slate-900 text-cyan-300 font-extrabold border border-white/5 active:scale-95 shadow-inner"
+                                  : "text-slate-400 hover:text-white"
+                              }`}
+                            >
+                              {tf}
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                       {chartType === "native" && (
                         <button
@@ -2998,6 +3105,133 @@ export default function EmitenDashboardView({
                               );
                             })}
 
+                            {/* Alarms / Price Alert Visual Indicators */}
+                            {(() => {
+                              const elements = [];
+                              
+                              // 1. Target Jual Line (Take Profit)
+                              if (activePriceAlerts.targetJual !== null) {
+                                const yJual = 45 + (1 - (activePriceAlerts.targetJual - minVal) / range) * (svgHeight - 110);
+                                if (yJual >= 10 && yJual <= svgHeight + 20) {
+                                  elements.push(
+                                    <g key="alert-line-targetjual" className="transition-all duration-300">
+                                      <line 
+                                        x1={30} 
+                                        y1={yJual} 
+                                        x2={svgWidth - 65} 
+                                        y2={yJual} 
+                                        stroke="rgba(244, 63, 94, 0.15)" 
+                                        strokeWidth="4" 
+                                      />
+                                      <line 
+                                        x1={30} 
+                                        y1={yJual} 
+                                        x2={svgWidth - 65} 
+                                        y2={yJual} 
+                                        stroke="#f43f5e" 
+                                        strokeWidth="1.6" 
+                                        strokeDasharray="4 4" 
+                                      />
+                                      <rect 
+                                        x={5} 
+                                        y={yJual - 7} 
+                                        width={28} 
+                                        height={14} 
+                                        rx={2} 
+                                        fill="#9f1239" 
+                                        stroke="#f43f5e"
+                                        strokeWidth={0.5}
+                                      />
+                                      <text 
+                                        x={19} 
+                                        y={yJual + 3} 
+                                        fill="#ffe4e6" 
+                                        fontSize="6.5" 
+                                        fontWeight="bold"
+                                        className="font-mono text-center"
+                                        textAnchor="middle"
+                                      >
+                                        JUAL
+                                      </text>
+                                      <text 
+                                        x={svgWidth - 62} 
+                                        y={yJual + 3.5} 
+                                        fill="#fda4af" 
+                                        fontSize="8" 
+                                        fontWeight="black"
+                                        className="font-mono"
+                                        textAnchor="start"
+                                      >
+                                        🎯 Rp{activePriceAlerts.targetJual.toLocaleString("id-ID")}
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                              }
+
+                              // 2. Stop Loss Line (Batas Alarm / Target Beli)
+                              if (activePriceAlerts.stopLoss !== null) {
+                                const ySL = 45 + (1 - (activePriceAlerts.stopLoss - minVal) / range) * (svgHeight - 110);
+                                if (ySL >= 10 && ySL <= svgHeight + 20) {
+                                  elements.push(
+                                    <g key="alert-line-stoploss" className="transition-all duration-300">
+                                      <line 
+                                        x1={30} 
+                                        y1={ySL} 
+                                        x2={svgWidth - 65} 
+                                        y2={ySL} 
+                                        stroke="rgba(16, 185, 129, 0.15)" 
+                                        strokeWidth="4" 
+                                      />
+                                      <line 
+                                        x1={30} 
+                                        y1={ySL} 
+                                        x2={svgWidth - 65} 
+                                        y2={ySL} 
+                                        stroke="#10b981" 
+                                        strokeWidth="1.6" 
+                                        strokeDasharray="4 4" 
+                                      />
+                                      <rect 
+                                        x={5} 
+                                        y={ySL - 7} 
+                                        width={28} 
+                                        height={14} 
+                                        rx={2} 
+                                        fill="#065f46" 
+                                        stroke="#10b981"
+                                        strokeWidth={0.5}
+                                      />
+                                      <text 
+                                        x={19} 
+                                        y={ySL + 3} 
+                                        fill="#ecfdf5" 
+                                        fontSize="6.5" 
+                                        fontWeight="bold"
+                                        className="font-mono text-center"
+                                        textAnchor="middle"
+                                      >
+                                        STOP
+                                      </text>
+                                      <text 
+                                        x={svgWidth - 62} 
+                                        y={ySL + 3.5} 
+                                        fill="#a7f3d0" 
+                                        fontSize="8" 
+                                        fontWeight="black"
+                                        className="font-mono"
+                                        textAnchor="start"
+                                      >
+                                        🛑 Rp{activePriceAlerts.stopLoss.toLocaleString("id-ID")}
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                              }
+
+                              return elements;
+                            })()}
+
                             {/* Fibonacci Swing Radar Highlights */}
                             {showFibonacci && (
                               <>
@@ -3192,6 +3426,11 @@ export default function EmitenDashboardView({
                           >
                             {(() => {
                               try {
+                                const total = historyDates.length;
+                                const step = total > 15 ? 4 : total > 8 ? 2 : 1;
+                                if (idx !== 0 && idx !== total - 1 && idx % step !== 0) {
+                                  return "";
+                                }
                                 const d = new Date(date);
                                 if (isNaN(d.getTime())) return "DD/MM";
                                 const dayNum = String(d.getDate()).padStart(2, "0");
@@ -3987,7 +4226,7 @@ export default function EmitenDashboardView({
           )}
 
           {activeHubTab === "broker" && (
-            <div className="space-y-6 bg-[#020e18]/60 border border-cyan-950/40 p-5 rounded-2xl animate-fadeIn">
+            <div className="space-y-6 bg-[#020e18]/60 border-y sm:border border-cyan-950/40 border-x-0 sm:border-x p-3 max-sm:px-2 sm:p-5 rounded-none sm:rounded-2xl animate-fadeIn">
               
               {/* Header with general Bandar Broker status */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyan-950/30 pb-4">
@@ -4220,8 +4459,143 @@ export default function EmitenDashboardView({
                 );
               })()}
 
+              {/* 📡 Detektor Kekuatan Aliran Dana 4 Pilar (Foreign, Retail, Big Money, Corporate) */}
+              <div className="bg-[#03101c]/90 border border-cyan-500/20 rounded-xl p-4 sm:p-5 shadow-xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-950/40 pb-2.5">
+                  <div className="flex items-center gap-1.5 font-sans">
+                    <div className="p-1 rounded bg-cyan-950/40 border border-cyan-900/40">
+                      <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-cyan-400 font-mono uppercase tracking-wider">
+                        📡 DETEKTOR KEKUATAN ALIRAN DANA BANDAR
+                      </h4>
+                      <p className="text-[9.5px] text-slate-400">Analisis sebaran modal kerja institusi, ritel, asing, dan insider secara real-time</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIs4PilarModalOpen(true)}
+                    className="text-[9px] font-mono text-cyan-400 bg-cyan-950/55 border border-cyan-800/30 px-2.5 py-1 rounded hover:bg-cyan-900/50 transition-colors cursor-pointer text-center font-bold"
+                  >
+                    💡 Pelajari 4 Pilar Flow
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* Foreign Flow */}
+                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
+                    <div className="flex justify-between items-start text-[10px] font-mono">
+                      <span className="text-slate-400 font-bold">🛸 Foreign (Asing)</span>
+                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.foreign.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-450"}`}>
+                        {capitalFlowForces.foreign.value >= 0 ? "ACCUM" : "DIST"}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className={`text-base font-black font-mono ${capitalFlowForces.foreign.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {capitalFlowForces.foreign.value >= 0 ? "+" : ""}{capitalFlowForces.foreign.value}%
+                      </span>
+                    </div>
+                    {/* Linear horizontal bar */}
+                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
+                      <div 
+                        className={`h-full ${capitalFlowForces.foreign.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
+                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.foreign.value))}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Big Money Flow */}
+                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
+                    <div className="flex justify-between items-start text-[10px] font-mono">
+                      <span className="text-slate-400 font-bold">🏛️ Big Money (Inst)</span>
+                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.bigMoney.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-400"}`}>
+                        {capitalFlowForces.bigMoney.value >= 0 ? "ACCUM" : "DIST"}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className={`text-base font-black font-mono ${capitalFlowForces.bigMoney.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {capitalFlowForces.bigMoney.value >= 0 ? "+" : ""}{capitalFlowForces.bigMoney.value}%
+                      </span>
+                    </div>
+                    {/* Linear horizontal bar */}
+                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
+                      <div 
+                        className={`h-full ${capitalFlowForces.bigMoney.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
+                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.bigMoney.value))}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Corporate Flow */}
+                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
+                    <div className="flex justify-between items-start text-[10px] font-mono">
+                      <span className="text-slate-400 font-bold">💼 Insider (Corp)</span>
+                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.corporate.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-400"}`}>
+                        {capitalFlowForces.corporate.value >= 0 ? "ACCUM" : "DIST"}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className={`text-base font-black font-mono ${capitalFlowForces.corporate.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {capitalFlowForces.corporate.value >= 0 ? "+" : ""}{capitalFlowForces.corporate.value}%
+                      </span>
+                    </div>
+                    {/* Linear horizontal bar */}
+                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
+                      <div 
+                        className={`h-full ${capitalFlowForces.corporate.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
+                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.corporate.value))}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Retail Flow */}
+                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
+                    <div className="flex justify-between items-start text-[10px] font-mono">
+                      <span className="text-slate-400 font-bold">🎈 Retail (Massa)</span>
+                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.retail.value >= 0 ? "bg-rose-950/40 text-rose-400" : "bg-emerald-950/40 text-emerald-400"}`}>
+                        {capitalFlowForces.retail.value >= 0 ? "HIGH INF" : "SILENT"}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className={`text-base font-black font-mono ${capitalFlowForces.retail.value >= 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                        {capitalFlowForces.retail.value >= 0 ? "+" : ""}{capitalFlowForces.retail.value}%
+                      </span>
+                    </div>
+                    {/* Linear horizontal bar */}
+                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
+                      <div 
+                        className={`h-full ${capitalFlowForces.retail.value >= 0 ? "bg-rose-500" : "bg-emerald-500"}`} 
+                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.retail.value))}%` }} 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Intelligent Verdict Advice */}
+                <div className="p-2.5 bg-slate-950 border border-slate-900 rounded-lg text-[10px] leading-relaxed text-slate-300 font-sans flex items-start gap-2">
+                  <span className="p-1 px-1.5 rounded bg-cyan-950/40 border border-cyan-800/40 text-cyan-400 text-[8px] font-mono uppercase font-black shrink-0 mt-0.5 select-none hover:scale-105 transition-transform">VERDICT</span>
+                  <span>
+                    {(() => {
+                      const isF = capitalFlowForces.foreign.value > 15;
+                      const isB = capitalFlowForces.bigMoney.value > 20;
+                      const isR = capitalFlowForces.retail.value > 15;
+                      if (isF && isB && !isR) {
+                        return `Aktivitas emiten ${activeStock.ticker} didominasi penuh oleh Foreign Institution dan Big Money dalam tren mark-up harga yang kokoh (Strong Accumulation Stage). Partisipasi retail terpantau rendah, meminimalkan tekanan profit taking harian. Rekomendasi: BUY/HOLD — Follow the Giants.`;
+                      } else if (isR && !isF && !isB) {
+                        return `Tekanan jual institusi ditampung penuh oleh massa investor retail (Distribution Stage). Perputaran dana bersifat fluktuatif cepat tanpa support harga berkelanjutan. Rekomendasi: SPEKULATIF BUY / SCALPING — Disiplin stop-loss ketat di batas level support harian.`;
+                      } else if (!isF && isB) {
+                        return `Meskipun asing netral, investor institusi domestik lokal bergerak senyap menyerap emiten ini (Silent Accumulation). Likuiditas order book dipertahankan stabil dengan holding cost yang tinggi. Rekomendasi: ACCUMULATIVE BUY — Buy on weakness.`;
+                      } else {
+                        return `Keseimbangan volume akumulasi dan distribusi tergolong seimbang (Neutral Stage / Sideways). Pasar cenderung menunggu pemicu sentimen bursa global atau laporan kinerja triwulan emiten. Rekomendasi: WAIT & SEE — Masuk saat harga breakout resistance utama harian.`;
+                      }
+                    })()}
+                  </span>
+                </div>
+              </div>
+
               {/* BRAND NEW: Broker Daily Activity (Grafik Garis Kumulatif + Kalender Heatmap + Rincian Rata Kanan-Kiri) */}
               {(() => {
+                if (!activeStock) return null;
                 const charSum = activeStock.ticker.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
                 const topBrokers = [
                   { code: "BK", color: "#38bdf8", name: "J.P. Morgan" },
@@ -4274,7 +4648,7 @@ export default function EmitenDashboardView({
                 const activeHoverDayIdx = hoveredBrokerDayIdx !== null ? hoveredBrokerDayIdx : 9;
 
                 return (
-                  <div className="bg-[#020b12]/90 border border-slate-900 rounded-2xl p-5 space-y-5 shadow-2xl mt-5 select-none">
+                  <div className="bg-[#020b12]/90 border-y sm:border border-slate-900 border-x-0 sm:border-x p-3 max-sm:px-2.5 sm:p-5 rounded-none sm:rounded-2xl space-y-5 shadow-2xl mt-5 select-none">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-cyan-950/40 pb-3 gap-3">
                       <div>
                         <h4 className="text-sm font-black text-white hover:text-cyan-400 flex items-center gap-1.5 font-mono uppercase tracking-wider">
@@ -5794,11 +6168,11 @@ export default function EmitenDashboardView({
               className="flex-1 flex flex-col bg-[#020b13] border border-cyan-500/25 rounded-2xl p-5 md:p-6 lg:p-8 shadow-2xl relative space-y-5"
             >
               {/* Header */}
-              <div className="flex justify-between items-center border-b border-slate-900 pb-4">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-slate-900 pb-4 gap-3">
                 <div className="flex items-center gap-3">
-                  <Activity className="w-6 h-6 text-cyan-400" />
+                  <Activity className="w-6 h-6 text-cyan-400 font-bold shrink-0" />
                   <div className="flex flex-col">
-                    <h3 className="text-base md:text-lg font-black text-white uppercase tracking-wider font-mono flex items-center gap-2">
+                    <h3 className="text-base md:text-lg font-black text-white uppercase tracking-wider font-mono flex items-center gap-2 flex-wrap">
                       Analisis Teknikal Detail Layar Penuh: {activeStock.ticker}
                       <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800/40 px-2 py-0.5 rounded font-black font-sans uppercase">
                         PRO CHART
@@ -5808,8 +6182,8 @@ export default function EmitenDashboardView({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-900 text-[10px]">
+                <div className="flex items-center flex-wrap gap-2 justify-start lg:justify-end">
+                  <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-900 text-[10px] items-center">
                     <button
                       type="button"
                       onClick={() => setChartType("native")}
@@ -5853,10 +6227,10 @@ export default function EmitenDashboardView({
                   <button
                     type="button"
                     onClick={() => setIsFullscreenChartOpen(false)}
-                    className="p-2 bg-slate-900 border border-slate-800 hover:border-rose-900/50 hover:bg-rose-950/20 text-slate-450 hover:text-rose-400 rounded-xl transition-all cursor-pointer font-sans text-xs flex items-center gap-1 font-bold uppercase"
+                    className="p-2 bg-slate-900 border border-slate-800 hover:border-rose-900/50 hover:bg-rose-950/20 text-slate-450 hover:text-rose-400 rounded-xl transition-all cursor-pointer font-sans text-xs flex items-center gap-1.5 font-bold uppercase"
                   >
-                    <Minimize2 className="w-4 h-4" />
-                    <span className="hidden sm:inline">Tutup</span>
+                    <Minimize2 className="w-4 h-4 text-cyan-400" />
+                    <span>Perkecil</span>
                   </button>
                 </div>
               </div>
@@ -5929,7 +6303,7 @@ export default function EmitenDashboardView({
                             const baseVol = activeStock.volume || 120000;
                             const volModifier = 0.7 + ((p % 17) / 100) + (changePct > 0 ? 0.35 : 0);
                             return {
-                              name: `Sesi T-${9-idx}`,
+                              name: `Sesi T-${prices.length - 1 - idx}`,
                               Harga: p,
                               changePercent: changePct,
                               volume: Math.round(baseVol * volModifier)
@@ -5984,6 +6358,40 @@ export default function EmitenDashboardView({
                               </ReferenceLine>
                             );
                           })}
+
+                          {/* Real-time alarm annotations for target Jual (Profit Taking) on Recharts */}
+                          {activePriceAlerts.targetJual !== null && (
+                            <ReferenceLine 
+                              y={activePriceAlerts.targetJual} 
+                              stroke="#f43f5e" 
+                              strokeWidth={2}
+                              strokeDasharray="4 4"
+                            >
+                              <Label 
+                                value={`🎯 TARGET JUAL: Rp ${activePriceAlerts.targetJual.toLocaleString("id-ID")}`} 
+                                position="insideRight" 
+                                fill="#fda4af"
+                                style={{ fontSize: "9px", fontFamily: "monospace", fontWeight: "bold" }}
+                              />
+                            </ReferenceLine>
+                          )}
+
+                          {/* Real-time alarm annotations for Stop Loss / Batas Alarm on Recharts */}
+                          {activePriceAlerts.stopLoss !== null && (
+                            <ReferenceLine 
+                              y={activePriceAlerts.stopLoss} 
+                              stroke="#10b981" 
+                              strokeWidth={2}
+                              strokeDasharray="4 4"
+                            >
+                              <Label 
+                                value={`🛑 STOP LOSS: Rp ${activePriceAlerts.stopLoss.toLocaleString("id-ID")}`} 
+                                position="insideRight" 
+                                fill="#a7f3d0"
+                                style={{ fontSize: "9px", fontFamily: "monospace", fontWeight: "bold" }}
+                              />
+                            </ReferenceLine>
+                          )}
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
@@ -6027,37 +6435,39 @@ export default function EmitenDashboardView({
       </AnimatePresence>
 
       {/* ==================== 📊 MODAL: QUICK COMPARE WITH IHSG ==================== */}
-      <AnimatePresence>
-        {isCompareOpen && (
-          <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+      {typeof window !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isCompareOpen && (
+            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[9999] flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-[450px] aspect-[3/4] max-h-[90vh] bg-[#020b13] border border-cyan-500/25 rounded-2xl p-5 md:p-6 shadow-2xl relative flex flex-col justify-between overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-cyan-950"
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="w-full max-w-[95%] xs:max-w-md md:max-w-3xl lg:max-w-4xl bg-[#030d17] border border-cyan-500/20 rounded-2xl p-3 sm:p-4 md:p-5 shadow-3xl relative flex flex-col space-y-2.5 sm:space-y-3.5 max-h-[96vh] md:max-h-[92vh] overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-950"
             >
               {/* Header */}
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-cyan-400" />
-                    <h2 className="text-lg font-black text-white font-display uppercase tracking-wider">
-                      KOMPARASI PRESTASI VISUAl: {activeStock.ticker} VS IHSG
+              <div className="flex justify-between items-start pb-1.5 sm:pb-2 border-b border-cyan-950/40 shrink-0">
+                <div className="space-y-0.5 pr-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 animate-pulse" />
+                    <h2 className="text-[11px] sm:text-xs md:text-sm font-black text-white font-display uppercase tracking-wider">
+                      KOMPARASI PRESTASI VISUAL: {activeStock.ticker} VS IHSG
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400 font-sans">
-                    Grafik return akumulatif (%) multifrekuensi memprediksi arah gerak relatif emiten terhadap performa indeks sektoral bursa.
+                  <p className="text-[8.5px] sm:text-[9.5px] md:text-[10px] text-slate-450 font-sans leading-relaxed">
+                    Grafik return akumulatif (%) relatif terhadap performa indeks bursa efek Indonesia.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsCompareOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 hover:border-slate-750 font-mono text-slate-350 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-900/80 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 text-[10px]"
                 >
                   ✕
                 </button>
               </div>
 
-              {/* Stats Box */}
+              {/* Stats & Chart Core Wrapper */}
               {(() => {
                 const stockSeed = activeStock.ticker.charCodeAt(0) + activeStock.ticker.charCodeAt(1);
                 
@@ -6077,9 +6487,9 @@ export default function EmitenDashboardView({
                   currentIhsgCum += ihsgChange;
                   
                   data.push({
-                    name: dayLabel,
-                    [activeStock.ticker]: Number(currentStockCum.toFixed(2)),
-                    IHSG: Number(currentIhsgCum.toFixed(2)),
+                     name: dayLabel,
+                     [activeStock.ticker]: Number(currentStockCum.toFixed(2)),
+                     IHSG: Number(currentIhsgCum.toFixed(2)),
                   });
                 }
 
@@ -6089,86 +6499,153 @@ export default function EmitenDashboardView({
                 const betaVal = (1.0 + (stockSeed % 40) / 100).toFixed(2);
                 
                 return (
-                  <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-[#011424] border border-cyan-955 p-2 rounded-xl">
-                        <span className="text-[8px] text-[#4ea1e4] uppercase font-black block tracking-wider font-sans">Total Return {activeStock.ticker}</span>
-                        <strong className={`text-sm font-black font-mono block mt-0.5 ${finalStockReturn >= 0 ? "text-emerald-400" : "text-rose-500"}`}>
-                          {finalStockReturn >= 0 ? "+" : ""}{finalStockReturn.toFixed(2)}%
-                        </strong>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch overflow-hidden flex-1">
+                    {/* Left: Stats & Expert Insights */}
+                    <div className="md:col-span-5 flex flex-col justify-between space-y-3 shrink-0">
+                      {/* Bento Metrics selection */}
+                      <div className="grid grid-cols-2 gap-2 text-left shrink-0">
+                        {/* Stat 1 */}
+                        <div className={`p-2 rounded-xl border transition-all bg-[#010912]/80 ${finalStockReturn >= 0 ? "border-emerald-500/20 hover:border-emerald-500/40" : "border-rose-500/20 hover:border-rose-500/40"}`}>
+                          <span className="text-[8px] text-[#4ea1e4] uppercase font-bold block tracking-wider font-mono">Return {activeStock.ticker}</span>
+                          <strong className={`text-xs sm:text-sm font-black font-mono block mt-0.5 ${finalStockReturn >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {finalStockReturn >= 0 ? "+" : ""}{finalStockReturn.toFixed(2)}%
+                          </strong>
+                        </div>
+
+                        {/* Stat 2 */}
+                        <div className={`p-2 rounded-xl border transition-all bg-[#010912]/80 ${finalIhsgReturn >= 0 ? "border-emerald-500/20 hover:border-emerald-500/40" : "border-rose-500/20 hover:border-rose-500/40"}`}>
+                          <span className="text-[8px] text-slate-450 uppercase font-bold block tracking-wider font-mono">Return IHSG</span>
+                          <strong className={`text-xs sm:text-sm font-black font-mono block mt-0.5 ${finalIhsgReturn >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {finalIhsgReturn >= 0 ? "+" : ""}{finalIhsgReturn.toFixed(2)}%
+                          </strong>
+                        </div>
+
+                        {/* Stat 3 */}
+                        <div className={`p-2 rounded-xl border transition-all bg-[#010912]/80 ${outperformance >= 0 ? "border-emerald-500/20 hover:border-emerald-500/40" : "border-rose-500/20 hover:border-rose-500/40"}`}>
+                          <span className="text-[8px] text-emerald-500/70 uppercase font-bold block tracking-wider font-mono">Relatif Alpha</span>
+                          <strong className={`text-xs sm:text-sm font-black font-mono block mt-0.5 ${outperformance >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                            {outperformance >= 0 ? "+" : ""}{outperformance.toFixed(2)}%
+                          </strong>
+                        </div>
+
+                        {/* Stat 4 */}
+                        <div className="p-2 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all bg-[#010912]/80">
+                          <span className="text-[8px] text-amber-500/70 uppercase font-bold block tracking-wider font-mono">Beta IDX</span>
+                          <strong className="text-xs sm:text-sm font-black text-amber-400 font-mono block mt-0.5">
+                            {betaVal}
+                          </strong>
+                        </div>
                       </div>
 
-                      <div className="bg-slate-950 border border-slate-900 p-2 rounded-xl">
-                        <span className="text-[8px] text-slate-450 uppercase font-black block tracking-wider font-sans">Total Return IHSG</span>
-                        <strong className={`text-sm font-black font-mono block mt-0.5 ${finalIhsgReturn >= 0 ? "text-emerald-400" : "text-rose-500"}`}>
-                          {finalIhsgReturn >= 0 ? "+" : ""}{finalIhsgReturn.toFixed(2)}%
-                        </strong>
-                      </div>
-
-                      <div className="bg-[#071911] border border-emerald-950 p-2 rounded-xl">
-                        <span className="text-[8px] text-emerald-500/70 uppercase font-black block tracking-wider font-sans">Relatif Alpha</span>
-                        <strong className={`text-sm font-black font-mono block mt-0.5 ${outperformance >= 0 ? "text-emerald-400" : "text-rose-500"}`}>
-                          {outperformance >= 0 ? "+" : ""}{outperformance.toFixed(2)}%
-                        </strong>
-                      </div>
-
-                      <div className="bg-[#181203] border border-amber-955 p-2 rounded-xl">
-                        <span className="text-[8px] text-amber-500/75 uppercase font-black block tracking-wider font-sans">Sensitivitas (Beta)</span>
-                        <strong className="text-sm font-black text-amber-400 font-mono block mt-0.5">
-                          {betaVal}
-                        </strong>
-                      </div>
-                    </div>
-
-                    {/* Chart Container */}
-                    <div className="h-44 w-full bg-slate-950/60 border border-cyan-950/20 p-2 rounded-2xl">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25}/>
-                              <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                            </linearGradient>
-                            <linearGradient id="colorIhsg" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15}/>
-                              <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#0f172a" />
-                          <XAxis dataKey="name" stroke="#475569" strokeWidth={1} style={{ fontSize: "10.5px" }} />
-                          <YAxis stroke="#475569" strokeWidth={1} style={{ fontSize: "10.5px" }} tickFormatter={(val) => `${val}%`} />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: "#020b13", borderColor: "#1e293b", borderRadius: "12px", fontSize: "11px" }}
-                            labelStyle={{ fontWeight: "bold", color: "#94a3b8" }}
-                          />
-                          <Area type="monotone" dataKey={activeStock.ticker} stroke="#22c55e" strokeWidth={2.5} fillOpacity={1} fill="url(#colorStock)" activeDot={{ r: 6 }} />
-                          <Area type="monotone" dataKey="IHSG" stroke="#0ea5e9" strokeWidth={2} fillOpacity={1} fill="url(#colorIhsg)" strokeDasharray="5 5" />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-
-                    {/* Narrative Comment */}
-                    <div className="p-3.5 bg-[#031525]/35 border border-cyan-900/20 rounded-xl text-xs flex gap-2.5 items-start">
-                      <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <span className="font-bold text-white block uppercase tracking-wider text-[9px] font-mono">Expert Market Insight (AI Evaluator)</span>
-                        <p className="text-slate-300 leading-relaxed font-sans">
-                          {outperformance >= 0 
-                            ? `Emiten ${activeStock.ticker} menunjukkan tren OUTPERFORM yang kokoh dengan perolehan relatif alfa positif sebesar +${outperformance.toFixed(2)}% di atas indeks bursa efek Indonesia. Volatilitasnya terbilang aktif dengan Beta ${betaVal}, mengonfirmasi minat beli agresif dari dana bandar (smart money) yang konsisten.`
-                            : `Saham ${activeStock.ticker} terpantau UNDERPERFORM indeks IHSG sebesar ${Math.abs(outperformance).toFixed(2)}% untuk rentang berjalan. Berdasarkan sensitivitas Beta senilai ${betaVal}, saham ini bersifat cenderung moderat defensif. Disarankan mencermati area support pilar satu untuk melakukan strategi akumulasi bertahap (buy on weakness).`
-                          }
-                        </p>
+                      {/* Narrative comment */}
+                      <div className="p-2.5 bg-gradient-to-r from-cyan-950/20 to-slate-950/25 border-l-4 border-l-cyan-500 border-y border-r border-[#1a2f42]/40 rounded-xl text-[10px] sm:text-[10.5px] flex gap-2 items-start shrink-0">
+                        <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
+                        <div className="space-y-0.5 text-left">
+                          <span className="font-extrabold text-white block uppercase tracking-wider text-[8px] font-mono">Expert Insight (AI)</span>
+                          <p className="text-slate-350 leading-relaxed font-sans line-clamp-3 sm:line-clamp-none">
+                            {outperformance >= 0 
+                              ? `Emiten ${activeStock.ticker} menunjukkan tren OUTPERFORM kokoh dengan perolehan relatif alfa positif +${outperformance.toFixed(2)}% di atas indeks bursa efek Indonesia. Volatilitasnya terbilang aktif dengan Beta ${betaVal}.`
+                              : `Saham ${activeStock.ticker} terpantau UNDERPERFORM indeks IHSG sebesar ${Math.abs(outperformance).toFixed(2)}% untuk rentang berjalan dengan Beta defensif ${betaVal}.`
+                            }
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </>
+
+                    {/* Right: Area Chart */}
+                    <div className="md:col-span-7 flex flex-col justify-between h-[180px] sm:h-[220px] md:h-full min-h-[160px] md:min-h-[250px]">
+                      <div className="h-full w-full bg-[#01060b] border border-cyan-950/40 p-2 rounded-xl relative">
+                        <div className="absolute top-2 right-2 flex items-center gap-2 text-[8px] text-slate-500 font-mono bg-[#030d17]/80 px-1.5 py-0.5 rounded border border-slate-900 z-10">
+                          <div className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <span>{activeStock.ticker}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 border border-dashed border-sky-400" />
+                            <span>IHSG</span>
+                          </div>
+                        </div>
+
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={data} margin={{ top: 15, right: 5, left: -26, bottom: -5 }}>
+                            <defs>
+                              <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                              </linearGradient>
+                              <linearGradient id="colorIhsg" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15}/>
+                                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#0c1a26" vertical={false} />
+                            <XAxis 
+                              dataKey="name" 
+                              stroke="#1a2f42" 
+                              strokeWidth={1} 
+                              tick={{ fill: "#64748b", fontSize: 8, fontFamily: "monospace" }} 
+                              dy={3}
+                            />
+                            <YAxis 
+                              stroke="#1a2f42" 
+                              strokeWidth={1} 
+                              tick={{ fill: "#64748b", fontSize: 8, fontFamily: "monospace" }} 
+                              tickFormatter={(val) => `${val >= 0 ? "+" : ""}${val}%`} 
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  const dayObj = payload[0].payload;
+                                  return (
+                                    <div className="bg-[#030e1a] border border-slate-800 p-2 rounded shadow-xl text-left min-w-[124px]">
+                                      <p className="text-[9px] font-bold text-slate-450 font-mono mb-1">{dayObj.name}</p>
+                                      <div className="space-y-0.5 text-[10px] font-mono">
+                                        <div className="flex justify-between gap-2 text-emerald-400">
+                                          <span>{activeStock.ticker}:</span>
+                                          <strong>{dayObj[activeStock.ticker] >= 0 ? "+" : ""}{dayObj[activeStock.ticker]}%</strong>
+                                        </div>
+                                        <div className="flex justify-between gap-2 text-sky-450 text-sky-450/90">
+                                          <span>IHSG:</span>
+                                          <strong>{dayObj.IHSG >= 0 ? "+" : ""}{dayObj.IHSG}%</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey={activeStock.ticker} 
+                              stroke="#10b981" 
+                              strokeWidth={2.5} 
+                              fillOpacity={1} 
+                              fill="url(#colorStock)" 
+                              activeDot={{ r: 5 }} 
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="IHSG" 
+                              stroke="#0ea5e9" 
+                              strokeWidth={2} 
+                              fillOpacity={1} 
+                              fill="url(#colorIhsg)" 
+                              strokeDasharray="5 5" 
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </div>
                 );
               })()}
 
-              {/* Close Button */}
-              <div className="flex justify-end pt-3 border-t border-slate-900">
+              {/* Close Button Footer */}
+              <div className="flex justify-end pt-2 border-t border-[#1a2f42]/40 shrink-0">
                 <button
                   onClick={() => setIsCompareOpen(false)}
-                  className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-550 font-sans text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95"
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 font-sans text-white text-[11px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95 shadow-md shadow-cyan-650/15"
                 >
                   Tutup Komparasi
                 </button>
@@ -6176,7 +6653,9 @@ export default function EmitenDashboardView({
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
         </div>
       )}

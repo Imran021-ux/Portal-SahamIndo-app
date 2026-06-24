@@ -380,6 +380,11 @@ export default function MarketHeatmap({ stocks, onSelectStock }: MarketHeatmapPr
                               <span className="font-mono text-[10.5px] font-black tracking-tight leading-none">
                                 {stock.ticker}
                               </span>
+                              {stock.isSuspended ? (
+                                <span className="bg-rose-500 text-white text-[6.5px] leading-none px-0.5 py-0.5 rounded font-mono font-black animate-pulse shrink-0 scale-90">S</span>
+                              ) : stock.isFca ? (
+                                <span className="bg-amber-400 text-slate-950 text-[6.5px] leading-none px-0.5 py-0.5 rounded font-mono font-black shrink-0 scale-90">F</span>
+                              ) : null}
                             </div>
                             <div className="flex justify-between items-baseline leading-none mt-1">
                               <span className="text-[8px] font-mono opacity-70">
@@ -404,10 +409,12 @@ export default function MarketHeatmap({ stocks, onSelectStock }: MarketHeatmapPr
                             onClick={() => onSelectStock(stock)}
                             onMouseEnter={() => setHoveredStock(stock)}
                             onMouseLeave={() => setHoveredStock(null)}
-                            className={`p-1.5 rounded flex flex-col justify-between h-[45px] text-center cursor-pointer select-none transition-all duration-150 hover:brightness-110 active:scale-95 shadow ${getPerformanceBg(stock.changePercent)}`}
+                            className={`p-1.5 rounded flex flex-col justify-between h-[45px] text-center cursor-pointer select-none transition-all duration-150 hover:brightness-110 active:scale-95 shadow relative overflow-hidden ${getPerformanceBg(stock.changePercent)}`}
                           >
                             <span className="font-mono text-[10px] font-black leading-none block">
                               {stock.ticker}
+                              {stock.isSuspended && <span className="ml-1 text-[6px] bg-rose-500 text-white px-0.5 rounded font-mono font-black inline-block align-middle animate-pulse">S</span>}
+                              {stock.isFca && !stock.isSuspended && <span className="ml-1 text-[6px] bg-amber-400 text-slate-950 px-0.5 rounded font-mono font-black inline-block align-middle">F</span>}
                             </span>
                             <span className="text-[8.5px] font-mono leading-none font-bold block opacity-95">
                               {changeLabel}
@@ -435,11 +442,20 @@ export default function MarketHeatmap({ stocks, onSelectStock }: MarketHeatmapPr
           >
             <div className="flex justify-between items-start border-b border-slate-900 pb-2 mb-2">
               <div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-mono text-xs font-black text-white">{hoveredStock.ticker}</span>
                   <span className="text-[8px] bg-slate-900 border border-slate-800 text-slate-400 px-1.5 rounded font-mono font-medium">
                     {hoveredStock.sector}
                   </span>
+                  {hoveredStock.isSuspended ? (
+                    <span className="text-[8px] bg-rose-955 text-rose-450 border border-rose-500/30 text-rose-400 px-1 rounded font-mono font-black animate-pulse">
+                      SUSPEND
+                    </span>
+                  ) : hoveredStock.isFca ? (
+                    <span className="text-[8px] bg-amber-955 text-amber-400 border border-amber-500/35 px-1 rounded font-mono font-black">
+                      FCA
+                    </span>
+                  ) : null}
                 </div>
                 <span className="text-[10px] text-slate-400 block truncate mt-0.5 max-w-[160px]">
                   {hoveredStock.name}

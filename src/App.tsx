@@ -41,6 +41,16 @@ import {
 } from "lucide-react";
 
 export default function App() {
+  // Ensure "light-mode" class is cleaned up and disabled
+  useEffect(() => {
+    try {
+      document.body.classList.remove("light-mode");
+      localStorage.removeItem("theme");
+    } catch (e) {
+      console.error("Theme cleanup error:", e);
+    }
+  }, []);
+
   // 🔐 1. Authentication & Session Manager
   const [session, setSession] = useState<UserSession | null>(null);
 
@@ -52,6 +62,30 @@ export default function App() {
 
   // 🗺️ 3. Navigation State Manager
   const [activeView, setActiveView] = useState<"dashboard" | "emiten-dashboard" | "watchlist" | "broker-stalker" | "screener" | "tracer" | "news" | "recommendations" | "developer" | "premium-strategies" | "comparison" | "accumulation-distribution-hold" | "profile" | "market-heatmap">("dashboard");
+  const [viewHistory, setViewHistory] = useState<string[]>(["dashboard"]);
+
+  // Track the navigation history whenever activeView changes
+  useEffect(() => {
+    setViewHistory(prev => {
+      if (prev[prev.length - 1] === activeView) return prev;
+      return [...prev, activeView];
+    });
+  }, [activeView]);
+
+  const handleBackView = () => {
+    setViewHistory(prev => {
+      if (prev.length <= 1) {
+        setActiveView("dashboard");
+        return ["dashboard"];
+      }
+      const nextHistory = [...prev];
+      nextHistory.pop(); // Remove current view
+      const previous = nextHistory[nextHistory.length - 1];
+      setActiveView(previous as any);
+      return nextHistory;
+    });
+  };
+
   const [premiumCategory, setPremiumCategory] = useState<"multibager" | "ara" | "momentum" | "undervalue" | "near_support" | "bull_divergence" | "early_breakout">("multibager");
   const [selectedBrokerCode, setSelectedBrokerCode] = useState<string>("CC");
 
@@ -82,6 +116,17 @@ export default function App() {
 
   // 🔔 6.5. Price Alerts States & Controllers
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [priceAlerts, setPriceAlerts] = useState<Record<string, number>>({
+    BBRI: 4800,
+    TLKM: 3100,
+  });
+  const [sellPriceAlerts, setSellPriceAlerts] = useState<Record<string, number>>({
+    BBRI: 5200,
+    TLKM: 3500,
+  });
+  const [triggeredAlerts, setTriggeredAlerts] = useState<string[]>([]);
+  const [triggeredSellAlerts, setTriggeredSellAlerts] = useState<string[]>([]);
+
   const [alerts, setAlerts] = useState<PriceAlert[]>(() => {
     try {
       const saved = localStorage.getItem("idx_price_alerts");
@@ -165,6 +210,8 @@ export default function App() {
   // 📈 7. IHSG Index States (Updated dynamically to real bursa levels)
   const [ihsgPrice, setIhsgPrice] = useState(marketData.ihsg_close);
   const [ihsgPrevClose, setIhsgPrevClose] = useState(marketData.prev_close);
+  const [ihsgHigh, setIhsgHigh] = useState<number>(marketData.ihsg_close * 1.002);
+  const [ihsgLow, setIhsgLow] = useState<number>(marketData.ihsg_close * 0.998);
   const [ihsgPriceHistory, setIhsgPriceHistory] = useState<number[]>([7112.50, 7120.40, 7125.80, 7132.20, 7144.91, 7150.25]);
 
   // Effect to append any dynamic changes in live index over active bursa ticks
@@ -379,6 +426,8 @@ export default function App() {
                     updated[idx].change = updated[idx].currentPrice - updated[idx].previousPrice;
                     updated[idx].changePercent = Number(((updated[idx].change / updated[idx].previousPrice) * 100).toFixed(2));
                   }
+                  if (data[ticker].low) updated[idx].low = data[ticker].low;
+                  if (data[ticker].high) updated[idx].high = data[ticker].high;
                 }
               });
               return updated;
@@ -400,6 +449,12 @@ export default function App() {
             setIhsgPrice(finalPrice);
             if (liveIhsg.previousPrice) {
               setIhsgPrevClose(liveIhsg.previousPrice);
+            }
+            if (liveIhsg.high) {
+              setIhsgHigh(liveIhsg.high);
+            }
+            if (liveIhsg.low) {
+              setIhsgLow(liveIhsg.low);
             }
           }
         }
@@ -430,6 +485,12 @@ export default function App() {
           setIhsgPrice(finalPrice);
           if (liveIhsg.previousPrice) {
             setIhsgPrevClose(liveIhsg.previousPrice);
+          }
+          if (liveIhsg.high) {
+            setIhsgHigh(liveIhsg.high);
+          }
+          if (liveIhsg.low) {
+            setIhsgLow(liveIhsg.low);
           }
         }
       }
@@ -616,9 +677,9 @@ export default function App() {
           <div className="flex items-center gap-2">
             {activeView !== "dashboard" && (
               <button
-                onClick={() => setActiveView("dashboard")}
+                onClick={handleBackView}
                 className="p-1 px-2 rounded-lg bg-teal-950/40 border border-teal-500/30 text-teal-300 hover:text-white hover:bg-teal-950/70 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1 font-bold text-[10px] uppercase font-sans shrink-0"
-                title="Kembali ke Dasbor Market"
+                title="Kembali ke Halaman Sebelumnya"
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-teal-400" />
                 <span>KEMBALI</span>
@@ -1155,7 +1216,7 @@ export default function App() {
         </aside>
 
         {/* Immersive Main Content Pane */}
-        <main className="flex-1 bg-[#030914] p-4 md:p-6 lg:p-8 space-y-6 overflow-y-auto max-h-[calc(100vh-64px)]">
+        <main className="flex-1 bg-[#030914] p-0 sm:p-4 md:p-6 lg:p-8 space-y-6 overflow-y-auto max-h-[calc(100vh-64px)]">
           
           {/* Dynamic Inner Router Layout with Framer-Motion Transitions */}
           <AnimatePresence mode="wait">
@@ -1183,9 +1244,19 @@ export default function App() {
                   propSetIhsgPrice={setIhsgPrice}
                   propIhsgPrevClose={ihsgPrevClose}
                   propSetIhsgPrevClose={setIhsgPrevClose}
+                  propIhsgHigh={ihsgHigh}
+                  propIhsgLow={ihsgLow}
                   watchlist={watchlist}
                   onToggleWatchlist={toggleWatchlist}
                   onNavigateToAccDist={() => setActiveView("accumulation-distribution-hold")}
+                  propPriceAlerts={priceAlerts}
+                  propSetPriceAlerts={setPriceAlerts}
+                  propSellPriceAlerts={sellPriceAlerts}
+                  propSetSellPriceAlerts={setSellPriceAlerts}
+                  propTriggeredAlerts={triggeredAlerts}
+                  propSetTriggeredAlerts={setTriggeredAlerts}
+                  propTriggeredSellAlerts={triggeredSellAlerts}
+                  propSetTriggeredSellAlerts={setTriggeredSellAlerts}
                 />
               )}
 
@@ -1201,6 +1272,9 @@ export default function App() {
                   setPortfolio={setPortfolio}
                   watchlist={watchlist}
                   onToggleWatchlist={toggleWatchlist}
+                  globalAlerts={alerts}
+                  priceAlerts={priceAlerts}
+                  sellPriceAlerts={sellPriceAlerts}
                   onSelectBroker={(brokerCode) => {
                     setSelectedBrokerCode(brokerCode);
                     setActiveView("broker-stalker");

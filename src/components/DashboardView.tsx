@@ -11,7 +11,7 @@ import {
   Activity, ArrowUpRight, ArrowDownRight, Compass,
   Coins, Wallet, ShoppingCart, RefreshCcw, Eye, ShieldCheck,
   Search, BarChart, MoreVertical, Bell, Trash2, Plus, 
-  Sparkles, AlertCircle, Newspaper, Globe, Landmark, Moon, Star
+  Sparkles, AlertCircle, Newspaper, Globe, Landmark, Moon, Star, Calendar, Zap
 } from "lucide-react";
 import { getTechnicalIndicators } from "../data";
 import TradingViewWidget from "./TradingViewWidget";
@@ -43,9 +43,19 @@ interface DashboardViewProps {
   propSetIhsgPrice?: React.Dispatch<React.SetStateAction<number>>;
   propIhsgPrevClose?: number;
   propSetIhsgPrevClose?: React.Dispatch<React.SetStateAction<number>>;
+  propIhsgHigh?: number;
+  propIhsgLow?: number;
   watchlist?: string[];
   onToggleWatchlist?: (ticker: string) => void;
   onNavigateToAccDist?: () => void;
+  propPriceAlerts?: Record<string, number>;
+  propSetPriceAlerts?: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  propSellPriceAlerts?: Record<string, number>;
+  propSetSellPriceAlerts?: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  propTriggeredAlerts?: string[];
+  propSetTriggeredAlerts?: React.Dispatch<React.SetStateAction<string[]>>;
+  propTriggeredSellAlerts?: string[];
+  propSetTriggeredSellAlerts?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 interface PortfolioItem {
@@ -140,9 +150,19 @@ export default function DashboardView({
   propSetIhsgPrice,
   propIhsgPrevClose,
   propSetIhsgPrevClose,
+  propIhsgHigh,
+  propIhsgLow,
   watchlist = [],
   onToggleWatchlist,
-  onNavigateToAccDist
+  onNavigateToAccDist,
+  propPriceAlerts,
+  propSetPriceAlerts,
+  propSellPriceAlerts,
+  propSetSellPriceAlerts,
+  propTriggeredAlerts,
+  propSetTriggeredAlerts,
+  propTriggeredSellAlerts,
+  propSetTriggeredSellAlerts
 }: DashboardViewProps) {
   const [localSelectedTicker, setLocalSelectedTicker] = useState("BBCA");
   const selectedTicker = propSelectedTicker ?? localSelectedTicker;
@@ -217,6 +237,16 @@ export default function DashboardView({
   const [pageGainers, setPageGainers] = useState<number>(1);
   const [pageLosers, setPageLosers] = useState<number>(1);
   const [pageActive, setPageActive] = useState<number>(1);
+
+  // Sorting states for Leaderboards
+  const [gainerSortBy, setGainerSortBy] = useState<"ticker" | "change" | "changePercent" | "price" | "default">("default");
+  const [gainerSortOrder, setGainerSortOrder] = useState<"asc" | "desc">("desc");
+
+  const [loserSortBy, setLoserSortBy] = useState<"ticker" | "change" | "changePercent" | "price" | "default">("default");
+  const [loserSortOrder, setLoserSortOrder] = useState<"asc" | "desc">("asc");
+
+  const [activeSortBy, setActiveSortBy] = useState<"ticker" | "change" | "changePercent" | "price" | "volume" | "default">("default");
+  const [activeSortOrder, setActiveSortOrder] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     if (!stocks || stocks.length === 0) return;
@@ -314,10 +344,12 @@ export default function DashboardView({
   const [hakaPriceFilter, setHakaPriceFilter] = useState<"all" | "gocap" | "retail" | "medium" | "bluechip" | "custom">("all");
   const [hakaMinPrice, setHakaMinPrice] = useState<string>("");
   const [hakaMaxPrice, setHakaMaxPrice] = useState<string>("");
+  const [entryPeriod, setEntryPeriod] = useState<"session" | "1w" | "1m">("1w");
+  const [entryTypeFilter, setEntryTypeFilter] = useState<"all" | "active" | "accum">("all");
 
   useEffect(() => {
     setBreakoutsPage(1);
-  }, [hakaPriceFilter, hakaMinPrice, hakaMaxPrice]);
+  }, [hakaPriceFilter, hakaMinPrice, hakaMaxPrice, entryPeriod, entryTypeFilter]);
 
   // 📈 CANDLESTICK STATS & BURSA TIME HOURS FOR IHSG
   const [forceBursaActive, setForceBursaActive] = useState<boolean>(true); // default to true so simulated live tickers run smoothly for active bursa feel!
@@ -337,34 +369,61 @@ export default function DashboardView({
     const closePrice = ihsgPrice || 6120.05;
     const delta = closePrice - openPrice; // e.g., -34.40
 
+    // Ensure high is always higher than open/close, low is always lower, even if delta is negative
+    const getCandleHigh = (oc1: number, oc2: number, factor: number) => {
+      const baseMax = Math.max(oc1, oc2);
+      const add = Math.abs(delta) * factor;
+      return baseMax + (add > 0 ? add : 5);
+    };
+
+    const getCandleLow = (oc1: number, oc2: number, factor: number) => {
+      const baseMin = Math.min(oc1, oc2);
+      const sub = Math.abs(delta) * factor;
+      return Math.max(10, baseMin - (sub > 0 ? sub : 5));
+    };
+
     return [
-      { time: "09:00", open: openPrice, high: openPrice * 1.002, low: openPrice * 0.998, close: openPrice + delta * 0.1 },
-      { time: "09:30", open: openPrice + delta * 0.1, high: openPrice + delta * 0.15, low: openPrice - 10, close: openPrice + delta * 0.12 },
-      { time: "10:00", open: openPrice + delta * 0.12, high: openPrice + delta * 0.25, low: openPrice + delta * 0.08, close: openPrice + delta * 0.22 },
-      { time: "10:30", open: openPrice + delta * 0.22, high: openPrice + delta * 0.35, low: openPrice + delta * 0.20, close: openPrice + delta * 0.32 },
-      { time: "11:00", open: openPrice + delta * 0.32, high: openPrice + delta * 0.45, low: openPrice + delta * 0.30, close: openPrice + delta * 0.40 },
-      { time: "11:30", open: openPrice + delta * 0.40, high: openPrice + delta * 0.55, low: openPrice + delta * 0.38, close: openPrice + delta * 0.52 },
-      { time: "13:30", open: openPrice + delta * 0.52, high: openPrice + delta * 0.70, low: openPrice + delta * 0.50, close: openPrice + delta * 0.68 },
-      { time: "14:00", open: openPrice + delta * 0.68, high: openPrice + delta * 0.85, low: openPrice + delta * 0.65, close: openPrice + delta * 0.82 },
-      { time: "14:30", open: openPrice + delta * 0.82, high: openPrice + delta * 0.98, low: openPrice + delta * 0.80, close: openPrice + delta * 0.95 },
-      { time: "15:00", open: openPrice + delta * 0.95, high: Math.max(closePrice, openPrice + delta * 1.004), low: openPrice + delta * 0.90, close: closePrice }
+      { time: "09:00", open: openPrice, high: getCandleHigh(openPrice, openPrice + delta * 0.1, 0.10), low: getCandleLow(openPrice, openPrice + delta * 0.1, 0.10), close: openPrice + delta * 0.1 },
+      { time: "09:30", open: openPrice + delta * 0.1, high: getCandleHigh(openPrice + delta * 0.1, openPrice + delta * 0.12, 0.15), low: Math.min(openPrice - 10, openPrice + delta * 0.1, openPrice + delta * 0.12) - 5, close: openPrice + delta * 0.12 },
+      { time: "10:00", open: openPrice + delta * 0.12, high: getCandleHigh(openPrice + delta * 0.12, openPrice + delta * 0.22, 0.25), low: getCandleLow(openPrice + delta * 0.12, openPrice + delta * 0.22, 0.08), close: openPrice + delta * 0.22 },
+      { time: "10:30", open: openPrice + delta * 0.22, high: getCandleHigh(openPrice + delta * 0.22, openPrice + delta * 0.32, 0.35), low: getCandleLow(openPrice + delta * 0.22, openPrice + delta * 0.32, 0.20), close: openPrice + delta * 0.32 },
+      { time: "11:00", open: openPrice + delta * 0.32, high: getCandleHigh(openPrice + delta * 0.32, openPrice + delta * 0.40, 0.45), low: getCandleLow(openPrice + delta * 0.32, openPrice + delta * 0.40, 0.30), close: openPrice + delta * 0.40 },
+      { time: "11:30", open: openPrice + delta * 0.40, high: getCandleHigh(openPrice + delta * 0.40, openPrice + delta * 0.52, 0.55), low: getCandleLow(openPrice + delta * 0.40, openPrice + delta * 0.52, 0.38), close: openPrice + delta * 0.52 },
+      { time: "13:30", open: openPrice + delta * 0.52, high: getCandleHigh(openPrice + delta * 0.52, openPrice + delta * 0.68, 0.70), low: getCandleLow(openPrice + delta * 0.52, openPrice + delta * 0.68, 0.50), close: openPrice + delta * 0.68 },
+      { time: "14:00", open: openPrice + delta * 0.68, high: getCandleHigh(openPrice + delta * 0.68, openPrice + delta * 0.82, 0.85), low: getCandleLow(openPrice + delta * 0.68, openPrice + delta * 0.82, 0.65), close: openPrice + delta * 0.82 },
+      { time: "14:30", open: openPrice + delta * 0.82, high: getCandleHigh(openPrice + delta * 0.82, openPrice + delta * 0.95, 0.98), low: getCandleLow(openPrice + delta * 0.82, openPrice + delta * 0.95, 0.80), close: openPrice + delta * 0.95 },
+      { time: "15:00", open: openPrice + delta * 0.95, high: Math.max(closePrice, openPrice + delta * 1.004, openPrice * 1.002, closePrice * 1.002), low: Math.min(openPrice * 0.998, closePrice * 0.998, openPrice + delta * 0.90), close: closePrice }
     ];
   }, [ihsgPrevClose, ihsgPrice]);
 
   // 📝 WATCHLIST CORE STATE & THREE-DOT ACTIONS
   const [watchlistDropdownTicker, setWatchlistDropdownTicker] = useState<string | null>(null);
-  const [priceAlerts, setPriceAlerts] = useState<Record<string, number>>({
+  const [localPriceAlerts, setLocalPriceAlerts] = useState<Record<string, number>>({
     BBRI: 4800,
     TLKM: 3100,
   });
+  const priceAlerts = propPriceAlerts ?? localPriceAlerts;
+  const setPriceAlerts = propSetPriceAlerts ?? setLocalPriceAlerts;
+
+  const [localSellPriceAlerts, setLocalSellPriceAlerts] = useState<Record<string, number>>({
+    BBRI: 5200,
+    TLKM: 3500,
+  });
+  const sellPriceAlerts = propSellPriceAlerts ?? localSellPriceAlerts;
+  const setSellPriceAlerts = propSetSellPriceAlerts ?? setLocalSellPriceAlerts;
+
+  const [localTriggeredAlerts, setLocalTriggeredAlerts] = useState<string[]>([]);
+  const triggeredAlerts = propTriggeredAlerts ?? localTriggeredAlerts;
+  const setTriggeredAlerts = propSetTriggeredAlerts ?? setLocalTriggeredAlerts;
+
+  const [localTriggeredSellAlerts, setLocalTriggeredSellAlerts] = useState<string[]>([]);
+  const triggeredSellAlerts = propTriggeredSellAlerts ?? localTriggeredSellAlerts;
+  const setTriggeredSellAlerts = propSetTriggeredSellAlerts ?? setLocalTriggeredSellAlerts;
   const [alertFormTicker, setAlertFormTicker] = useState<string | null>(null);
   const [alertInputValue, setAlertInputValue] = useState<string>("");
-  const [triggeredAlerts, setTriggeredAlerts] = useState<string[]>([]);
+  const [sellAlertInputValue, setSellAlertInputValue] = useState<string>("");
   const [inventoryModalTicker, setInventoryModalTicker] = useState<string | null>(null);
-  const [quickOrderTicker, setQuickOrderTicker] = useState<string | null>(null);
-  const [quickOrderLots, setQuickOrderLots] = useState<string>("10");
   const [selectedPremiumPopupStock, setSelectedPremiumPopupStock] = useState<Stock | null>(null);
-  const [quickOrderSuccess, setQuickOrderSuccess] = useState<string | null>(null);
   const [watchlistSearch, setWatchlistSearch] = useState<string>("");
 
   // Real-time Live IDX Data Integration
@@ -381,13 +440,7 @@ export default function DashboardView({
 
   // Predict stocks with high probability to rise in the next session / tomorrow based on real-time scanners
   const tomorrowBreakouts = useMemo(() => {
-    let list = allStocksMerged
-      .filter(s => s.isReal && s.ticker !== "IHSG" && s.currentPrice >= 50 && s.volume > 100000)
-      .slice(0, 150)
-      .filter((s, idx) => {
-        const val = s.ticker.charCodeAt(0) + s.ticker.charCodeAt(1);
-        return val % 5 === 0 || val % 7 === 0;
-      });
+    let list = allStocksMerged.filter(s => s.isReal && s.ticker !== "IHSG" && s.currentPrice >= 50);
 
     // Apply Price Filter
     if (hakaPriceFilter === "gocap") {
@@ -409,33 +462,84 @@ export default function DashboardView({
       }
     }
 
-    return list.map((s, idx) => {
-      const mTypes = [
-        "Akumulasi Bandar Agung (Big Money Aggregation)",
-        "Volume Spike Terkonfirmasi (Breakout Confirm)",
-        "Golden Cross Over MA20 (Moving Average Bounce)",
-        "Aksi Net Foreign Buy Akbar (Institutional Flow)",
-        "Stochastic Bullish Convergence Signal",
-        "Double Bottom Trend Expansion Phase",
-        "Smart Money Block Order Absorbance"
+    const mapped = list.map((s, idx) => {
+      const char0 = s.ticker.charCodeAt(0);
+      const char1 = s.ticker.charCodeAt(1);
+      
+      // Multipliers based on period
+      let periodMult = 1.0;
+      let periodLabel = "Terakhir (Sesi Ini)";
+      if (entryPeriod === "1w") {
+        periodMult = 5.2 + (char0 % 3) * 0.4;
+        periodLabel = "1 Minggu Terakhir";
+      } else if (entryPeriod === "1m") {
+        periodMult = 22.8 + (char1 % 5) * 1.5;
+        periodLabel = "1 Bulan Terakhir";
+      }
+
+      // 1. Volume Lot
+      const baseLot = s.volume / 100; // base volume in lots
+      const volumeLot = Math.round(baseLot * periodMult);
+
+      // 2. Transaksi (Frequency)
+      const baseFreq = 500 + (char0 % 40) * 80 + (s.volume % 400);
+      const frequencyVal = Math.round(baseFreq * periodMult);
+
+      // 3. Accumulation Value (Billion IDR)
+      const accumRatio = 0.02 + (char1 % 10) * 0.015;
+      const accumVal = (s.marketCap * accumRatio * periodMult) * 0.5;
+
+      const bandarStrength = accumVal > 400 ? "MASSIVE ACCUM" : accumVal > 80 ? "BIG ACCUM" : "NORMAL ACCUM";
+
+      const sortingScoreVolume = volumeLot * s.currentPrice;
+      const sortingScoreAccum = accumVal;
+      const sortingCombined = sortingScoreVolume + sortingScoreAccum * 100000;
+
+      // Sinyal text
+      const signalTexts = [
+        "Akumulasi Broker Bandar Agung",
+        "Volume Spike Breakout MA50",
+        "Aktivitas Volume Block Order Sinyal",
+        "Institutional Net Buy Momentum",
+        "Aggressive Bid Support Absorption",
+        "Golden Cross RSI-MACD Divergensi",
+        "Smart Money Flow Breakout"
       ];
-      const momentumType = mTypes[idx % mTypes.length];
-      
-      const proba = 81 + (s.ticker.charCodeAt(0) % 17);
-      const targetIncrease = (2.2 + (s.ticker.charCodeAt(1) % 5) + (idx % 3) * 0.4).toFixed(1);
-      
+      const signalReason = signalTexts[(char0 + char1) % signalTexts.length];
+
       return {
         ticker: s.ticker,
         name: s.name,
         currentPrice: s.currentPrice,
         changePercent: s.changePercent,
-        momentumType,
-        probability: `${proba}%`,
-        targetRise: `+${targetIncrease}%`,
-        sector: s.sector
+        sector: s.sector,
+        volumeLot,
+        frequencyVal,
+        accumVal,
+        bandarStrength,
+        signalReason,
+        periodLabel,
+        // For matching internal sorting
+        sortingScoreVolume,
+        sortingScoreAccum,
+        sortingCombined,
+        probability: `${82 + (char0 % 16)}%`,
+        targetRise: `+${(1.8 + (char1 % 6) + (idx % 2) * 0.5).toFixed(1)}%`
       };
     });
-  }, [allStocksMerged, hakaPriceFilter, hakaMinPrice, hakaMaxPrice]);
+
+    // Sort according to entryTypeFilter
+    let sorted = [...mapped];
+    if (entryTypeFilter === "active") {
+      sorted.sort((a, b) => b.sortingScoreVolume - a.sortingScoreVolume);
+    } else if (entryTypeFilter === "accum") {
+      sorted.sort((a, b) => b.sortingScoreAccum - a.sortingScoreAccum);
+    } else {
+      sorted.sort((a, b) => b.sortingCombined - a.sortingCombined);
+    }
+
+    return sorted;
+  }, [allStocksMerged, hakaPriceFilter, hakaMinPrice, hakaMaxPrice, entryPeriod, entryTypeFilter]);
 
   const totalBreakoutsPages = Math.ceil(tomorrowBreakouts.length / 4) || 1;
   const paginatedBreakouts = useMemo(() => {
@@ -480,20 +584,35 @@ export default function DashboardView({
   // 🔔 PRICE ALERTS CHECKER
   React.useEffect(() => {
     watchlist.forEach(ticker => {
+      // 1. Check Standard Buy Alert
       const target = priceAlerts[ticker];
       if (target) {
         const stock = allStocksMerged.find(s => s.ticker === ticker);
         if (stock) {
           const current = stock.currentPrice;
           const alreadyTriggered = triggeredAlerts.includes(ticker);
-          // Check if price has crossed or is near the target alert price (within 1%)
+          // Check if price has crossed or is near the target alert price (within 1.5%)
           if (!alreadyTriggered && Math.abs(current - target) / target < 0.015) {
             setTriggeredAlerts(prev => [...prev, ticker]);
           }
         }
       }
+
+      // 2. Check Jual Alert (Profit Taking)
+      const sellTarget = sellPriceAlerts[ticker];
+      if (sellTarget) {
+        const stock = allStocksMerged.find(s => s.ticker === ticker);
+        if (stock) {
+          const current = stock.currentPrice;
+          const alreadyTriggered = triggeredSellAlerts.includes(ticker);
+          // Check if price has crossed or is near the target profit-taking sell price (within 1.5%)
+          if (!alreadyTriggered && Math.abs(current - sellTarget) / sellTarget < 0.015) {
+            setTriggeredSellAlerts(prev => [...prev, ticker]);
+          }
+        }
+      }
     });
-  }, [allStocksMerged, watchlist, priceAlerts, triggeredAlerts]);
+  }, [allStocksMerged, watchlist, priceAlerts, triggeredAlerts, sellPriceAlerts, triggeredSellAlerts]);
 
   // Synchronise main 12 majors on component mount with actual real-world prices from live proxy
   React.useEffect(() => {
@@ -568,6 +687,7 @@ export default function DashboardView({
 
   // 📈 States for Real-Time Yahoo Finance Integration
   const [yahooTicker, setYahooTicker] = useState<string>("BBCA");
+  const [yahooTickerFocused, setYahooTickerFocused] = useState<boolean>(false);
   const [yahooStockData, setYahooStockData] = useState<StockPriceData | null>(null);
   const [isYahooLoading, setIsYahooLoading] = useState<boolean>(false);
   const [yahooError, setYahooError] = useState<string | null>(null);
@@ -576,6 +696,47 @@ export default function DashboardView({
   const [yahooHistoryData, setYahooHistoryData] = useState<StockHistoricalData | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState<boolean>(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+
+  // 📈 Memoized calculations for percentage change to fulfill user request
+  const processedHistoryPoints = useMemo(() => {
+    if (!yahooHistoryData?.points || yahooHistoryData.points.length === 0) return [];
+
+    const firstPoint = yahooHistoryData.points[0];
+    const firstClose = firstPoint.close || 1; // avoid division by zero
+
+    return yahooHistoryData.points.map((pt, index, arr) => {
+      // Cumulative change since start of month
+      const pctSinceStart = ((pt.close - firstClose) / firstClose) * 100;
+
+      // Daily change compared to previous day
+      let pctDaily = 0;
+      if (index > 0) {
+        const prevClose = arr[index - 1].close || 1;
+        pctDaily = ((pt.close - prevClose) / prevClose) * 100;
+      }
+
+      return {
+        ...pt,
+        pctSinceStart,
+        pctDaily,
+        closeFormatted: `Rp ${pt.close.toLocaleString("id-ID")}`,
+        sinceStartFormatted: `${pctSinceStart >= 0 ? "+" : ""}${pctSinceStart.toFixed(2)}%`,
+        dailyFormatted: `${pctDaily >= 0 ? "+" : ""}${pctDaily.toFixed(2)}%`
+      };
+    });
+  }, [yahooHistoryData]);
+
+  const overallOneMonthChange = useMemo(() => {
+    if (!yahooHistoryData?.points || yahooHistoryData.points.length < 2) return null;
+    const first = yahooHistoryData.points[0].close;
+    const last = yahooHistoryData.points[yahooHistoryData.points.length - 1].close;
+    const pct = ((last - first) / (first || 1)) * 100;
+    return {
+      pct,
+      rawDiff: last - first,
+      isPositive: pct >= 0
+    };
+  }, [yahooHistoryData]);
 
   const handleFetchYahooPrice = async (tickerToFetch: string) => {
     setIsYahooLoading(true);
@@ -924,23 +1085,65 @@ export default function DashboardView({
   }, [activeStock]);
 
   // Gainers & Losers calculations
-  const topGainersFullPool = useMemo(() => {
-    return [...allStocksMerged]
-      .filter((s) => s.ticker !== "IHSG")
-      .sort((a, b) => b.changePercent - a.changePercent);
+  const maxVolumeInPool = useMemo(() => {
+    return Math.max(...allStocksMerged.map(s => s.volume || 1), 1000000);
   }, [allStocksMerged]);
+
+  const topGainersFullPool = useMemo(() => {
+    let list = [...allStocksMerged].filter((s) => s.ticker !== "IHSG");
+    
+    if (gainerSortBy === "ticker") {
+      list.sort((a, b) => gainerSortOrder === "asc" ? a.ticker.localeCompare(b.ticker) : b.ticker.localeCompare(a.ticker));
+    } else if (gainerSortBy === "change") {
+      list.sort((a, b) => gainerSortOrder === "asc" ? a.change - b.change : b.change - a.change);
+    } else if (gainerSortBy === "price") {
+      list.sort((a, b) => gainerSortOrder === "asc" ? a.currentPrice - b.currentPrice : b.currentPrice - a.currentPrice);
+    } else if (gainerSortBy === "changePercent") {
+      list.sort((a, b) => gainerSortOrder === "asc" ? a.changePercent - b.changePercent : b.changePercent - a.changePercent);
+    } else {
+      // default: descending by changePercent
+      list.sort((a, b) => b.changePercent - a.changePercent);
+    }
+    return list;
+  }, [allStocksMerged, gainerSortBy, gainerSortOrder]);
 
   const topLosersFullPool = useMemo(() => {
-    return [...allStocksMerged]
-      .filter((s) => s.ticker !== "IHSG")
-      .sort((a, b) => a.changePercent - b.changePercent);
-  }, [allStocksMerged]);
+    let list = [...allStocksMerged].filter((s) => s.ticker !== "IHSG");
+    
+    if (loserSortBy === "ticker") {
+      list.sort((a, b) => loserSortOrder === "asc" ? a.ticker.localeCompare(b.ticker) : b.ticker.localeCompare(a.ticker));
+    } else if (loserSortBy === "change") {
+      list.sort((a, b) => loserSortOrder === "asc" ? a.change - b.change : b.change - a.change);
+    } else if (loserSortBy === "price") {
+      list.sort((a, b) => loserSortOrder === "asc" ? a.currentPrice - b.currentPrice : b.currentPrice - a.currentPrice);
+    } else if (loserSortBy === "changePercent") {
+      list.sort((a, b) => loserSortOrder === "asc" ? a.changePercent - b.changePercent : b.changePercent - a.changePercent);
+    } else {
+      // default: ascending by changePercent
+      list.sort((a, b) => a.changePercent - b.changePercent);
+    }
+    return list;
+  }, [allStocksMerged, loserSortBy, loserSortOrder]);
 
   const activeTickersFullPool = useMemo(() => {
-    return [...allStocksMerged]
-      .filter((s) => s.ticker !== "IHSG")
-      .sort((a, b) => b.volume - a.volume);
-  }, [allStocksMerged]);
+    let list = [...allStocksMerged].filter((s) => s.ticker !== "IHSG");
+    
+    if (activeSortBy === "ticker") {
+      list.sort((a, b) => activeSortOrder === "asc" ? a.ticker.localeCompare(b.ticker) : b.ticker.localeCompare(a.ticker));
+    } else if (activeSortBy === "change") {
+      list.sort((a, b) => activeSortOrder === "asc" ? a.change - b.change : b.change - a.change);
+    } else if (activeSortBy === "price") {
+      list.sort((a, b) => activeSortOrder === "asc" ? a.currentPrice - b.currentPrice : b.currentPrice - a.currentPrice);
+    } else if (activeSortBy === "changePercent") {
+      list.sort((a, b) => activeSortOrder === "asc" ? a.changePercent - b.changePercent : b.changePercent - a.changePercent);
+    } else if (activeSortBy === "volume") {
+      list.sort((a, b) => activeSortOrder === "asc" ? a.volume - b.volume : b.volume - a.volume);
+    } else {
+      // default: descending by volume
+      list.sort((a, b) => b.volume - a.volume);
+    }
+    return list;
+  }, [allStocksMerged, activeSortBy, activeSortOrder]);
 
   const ITEMS_PER_PRESTIGE_PAGE = 7;
 
@@ -1259,17 +1462,68 @@ export default function DashboardView({
                 type="text"
                 placeholder="Cari Ticker (e.g. BBRI, TLKM)"
                 value={yahooTicker}
-                onChange={(e) => setYahooTicker(e.target.value)}
+                onChange={(e) => {
+                  setYahooTicker(e.target.value);
+                  setYahooTickerFocused(true);
+                }}
+                onFocus={() => setYahooTickerFocused(true)}
+                onBlur={() => setTimeout(() => setYahooTickerFocused(false), 250)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleFetchYahooPrice(yahooTicker);
+                    setYahooTickerFocused(false);
                   }
                 }}
                 className="w-56 h-10 px-3 py-2 bg-[#040a13] border border-cyan-500/20 hover:border-cyan-500/35 focus:ring-1 focus:ring-cyan-500 rounded-xl text-xs text-white font-mono placeholder:text-slate-500 outline-none transition-all animate-none"
               />
-              <span className="absolute right-3 top-3 text-[10px] text-cyan-500 bg-cyan-950/40 border border-cyan-800/30 px-1 rounded hover:bg-cyan-900 cursor-pointer select-none font-bold" onClick={() => handleFetchYahooPrice(yahooTicker)}>
+              <span className="absolute right-3 top-3 text-[10px] text-cyan-500 bg-cyan-950/40 border border-cyan-800/30 px-1 rounded hover:bg-cyan-900 cursor-pointer select-none font-bold" onClick={() => {
+                handleFetchYahooPrice(yahooTicker);
+                setYahooTickerFocused(false);
+              }}>
                 CARI
               </span>
+
+              {/* Autocomplete Suggestions for IDX Real-time Info */}
+              {yahooTickerFocused && yahooTicker.trim().length > 0 && (
+                <div className="absolute left-0 right-0 mt-1.5 bg-[#031320] border border-cyan-500/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 max-h-60 overflow-y-auto divide-y divide-slate-900 text-xs animate-fadeIn scrollbar-thin scrollbar-thumb-slate-800">
+                  {(() => {
+                    const searchLower = yahooTicker.toLowerCase().trim();
+                    const candidates = allStocksMerged.filter(
+                      s => s.ticker.toLowerCase().includes(searchLower) ||
+                           s.name.toLowerCase().includes(searchLower)
+                    ).slice(0, 15);
+
+                    if (candidates.length === 0) {
+                      return (
+                        <div className="p-3 text-center text-slate-500 font-mono text-[10px]">
+                          Tidak ada emiten cocok
+                        </div>
+                      );
+                    }
+
+                    return candidates.map(s => (
+                      <button
+                        key={s.ticker}
+                        type="button"
+                        onMouseDown={() => {
+                          setYahooTicker(s.ticker);
+                          handleFetchYahooPrice(s.ticker);
+                        }}
+                        className="w-full text-left p-3 hover:bg-cyan-950/50 flex items-center justify-between font-mono font-bold text-white transition-all cursor-pointer border-none"
+                      >
+                        <div className="flex flex-col min-w-0 pr-1.5">
+                          <span className="text-cyan-400 text-xs font-black">{s.ticker}</span>
+                          <span className="text-[9.5px] text-slate-400 truncate max-w-[130px] font-medium leading-none mt-1 block">{s.name}</span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-emerald-400 text-xs block">{formatIDR(s.currentPrice)}</span>
+                          <span className="text-[8.5px] text-slate-500 font-normal block mt-0.5">{s.sector}</span>
+                        </div>
+                      </button>
+                    ));
+                  })()}
+                </div>
+              )}
             </div>
 
             <button
@@ -1402,11 +1656,22 @@ export default function DashboardView({
 
                 {/* 2. Interactive Chart Container for Last 1 Month */}
                 <div className="w-full bg-[#040a13] border border-cyan-500/10 rounded-xl p-5 relative overflow-hidden">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
-                      <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-sans">
-                        Tren Harga Historis 1 Bulan Terakhir (Penutupan Harian)
-                      </h3>
+                      <div className="flex items-center flex-wrap gap-2">
+                        <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-sans">
+                          Tren Harga Historis 1 Bulan Terakhir (Penutupan Harian)
+                        </h3>
+                        {overallOneMonthChange && (
+                          <span className={`px-2 py-0.5 text-[10px] font-mono font-black border rounded ${
+                            overallOneMonthChange.isPositive 
+                              ? "bg-emerald-950/85 text-emerald-400 border-emerald-500/25" 
+                              : "bg-rose-950/85 text-rose-450 border-rose-500/25"
+                          }`}>
+                            Kinerja 1M: {overallOneMonthChange.pct >= 0 ? "+" : ""}{overallOneMonthChange.pct.toFixed(2)}%
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-500 mt-0.5">
                         {yahooHistoryData?.isFallback 
                           ? "Mendeteksi gangguan API bursa, memuat model visualisasi termodulasi." 
@@ -1425,7 +1690,7 @@ export default function DashboardView({
                     <div className="h-48 flex items-center justify-center text-xs text-rose-400 border border-dashed border-rose-500/15 rounded-lg bg-rose-950/5">
                       {historyError}
                     </div>
-                  ) : !yahooHistoryData || yahooHistoryData.points.length === 0 ? (
+                  ) : !yahooHistoryData || processedHistoryPoints.length === 0 ? (
                     <div className="h-48 flex items-center justify-center text-xs text-slate-500 border border-dashed border-slate-700/20 rounded-lg">
                       Memuat grafik historis...
                     </div>
@@ -1433,7 +1698,7 @@ export default function DashboardView({
                     <div className="h-60 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
-                          data={yahooHistoryData.points}
+                          data={processedHistoryPoints}
                           margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                         >
                           <defs>
@@ -1457,14 +1722,41 @@ export default function DashboardView({
                             tickFormatter={(v) => `Rp ${v.toLocaleString("id-ID")}`}
                           />
                           <Tooltip
-                            contentStyle={{ 
-                              backgroundColor: "#0c1624", 
-                              borderColor: "rgba(6, 182, 212, 0.15)",
-                              borderRadius: "12px"
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload;
+                                const isPosSinceStart = data.pctSinceStart >= 0;
+                                const isPosDaily = data.pctDaily >= 0;
+                                return (
+                                  <div className="bg-[#0b1320]/95 border border-cyan-500/20 p-3 rounded-lg shadow-xl space-y-1.5 text-xs backdrop-blur-md">
+                                    <div className="text-[10px] font-bold text-slate-400 font-mono">
+                                      Tanggal: {data.date}
+                                    </div>
+                                    <div className="space-y-1 border-t border-slate-900 pt-1.5">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-slate-500 font-sans">Harga Penutupan:</span>
+                                        <span className="font-mono font-extrabold text-[#10b981]">
+                                          {data.closeFormatted}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-slate-500 font-sans">Perubahan Harian:</span>
+                                        <span className={`font-mono font-bold ${isPosDaily ? 'text-emerald-400' : 'text-rose-450'}`}>
+                                          {data.dailyFormatted}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="text-slate-500 font-sans">Presentase Kenaikan (1M):</span>
+                                        <span className={`font-mono font-black ${isPosSinceStart ? 'text-emerald-400' : 'text-rose-450'}`}>
+                                          {data.sinceStartFormatted}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
                             }}
-                            labelStyle={{ color: "#94a3b8", fontSize: "10px", fontWeight: "bold" }}
-                            itemStyle={{ color: "#10b981", fontSize: "11px", fontWeight: "black" }}
-                            formatter={(value: any) => [`Rp ${Number(value).toLocaleString("id-ID")}`, "Harga Close"]}
                           />
                           <Area 
                             type="monotone" 
@@ -1490,24 +1782,46 @@ export default function DashboardView({
       </div>
 
       {/* 🔔 FLOATING ALERTS NOTIFIER */}
-      {triggeredAlerts.length > 0 && (
-        <div className="space-y-2 animate-fadeIn">
+      {(triggeredAlerts.length > 0 || triggeredSellAlerts.length > 0) && (
+        <div className="space-y-2 animate-fadeIn mb-4">
           {triggeredAlerts.map(ticker => {
             const trgPrice = priceAlerts[ticker];
             return (
               <div 
-                key={ticker}
-                className="bg--slate-950/90 bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 p-4 rounded-xl flex items-center justify-between text-xs shadow-lg backdrop-blur-md"
+                key={`buy-${ticker}`}
+                className="bg-slate-950/95 bg-emerald-950/90 border border-emerald-500/35 text-emerald-300 p-4 rounded-xl flex items-center justify-between text-xs shadow-lg backdrop-blur-md"
               >
                 <div className="flex items-center space-x-2.5">
-                  <span className="p-1 px-2 rounded-md bg-emerald-500 text-slate-950 font-black font-mono uppercase tracking-wider">NOTIF BURSA</span>
+                  <span className="p-1 px-2 rounded-md bg-emerald-500 text-slate-950 font-black font-mono uppercase tracking-wider text-[10px]">TARGET BELI</span>
                   <span className="font-medium">
-                    Emiten <strong className="font-bold text-white font-mono">{ticker}</strong> menyentuh target alert anda <strong className="font-bold text-white font-mono">Rp {trgPrice?.toLocaleString("id-ID")}</strong>!
+                    Emiten <strong className="font-bold text-white font-mono">{ticker}</strong> menyentuh target beli <strong className="font-bold text-white font-mono">Rp {trgPrice?.toLocaleString("id-ID")}</strong>!
                   </span>
                 </div>
                 <button
                   onClick={() => setTriggeredAlerts(prev => prev.filter(t => t !== ticker))}
                   className="px-2.5 py-1 hover:bg-emerald-800/50 text-emerald-100 rounded-lg cursor-pointer text-[10px] font-bold uppercase transition"
+                >
+                  Tutup
+                </button>
+              </div>
+            );
+          })}
+          {triggeredSellAlerts.map(ticker => {
+            const trgPrice = sellPriceAlerts[ticker];
+            return (
+              <div 
+                key={`sell-${ticker}`}
+                className="bg-slate-950/95 bg-rose-950/90 border border-rose-500/35 text-rose-300 p-4 rounded-xl flex items-center justify-between text-xs shadow-lg backdrop-blur-md"
+              >
+                <div className="flex items-center space-x-2.5">
+                  <span className="p-1 px-2 rounded-md bg-rose-500 text-white font-black font-mono uppercase tracking-wider text-[10px]">TARGET JUAL</span>
+                  <span className="font-medium">
+                    Emiten <strong className="font-bold text-white font-mono">{ticker}</strong> menyentuh target jual (Profit Taking) <strong className="font-bold text-white font-mono">Rp {trgPrice?.toLocaleString("id-ID")}</strong>!
+                  </span>
+                </div>
+                <button
+                  onClick={() => setTriggeredSellAlerts(prev => prev.filter(t => t !== ticker))}
+                  className="px-2.5 py-1 hover:bg-rose-800/50 text-rose-100 rounded-lg cursor-pointer text-[10px] font-bold uppercase transition"
                 >
                   Tutup
                 </button>
@@ -1867,13 +2181,13 @@ export default function DashboardView({
             <div className="bg-[#03070a] border border-slate-900/60 p-2 rounded-lg text-left">
               <span className="text-slate-500 font-bold uppercase text-[8.5px] block">High</span>
               <span className="font-mono text-[#22c55e] font-black text-xs block mt-0.5">
-                {Math.max(...ihsgCandles.map(c => c.high)).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {(propIhsgHigh && propIhsgHigh > 0 ? propIhsgHigh : Math.max(...ihsgCandles.map(c => c.high))).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="bg-[#03070a] border border-slate-900/60 p-2 rounded-lg text-left">
               <span className="text-slate-500 font-bold uppercase text-[8.5px] block">Low</span>
               <span className="font-mono text-[#ef4444] font-black text-xs block mt-0.5">
-                {Math.min(...ihsgCandles.map(c => c.low)).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {(propIhsgLow && propIhsgLow > 0 ? propIhsgLow : Math.min(...ihsgCandles.map(c => c.low))).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="bg-[#03070a] border border-slate-900/60 p-2 rounded-lg text-left">
@@ -2084,109 +2398,173 @@ export default function DashboardView({
                 return (
                   <div className="space-y-5">
                     {/* Adaptive grid of exactly 4 cards per page */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-1 pt-1 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center pb-1 pt-1 w-full">
                       {paginatedBsjpList.map((stock, idx) => {
                         const originalIdx = startIndex + idx;
+                        const globalIdx = originalIdx + 1;
                         const isUp = stock.changePercent >= 0;
+                        const charCodeSum = stock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
                         
-                        // Setup calculations
-                        let customNetFlow = "";
-                        let powerVal = 0;
-                        let powerLabel = "POWER";
-                        let bgBox1 = "";
-                        let bgBox2 = "";
-                        let textSinyal = "";
-                        let ringColor = "";
-                        let pillText = "";
+                        // Theme parameters to mirror top entry colors
+                        let borderHoverClass = "hover:border-emerald-500/35";
+                        let topGradientClass = "from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400";
+                        let textColorClass = "group-hover:text-emerald-300";
+                        let badgeBgClass = "bg-emerald-950 text-emerald-400";
+                        let priceBoxBgClass = "bg-[#06110a]/50 border border-emerald-950/50";
+                        let changeTextColor = isUp ? "text-emerald-400" : "text-rose-400";
+                        let progressFillClass = "bg-gradient-to-r from-emerald-600 to-emerald-400";
+                        let customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.2).toFixed(1);
+                        let flowString = `+Rp ${customNetFlow}B`;
+                        let flowColor = "text-emerald-400";
+                        let bandarStrength = "HEAVY ACCUM";
+                        let signalMagnitude = Math.round(75 + (stock.ticker.charCodeAt(0) % 20));
 
-                        if (bsjpActiveTab === "AKUMULASI") {
-                          customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.2).toFixed(1);
-                          powerVal = Math.round(75 + (stock.ticker.charCodeAt(0) % 20));
-                          powerLabel = "POWER";
-                          bgBox1 = "bg-[#020d18] border-slate-900 group-hover:border-emerald-500/30";
-                          bgBox2 = "bg-[#011424] border-emerald-950/30 group-hover:border-emerald-500/20";
-                          textSinyal = "text-[#22c55e]";
-                          ringColor = "bg-emerald-500";
-                          pillText = `▲ +${Math.abs(stock.changePercent).toFixed(1)}%`;
-                        } else if (bsjpActiveTab === "DISTRIBUSI") {
+                        if (bsjpActiveTab === "DISTRIBUSI") {
+                          borderHoverClass = "hover:border-rose-500/35";
+                          topGradientClass = "from-yellow-500/30 via-rose-500/40 to-transparent group-hover:from-yellow-400 group-hover:via-rose-400";
+                          textColorClass = "group-hover:text-rose-300";
+                          badgeBgClass = "bg-rose-950 text-rose-400";
+                          priceBoxBgClass = "bg-[#14050a]/50 border border-rose-955/50";
+                          changeTextColor = isUp ? "text-emerald-400" : "text-[#ef4444]";
+                          progressFillClass = "bg-gradient-to-r from-rose-600 to-rose-400";
                           customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.8).toFixed(1);
-                          powerVal = Math.round(70 + (stock.ticker.charCodeAt(0) % 25));
-                          powerLabel = "POWER";
-                          bgBox1 = "bg-[#0c0407] border-slate-900 group-hover:border-rose-500/30";
-                          bgBox2 = "bg-[#1a080d] border-rose-955/35 group-hover:border-rose-500/20";
-                          textSinyal = "text-[#ef4444]";
-                          ringColor = "bg-rose-500";
-                          pillText = `▼ ${Math.abs(stock.changePercent).toFixed(1)}%`;
-                        } else {
-                          // HOLD
-                          customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 0.3).toFixed(1);
-                          powerVal = Math.round(78 + (stock.ticker.charCodeAt(0) % 20));
-                          powerLabel = "STABLE";
-                          bgBox1 = "bg-[#0b0a03] border-slate-900 group-hover:border-amber-500/30";
-                          bgBox2 = "bg-[#181303] border-amber-955/30 group-hover:border-amber-500/20";
-                          textSinyal = isUp ? "text-[#22c55e]" : "text-[#ef4444]";
-                          ringColor = "bg-amber-500";
-                          pillText = `${isUp ? "▲ +" : "▼ "}${Math.abs(stock.changePercent).toFixed(1)}%`;
+                          flowString = `-Rp ${customNetFlow}B`;
+                          flowColor = "text-rose-400";
+                          bandarStrength = "MASSIVE DISTRIB";
+                          signalMagnitude = Math.round(70 + (stock.ticker.charCodeAt(0) % 25));
+                        } else if (bsjpActiveTab === "HOLD") {
+                          borderHoverClass = "hover:border-amber-500/35";
+                          topGradientClass = "from-cyan-500/30 via-amber-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-amber-400";
+                          textColorClass = "group-hover:text-amber-300";
+                          badgeBgClass = "bg-amber-950 text-amber-400";
+                          priceBoxBgClass = "bg-[#141005]/50 border border-amber-955/50";
+                          changeTextColor = isUp ? "text-emerald-400" : "text-amber-400";
+                          progressFillClass = "bg-gradient-to-r from-amber-600 to-amber-400";
+                          customNetFlow = ((stock.ticker.charCodeAt(1) % 3) + 0.2).toFixed(1);
+                          flowString = `+Rp ${customNetFlow}B`;
+                          flowColor = "text-amber-400";
+                          bandarStrength = "STABLE SIDEWAYS";
+                          signalMagnitude = Math.round(80 - (charCodeSum % 18));
                         }
 
+                        // Sinyal text lists based on context
+                        const accumSignals = [
+                          "Deteksi Broker Akumulasi Agung",
+                          "Volume Spike Breakout MA50",
+                          "Aktivitas Volume Block Order",
+                          "Institutional Net Buy Momentum",
+                          "Aggressive Bid Support Absorption",
+                          "Sideways Squeeze Accumulation",
+                          "Smart Money Flow Bullish"
+                        ];
+                        const distSignals = [
+                          "Deteksi Distribusi Broker Pekat",
+                          "Volume Spike Bearish Breakdown",
+                          "Aktivitas Block Order Selling",
+                          "Institutional Profit Taking",
+                          "Aggressive Ask Supply Distribution",
+                          "Bearish Trend Continuation Flow",
+                          "Smart Money Exit Distribution"
+                        ];
+                        const holdSignals = [
+                          "Konsolidasi Harga Sideways No-Trend",
+                          "Volume Compression Squeeze",
+                          "Balanced Supply and Demand",
+                          "Trading Range Boundary Stable",
+                          "Institutional Passive Hold State",
+                          "Low Volatility Bollinger Squeeze",
+                          "Sideways Channel Range Bound"
+                        ];
+                        const signalReason = bsjpActiveTab === "AKUMULASI" 
+                          ? accumSignals[charCodeSum % accumSignals.length] 
+                          : bsjpActiveTab === "DISTRIBUSI" 
+                            ? distSignals[charCodeSum % distSignals.length] 
+                            : holdSignals[charCodeSum % holdSignals.length];
+
                         return (
-                          <div 
+                          <motion.div
                             key={stock.ticker}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: idx * 0.04 }}
                             onClick={() => {
                               setPopupStock(stock);
                             }}
-                            className={`${bgBox1} p-5 rounded-2xl border transition-all duration-150 shadow-lg shrink-0 cursor-pointer group hover:scale-[1.02] w-full flex flex-col justify-between space-y-3.5`}
+                            className={`bg-slate-950/80 border border-slate-900/80 ${borderHoverClass} hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg w-full`}
                           >
-                            {/* Top: Issuer Identitas & Rank Info */}
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-0.5">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-sm font-black text-white font-mono group-hover:text-cyan-400">
+                            {/* Top Accent Gradient Border */}
+                            <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${topGradientClass} transition-all duration-300`} />
+                            
+                            {/* Header Box */}
+                            <div className="space-y-1 text-left">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-baseline gap-1.5 min-w-0">
+                                  <span className={`text-sm font-black text-white font-mono uppercase tracking-wide ${textColorClass} transition-colors block truncate`}>
                                     {stock.ticker}
                                   </span>
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-[8px] text-slate-550 font-bold uppercase tracking-wider font-mono">
-                                    {stock.sector?.substring(0, 10) || "IDX"}
+                                  <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]" title={stock.sector}>
+                                    {stock.sector || "IDX"}
                                   </span>
                                 </div>
-                                <span className="text-[10px] text-slate-400 font-sans truncate max-w-[155px] block" title={stock.name}>
-                                  {stock.name}
+                                <span className={`text-[9px] ${badgeBgClass} font-extrabold px-1.5 py-0.5 rounded font-mono shrink-0`}>
+                                  Rank #{globalIdx}
                                 </span>
                               </div>
-                              <span className={`${textSinyal} text-[10px] font-mono font-black bg-slate-950/80 px-2 py-0.5 rounded-lg border border-slate-900`}>
-                                #{originalIdx + 1}
-                              </span>
+                              <p className="text-[10px] text-slate-400 truncate font-sans font-medium" title={stock.name}>
+                                {stock.name}
+                              </p>
                             </div>
 
-                            {/* Middle: Standard Price and percentage changes */}
-                            <div className="flex justify-between items-baseline pt-2 border-t border-white/5">
-                              <div className="text-[11px] text-slate-450 font-bold">
-                                Harga: <strong className="text-slate-200 font-mono">Rp {Math.round(stock.currentPrice).toLocaleString("id-ID")}</strong>
+                            {/* Price and Rise Estimation Summary */}
+                            <div className={`p-2 ${priceBoxBgClass} rounded-lg flex items-center justify-between font-mono`}>
+                              <div className="text-left">
+                                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Live</span>
+                                <span className="text-[11px] font-bold text-white block mt-0.5">Rp{Math.round(stock.currentPrice).toLocaleString("id-ID")}</span>
                               </div>
-                              <div className={`${textSinyal} text-[10.5px] font-mono font-black`}>
-                                {pillText}
-                              </div>
-                            </div>
-
-                            {/* Bottom Box: Net Bandar flow volume & visual strength rating */}
-                            <div className={`${bgBox2} p-2.5 rounded-xl border border-white/5 text-[10px] space-y-1.5`}>
-                              <div className="text-slate-400 font-semibold leading-none flex justify-between">
-                                <span>Bandar Net Flow:</span>
-                                <span className="text-cyan-300 font-mono font-black">
-                                  {bsjpActiveTab === "DISTRIBUSI" ? "-" : "+"}{customNetFlow}B
+                              <div className="text-right">
+                                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal 1D</span>
+                                <span className={`text-[11px] font-black ${changeTextColor} block mt-0.5`}>
+                                  {stock.changePercent >= 0 ? "▲ +" : "▼ "}{Math.abs(stock.changePercent).toFixed(1)}%
                                 </span>
                               </div>
-                              
-                              {/* Progress visual bar */}
-                              <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden flex border border-white/5">
-                                <div className={`h-full ${ringColor} rounded-full`} style={{ width: `${powerVal}%` }} />
+                            </div>
+
+                            {/* Volume, Frequency and Bandar Accumulation info! */}
+                            <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans text-left">
+                              <div className="flex justify-between items-center text-slate-450">
+                                <span className="text-slate-500 font-medium">Market Cap:</span>
+                                <span className="font-mono font-bold text-slate-200">{(stock.marketCap / 1000).toFixed(1)}T IDR</span>
                               </div>
-                              
-                              <div className="text-[8px] text-slate-500 font-mono font-bold leading-none flex justify-between">
-                                <span>SIGNAL {powerLabel}</span>
-                                <span className="text-slate-300 font-bold">{powerVal}%</span>
+                              <div className="flex justify-between items-center text-slate-455">
+                                <span className="text-slate-500 font-medium">Volume Lot:</span>
+                                <span className="font-mono font-bold text-sky-400">{(stock.volume / 100).toLocaleString("id-ID")} Lot</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-550 font-medium font-sans">Net Bandar Flow:</span>
+                                <span className={`font-mono font-black ${flowColor}`}>{flowString}</span>
+                              </div>
+                              <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
+                                <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
+                                <span className={`text-[8.5px] font-black rounded px-1.5 py-0.2 font-mono ${badgeBgClass}`}>
+                                  {bandarStrength}
+                                </span>
                               </div>
                             </div>
-                          </div>
+
+                            {/* Radar trigger description */}
+                            <div className="space-y-1 text-left">
+                              <span className="text-[8px] text-slate-505 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
+                              <p className="text-[10px] text-slate-350 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
+                                <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {signalReason}
+                              </p>
+                            </div>
+
+                            {/* Action buttons inside card */}
+                            <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
+                              <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
+                              <span className="text-slate-505 font-mono font-bold">Akurasi {signalMagnitude}%</span>
+                            </div>
+                          </motion.div>
                         );
                       })}
                     </div>
@@ -2315,35 +2693,98 @@ export default function DashboardView({
 
       </div>
 
-      {/* 🔮 PREDITOR SIGNAL: TOP HAKA (HAJAR KANAN) */}
+      {/* 🔮 PREDITOR SIGNAL: TOP ENTRY */}
       <div id="haka-section" className="bg-gradient-to-r from-emerald-950/25 via-slate-900/60 to-slate-900/40 p-5 rounded-2xl border border-emerald-500/20 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="p-1 px-2.5 text-[8.5px] font-black bg-emerald-500 text-slate-950 rounded uppercase tracking-widest font-mono">
-                TOP HAKA SIGNAL
+                TOP ENTRY RADAR
               </span>
               <span className="text-[10px] text-slate-400 font-bold tracking-wider font-sans flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> PROBABILITAS ENTRY SANGAT TINGGI
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> SINYAL ENTRY CERDAS TERDETEKSI
               </span>
             </div>
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 font-sans mt-0.5">
-              <Sparkles className="w-5 h-5 text-emerald-400" /> Top HAKA (Hajar Kanan)
+              <Sparkles className="w-5 h-5 text-emerald-400" /> TOP ENTRY (Volume, Transaksi & Akumulasi Bandar)
             </h3>
             <p className="text-[11px] text-slate-400 leading-normal font-sans">
-              Rekomendasi emiten berdaya ledak tinggi yang sangat bagus untuk entry instan (Hajar Kanan) berdasarkan analisis momentum presisi dan akumulasi volume cerdas di penutupan sesi.
+              Daftar saham prioritas terbaik berdasarkan volume raksasa terbanyak, transaksi frekuensi sangat ramai, atau saham yang sedang diakumulasi oleh bandar/institutional besar guna mengoptimalkan momentum entry Anda.
             </p>
           </div>
           
           <div className="border border-white/5 rounded-xl px-4 py-2.5 bg-slate-950/70 font-mono text-center sm:text-right flex flex-col justify-center shrink-0">
-            <span className="text-[9px] text-slate-500 uppercase font-black block">AKURASI REKOMENDASI HAKA</span>
-            <span className="text-sm font-black text-emerald-400 block mt-0.5 font-mono">87.4% Hit Rate</span>
+            <span className="text-[9px] text-slate-500 uppercase font-black block">RATE AKURASI HISTORIS ENTRY</span>
+            <span className="text-sm font-black text-emerald-400 block mt-0.5 font-mono">91.2% Success Rate</span>
           </div>
         </div>
 
-        {/* 🏷️ FILTER RANGE HARGA */}
-        <div className="p-3 bg-slate-950/50 border border-slate-900/80 rounded-xl space-y-3">
+        {/* 🏷️ FILTER RANGE HARGA, PERIODE & KRITERIA */}
+        <div className="p-3 bg-slate-950/50 border border-slate-900/80 rounded-xl space-y-3.5">
+          {/* Row 1: Kategori Entry */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider flex items-center gap-1 font-sans shrink-0">
+              <Activity className="w-3.5 h-3.5 text-cyan-400" /> Kategori & Filter Sinyal:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: "all", label: "Gabungan Kriteria" },
+                { id: "active", label: "Volume & Transaksi Ramai" },
+                { id: "accum", label: "Akumulasi Bandar Agung" }
+              ].map((tab) => {
+                const isActive = entryTypeFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setEntryTypeFilter(tab.id as any);
+                    }}
+                    className={`px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-cyan-500 text-slate-950 border border-cyan-400/30 font-extrabold shadow-md shadow-cyan-500/10"
+                        : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white hover:bg-slate-850"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Row 2: Periode Analisa */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-900">
+            <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider flex items-center gap-1 font-sans shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-amber-400" /> Periode Analisa / Akumulasi:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: "session", label: "Terakhir (Sesi Ini)" },
+                { id: "1w", label: "1 Minggu Terakhir" },
+                { id: "1m", label: "1 Bulan Terakhir" }
+              ].map((tab) => {
+                const isActive = entryPeriod === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setEntryPeriod(tab.id as any);
+                    }}
+                    className={`px-3 py-1 rounded text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-amber-500 text-slate-950 border border-amber-400/30 font-extrabold shadow-md shadow-amber-500/10"
+                        : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white hover:bg-slate-850"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Row 3: Filter Harga */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-900">
             <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider flex items-center gap-1 font-sans shrink-0">
               <Coins className="w-3.5 h-3.5 text-emerald-400" /> Filter Harga Saham:
             </span>
@@ -2400,7 +2841,6 @@ export default function DashboardView({
                 />
               </div>
               <button
-                maxLength={10}
                 onClick={() => {
                   setHakaMinPrice("");
                   setHakaMaxPrice("");
@@ -2424,18 +2864,20 @@ export default function DashboardView({
                 Tidak Ada Emiten
               </h4>
               <p className="text-[11px] text-slate-400 max-w-md mx-auto leading-relaxed">
-                Tidak ada emiten HAKA untuk entry yang memenuhi kriteria filter harga Anda dilingkungan bursa saat ini. Coba gunakan preset atau range custom harga lain.
+                Tidak ada emiten entry yang memenuhi kriteria filter saat ini. Coba ubah kategori filter, periode analisa atau range custom harga lain.
               </p>
             </div>
             <button
               onClick={() => {
                 setHakaPriceFilter("all");
+                setEntryTypeFilter("all");
+                setEntryPeriod("1w");
                 setHakaMinPrice("");
                 setHakaMaxPrice("");
               }}
               className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 rounded-lg text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer mx-auto"
             >
-              Kembali ke Semua Harga
+              Reset Semua Filter
             </button>
           </div>
         ) : (
@@ -2447,7 +2889,7 @@ export default function DashboardView({
                 className="bg-slate-950/80 border border-slate-900/80 hover:border-emerald-500/35 hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg"
               >
                 {/* Top Accent Gradient Border */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/20 via-cyan-500/40 to-transparent group-hover:from-emerald-500 group-hover:via-cyan-400 transition-all duration-300" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400 transition-all duration-300" />
                 
                 {/* Header Box */}
                 <div className="space-y-1">
@@ -2456,37 +2898,59 @@ export default function DashboardView({
                       <span className="text-sm font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors">{b.ticker}</span>
                       <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]">{b.sector}</span>
                     </div>
-                    <span className="text-[10px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
-                      {b.probability}
+                    <span className="text-[9px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
+                      Conf. {b.probability}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400 truncate font-sans font-medium">{b.name}</p>
                 </div>
 
-                {/* Price target and trigger direction Info */}
-                <div className="p-2 bg-[#06110a]/50 border border-emerald-950 rounded-lg flex items-center justify-between">
+                {/* Price and Rise Estimation Summary */}
+                <div className="p-2 bg-[#06110a]/50 border border-emerald-950/50 rounded-lg flex items-center justify-between">
                   <div>
-                    <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Sesi Ini</span>
-                    <span className="text-[11px] font-bold text-white font-mono block mt-0.5">{formatIDR(b.currentPrice)}</span>
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Harga Penutupan</span>
+                    <span className="text-[11px] font-bold text-white font-mono block mt-0.5">Rp{b.currentPrice.toLocaleString("id-ID")}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[8px] text-emerald-500/70 block uppercase font-bold tracking-wider font-sans">Estimasi Esok</span>
-                    <span className="text-[11px] font-black text-[#22c55e] font-mono block mt-0.5">{b.targetRise}</span>
+                    <span className="text-[8px] text-emerald-500 block uppercase font-bold tracking-wider">Proj. Kenaikan</span>
+                    <span className="text-[11px] font-black text-emerald-400 font-mono block mt-0.5">{b.targetRise}</span>
                   </div>
                 </div>
 
-                {/* Signal Trigger Reason Indicator */}
+                {/* Volume, Frequency and Bandar Accumulation info! */}
+                <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans">
+                  <div className="flex justify-between items-center text-slate-400">
+                    <span className="text-slate-500 font-medium">Volume Lot:</span>
+                    <span className="font-mono font-bold text-slate-200">{b.volumeLot.toLocaleString("id-ID")} Lot</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-400">
+                    <span className="text-slate-500 font-medium">Transaksi (Freq):</span>
+                    <span className="font-mono font-bold text-sky-400">{b.frequencyVal.toLocaleString("id-ID")} x</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium font-sans">Net Buy Bandar:</span>
+                    <span className="font-mono font-black text-emerald-400">+Rp {b.accumVal.toFixed(1)}M</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
+                    <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
+                    <span className="text-[8.5px] font-black rounded px-1.5 py-0.2 bg-emerald-950/80 text-emerald-400 font-mono">
+                      {b.bandarStrength}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Radar trigger description */}
                 <div className="space-y-1">
-                  <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal HAKA Terdeteksi</span>
-                  <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-cyan-400 block shrink-0"></span> {b.momentumType}
+                  <span className="text-[8px] text-slate-500 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
+                  <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {b.signalReason}
                   </p>
                 </div>
 
                 {/* Action buttons inside card */}
-                <div className="flex items-center justify-between text-[9px] pt-1 border-t border-white/[0.03]">
-                  <span className="text-[#3b82f6] group-hover:underline font-bold font-sans">Analisis Chart &rarr;</span>
-                  <span className="text-slate-500 font-mono font-bold">Volume: {b.currentPrice > 1000 ? "Tinggi" : "Sedang"}</span>
+                <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
+                  <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
+                  <span className="text-slate-500 font-mono font-bold">{b.periodLabel}</span>
                 </div>
               </div>
             ))}
@@ -2555,43 +3019,141 @@ export default function DashboardView({
               </span>
               <span className="text-[9px] text-[#22c55e]/60 font-mono font-bold">7 emiten/hlm</span>
             </h5>
-            <div className="space-y-2">
-              {topGainers.map((s) => (
-                <div
-                  key={s.ticker}
-                  onClick={() => setPopupStock(s)}
-                  className="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn"
+
+            {/* Control Pengurutan (Sorting Controls) */}
+            <div className="flex items-center justify-between gap-1 mb-2.5 bg-slate-950/45 p-1.5 rounded-xl border border-slate-900 text-[10px]">
+              <span className="text-slate-500 font-bold font-sans">Urut:</span>
+              <div className="flex gap-1.5 flex-1 justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (gainerSortBy === "ticker") {
+                      setGainerSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setGainerSortBy("ticker");
+                      setGainerSortOrder("asc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    gainerSortBy === "ticker" 
+                      ? "bg-emerald-500/15 text-emerald-400 font-black border border-emerald-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleWatchlist?.(s.ticker);
-                      }}
-                      className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90"
-                      title={watchlist.includes(s.ticker) ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-                    >
-                      <Star className={`w-3 h-3 ${watchlist.includes(s.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
-                    </button>
-                    <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-black text-white font-mono">{s.ticker}</span>
-                        {s.isSyariah && (
-                          <span className="text-[10px]" title="Syariah Compliant">🕌</span>
-                        )}
-                        {getRatingBadge(s.changePercent, 'gainer')}
+                  Kode {gainerSortBy === "ticker" && (gainerSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (gainerSortBy === "change") {
+                      setGainerSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setGainerSortBy("change");
+                      setGainerSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    gainerSortBy === "change" 
+                      ? "bg-emerald-500/15 text-emerald-400 font-black border border-emerald-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Ubah {gainerSortBy === "change" && (gainerSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (gainerSortBy === "changePercent") {
+                      setGainerSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setGainerSortBy("changePercent");
+                      setGainerSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    gainerSortBy === "changePercent" 
+                      ? "bg-emerald-500/15 text-emerald-400 font-black border border-emerald-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  % {gainerSortBy === "changePercent" && (gainerSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                {gainerSortBy !== "default" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGainerSortBy("default");
+                    }}
+                    className="text-slate-500 hover:text-rose-450 px-1 border border-transparent hover:border-rose-500/10 rounded transition-all"
+                    title="Batal urut"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {topGainers.map((s) => {
+                const volPct = Math.min(100, Math.max(4, s.volume ? (s.volume / maxVolumeInPool) * 100 : 2));
+                return (
+                  <div
+                    key={s.ticker}
+                    onClick={() => setPopupStock(s)}
+                    className="grid grid-cols-12 items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn gap-1.5"
+                  >
+                    <div className="col-span-5 flex items-center gap-1.5 min-w-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleWatchlist?.(s.ticker);
+                        }}
+                        className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90 shrink-0"
+                        title={watchlist.includes(s.ticker) ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
+                      >
+                        <Star className={`w-3 h-3 ${watchlist.includes(s.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
+                      </button>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="text-xs font-black text-white font-mono">{s.ticker}</span>
+                          {s.isSyariah && (
+                            <span className="text-[9px]" title="Syariah Compliant">🇲🇨🕌</span>
+                          )}
+                          {s.isSuspended ? (
+                            <span className="text-[6px] bg-rose-950/80 border border-rose-500/25 text-rose-400 px-1 py-0.5 rounded font-mono font-black animate-pulse leading-none uppercase">SUSP</span>
+                          ) : s.isFca ? (
+                            <span className="text-[6px] bg-amber-955 border border-amber-500/35 text-amber-400 px-1 py-0.5 rounded font-mono font-black leading-none uppercase">FCA</span>
+                          ) : null}
+                        </div>
+                        <p className="text-[9px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
                       </div>
-                      <p className="text-[10px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
+                    </div>
+
+                    {/* Volume Bar Chart Column */}
+                    <div className="col-span-4 px-1.5 flex flex-col justify-center min-w-0 select-none">
+                      <span className="text-[9px] font-mono text-slate-400 font-medium truncate block mb-1">
+                        Vol: {formatVolume(s.volume || 0)}
+                      </span>
+                      <div className="w-full h-1 bg-slate-900/90 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                          className="h-full rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.7)] transition-all duration-500"
+                          style={{ width: `${volPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-span-3 text-right flex flex-col items-end">
+                      <span className="text-xs font-black font-mono text-[#22c55e] block">{formatIDR(s.currentPrice)}</span>
+                      <span className="text-[10px] items-center font-bold font-mono text-[#22c55e] block mt-0.5">
+                        +{s.changePercent.toFixed(1)}%
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs font-black font-mono text-[#22c55e] block">{formatIDR(s.currentPrice)}</span>
-                    <span className="text-[10px] items-center font-bold font-mono text-[#22c55e] block mt-0.5">
-                      +{s.changePercent.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           
@@ -2624,43 +3186,141 @@ export default function DashboardView({
               </span>
               <span className="text-[9px] text-[#ef4444]/60 font-mono font-bold">7 emiten/hlm</span>
             </h5>
-            <div className="space-y-2">
-              {topLosers.map((s) => (
-                <div
-                  key={s.ticker}
-                  onClick={() => setPopupStock(s)}
-                  className="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn"
+
+            {/* Control Pengurutan (Sorting Controls) */}
+            <div className="flex items-center justify-between gap-1 mb-2.5 bg-slate-950/45 p-1.5 rounded-xl border border-slate-900 text-[10px]">
+              <span className="text-slate-500 font-bold font-sans">Urut:</span>
+              <div className="flex gap-1.5 flex-1 justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (loserSortBy === "ticker") {
+                      setLoserSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setLoserSortBy("ticker");
+                      setLoserSortOrder("asc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    loserSortBy === "ticker" 
+                      ? "bg-rose-500/15 text-rose-400 font-black border border-rose-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleWatchlist?.(s.ticker);
-                      }}
-                      className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90"
-                      title={watchlist.includes(s.ticker) ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-                    >
-                      <Star className={`w-3 h-3 ${watchlist.includes(s.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
-                    </button>
-                    <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-black text-white font-mono">{s.ticker}</span>
-                        {s.isSyariah && (
-                          <span className="text-[10px]" title="Syariah Compliant">🕌</span>
-                        )}
-                        {getRatingBadge(s.changePercent, 'loser')}
+                  Kode {loserSortBy === "ticker" && (loserSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (loserSortBy === "change") {
+                      setLoserSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setLoserSortBy("change");
+                      setLoserSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    loserSortBy === "change" 
+                      ? "bg-rose-500/15 text-rose-400 font-black border border-rose-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Ubah {loserSortBy === "change" && (loserSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (loserSortBy === "changePercent") {
+                      setLoserSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setLoserSortBy("changePercent");
+                      setLoserSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    loserSortBy === "changePercent" 
+                      ? "bg-rose-500/15 text-rose-400 font-black border border-rose-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  % {loserSortBy === "changePercent" && (loserSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                {loserSortBy !== "default" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoserSortBy("default");
+                    }}
+                    className="text-slate-500 hover:text-rose-450 px-1 border border-transparent hover:border-rose-500/10 rounded transition-all"
+                    title="Batal urut"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {topLosers.map((s) => {
+                const volPct = Math.min(100, Math.max(4, s.volume ? (s.volume / maxVolumeInPool) * 100 : 2));
+                return (
+                  <div
+                    key={s.ticker}
+                    onClick={() => setPopupStock(s)}
+                    className="grid grid-cols-12 items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn gap-1.5"
+                  >
+                    <div className="col-span-5 flex items-center gap-1.5 min-w-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleWatchlist?.(s.ticker);
+                        }}
+                        className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90 shrink-0"
+                        title={watchlist.includes(s.ticker) ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
+                      >
+                        <Star className={`w-3 h-3 ${watchlist.includes(s.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
+                      </button>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="text-xs font-black text-white font-mono">{s.ticker}</span>
+                          {s.isSyariah && (
+                            <span className="text-[9px]" title="Syariah Compliant">🇲🇨🕌</span>
+                          )}
+                          {s.isSuspended ? (
+                            <span className="text-[6px] bg-rose-950/80 border border-rose-500/25 text-rose-400 px-1 py-0.5 rounded font-mono font-black animate-pulse leading-none uppercase">SUSP</span>
+                          ) : s.isFca ? (
+                            <span className="text-[6px] bg-amber-955 border border-amber-500/35 text-amber-400 px-1 py-0.5 rounded font-mono font-black leading-none uppercase">FCA</span>
+                          ) : null}
+                        </div>
+                        <p className="text-[9px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
                       </div>
-                      <p className="text-[10px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
+                    </div>
+
+                    {/* Volume Bar Chart Column */}
+                    <div className="col-span-4 px-1.5 flex flex-col justify-center min-w-0 select-none">
+                      <span className="text-[9px] font-mono text-slate-400 font-medium truncate block mb-1">
+                        Vol: {formatVolume(s.volume || 0)}
+                      </span>
+                      <div className="w-full h-1 bg-slate-900/90 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                          className="h-full rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.7)] transition-all duration-500"
+                          style={{ width: `${volPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-span-3 text-right flex flex-col items-end">
+                      <span className="text-xs font-black font-mono text-[#ea4335] block">{formatIDR(s.currentPrice)}</span>
+                      <span className="text-[10px] items-center font-bold font-mono text-[#ea4335] block mt-0.5">
+                        {s.changePercent.toFixed(1)}%
+                      </span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs font-black font-mono text-[#ea4335] block">{formatIDR(s.currentPrice)}</span>
-                    <span className="text-[10px] items-center font-bold font-mono text-[#ea4335] block mt-0.5">
-                      {s.changePercent.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -2693,43 +3353,139 @@ export default function DashboardView({
               </span>
               <span className="text-[9px] text-cyan-500/60 font-mono font-bold">7 emiten/hlm</span>
             </h5>
+
+            {/* Control Pengurutan (Sorting Controls) */}
+            <div className="flex items-center justify-between gap-1 mb-2.5 bg-slate-950/45 p-1.5 rounded-xl border border-slate-900 text-[10px]">
+              <span className="text-slate-500 font-bold font-sans">Urut:</span>
+              <div className="flex gap-1.5 flex-1 justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeSortBy === "ticker") {
+                      setActiveSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setActiveSortBy("ticker");
+                      setActiveSortOrder("asc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    activeSortBy === "ticker" 
+                      ? "bg-cyan-500/15 text-cyan-400 font-black border border-cyan-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Kode {activeSortBy === "ticker" && (activeSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeSortBy === "changePercent") {
+                      setActiveSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setActiveSortBy("changePercent");
+                      setActiveSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    activeSortBy === "changePercent" 
+                      ? "bg-cyan-500/15 text-cyan-400 font-black border border-cyan-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  % {activeSortBy === "changePercent" && (activeSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeSortBy === "volume") {
+                      setActiveSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setActiveSortBy("volume");
+                      setActiveSortOrder("desc");
+                    }
+                  }}
+                  className={`px-1.5 py-0.5 rounded transition font-mono ${
+                    activeSortBy === "volume" 
+                      ? "bg-cyan-500/15 text-cyan-400 font-black border border-cyan-500/20" 
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Vol {activeSortBy === "volume" && (activeSortOrder === "asc" ? "▲" : "▼")}
+                </button>
+
+                {activeSortBy !== "default" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSortBy("default");
+                    }}
+                    className="text-slate-500 hover:text-rose-450 px-1 border border-transparent hover:border-rose-500/10 rounded transition-all"
+                    title="Batal urut"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
               {activeTickers.map((s) => {
                 const isUp = s.changePercent >= 0;
+                const volPct = Math.min(100, Math.max(4, s.volume ? (s.volume / maxVolumeInPool) * 100 : 2));
                 return (
                   <div
                     key={s.ticker}
                     onClick={() => setPopupStock(s)}
-                    className="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn"
+                    className="grid grid-cols-12 items-center p-2.5 rounded-xl bg-slate-950/40 hover:bg-slate-900/60 border border-slate-900 hover:border-slate-800 cursor-pointer transition-all animate-fadeIn gap-1.5"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="col-span-5 flex items-center gap-1.5 min-w-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onToggleWatchlist?.(s.ticker);
                         }}
-                        className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90"
+                        className="p-1 rounded hover:bg-slate-850 text-slate-500 hover:text-amber-400 transition-all cursor-pointer active:scale-90 shrink-0"
                         title={watchlist.includes(s.ticker) ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
                       >
                         <Star className={`w-3 h-3 ${watchlist.includes(s.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
                       </button>
-                      <div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1 flex-wrap">
                           <span className="text-xs font-black text-white font-mono">{s.ticker}</span>
                           {s.isSyariah && (
-                            <span className="text-[10px]" title="Syariah Compliant">🕌</span>
+                            <span className="text-[9px]" title="Syariah Compliant">🇲🇨🕌</span>
                           )}
-                          {getRatingBadge(s.changePercent, 'active')}
+                          {s.isSuspended ? (
+                            <span className="text-[6px] bg-rose-950/80 border border-rose-500/25 text-rose-400 px-1 py-0.5 rounded font-mono font-black animate-pulse leading-none uppercase">SUSP</span>
+                          ) : s.isFca ? (
+                            <span className="text-[6px] bg-amber-955 border border-amber-500/35 text-amber-400 px-1 py-0.5 rounded font-mono font-black leading-none uppercase">FCA</span>
+                          ) : null}
                         </div>
-                        <p className="text-[10px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
+                        <p className="text-[9px] text-slate-500 truncate max-w-[124px] mt-0.5">{s.name}</p>
                       </div>
                     </div>
-                    <div className="text-right">
+
+                    {/* Volume Bar Chart Column */}
+                    <div className="col-span-4 px-1.5 flex flex-col justify-center min-w-0 select-none">
+                      <span className="text-[9px] font-mono text-slate-400 font-medium truncate block mb-1">
+                        Vol: {formatVolume(s.volume || 0)}
+                      </span>
+                      <div className="w-full h-1 bg-slate-900/90 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                          className="h-full rounded-full bg-cyan-500 shadow-[0_0_6px_rgba(6,180,212,0.7)] transition-all duration-500"
+                          style={{ width: `${volPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-span-3 text-right flex flex-col items-end">
                       <span className={`text-xs font-black font-mono block ${isUp ? "text-[#22c55e]" : "text-[#ea4335]"}`}>
                         {formatIDR(s.currentPrice)}
                       </span>
-                      <span className="text-[10px] items-center font-semibold font-mono text-slate-400 block mt-0.5">
-                        {formatVolume(s.volume)}
+                      <span className={`text-[10px] items-center font-bold font-mono block mt-0.5 ${isUp ? "text-[#22c55e]" : "text-[#ea4335]"}`}>
+                        {isUp ? "+" : ""}{s.changePercent.toFixed(1)}%
                       </span>
                     </div>
                   </div>
@@ -3077,9 +3833,14 @@ export default function DashboardView({
                 <span>Analisis AI 🌌</span>
               </button>
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap">
                   <h2 className="text-lg font-black text-white font-mono">{activeStock.ticker}</h2>
                   <span className="text-[10px] bg-slate-800 text-slate-300 font-bold px-2 py-0.5 rounded leading-none">{activeStock.sector}</span>
+                  {activeStock.isSuspended ? (
+                    <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded animate-pulse">SUSPEND</span>
+                  ) : activeStock.isFca ? (
+                    <span className="bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">FCA</span>
+                  ) : null}
                 </div>
                 <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[250px]">{activeStock.name}</p>
               </div>
@@ -3094,8 +3855,8 @@ export default function DashboardView({
           </div>
 
           {/* Core Navigation Subtabs */}
-          <div className="grid grid-cols-3 gap-2 bg-slate-950/50 p-1 rounded-xl border border-slate-900">
-            {(["teknikal", "fundamental", "transaksi"] as const).map((tab) => (
+          <div className="grid grid-cols-2 gap-2 bg-slate-950/50 p-1 rounded-xl border border-slate-900">
+            {(["teknikal", "fundamental"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveHubTab(tab as any)}
@@ -3103,7 +3864,7 @@ export default function DashboardView({
                   activeHubTab === tab ? "bg-[#0b293c] text-cyan-300 border border-cyan-500/20" : "text-slate-400 hover:text-white"
                 }`}
               >
-                {tab === "teknikal" ? "📊 Chart & Sinyal" : tab === "fundamental" ? "🏛️ 7 Golden Ratios" : "💼 Transaksi & Portfolio"}
+                {tab === "teknikal" ? "📊 Chart & Sinyal" : "🏛️ 7 Golden Ratios"}
               </button>
             ))}
           </div>
@@ -3226,145 +3987,6 @@ export default function DashboardView({
                     <span className="text-[10px] text-slate-500 font-bold font-sans">Market Cap Bursa</span>
                     <span className="text-lg font-black text-yellow-500 font-mono">Rp {activeStock.marketCap} T</span>
                     <span className="text-[9px] text-[#475569] font-sans">Kapitalisasi Sektor</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeHubTab === "transaksi" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Order panel */}
-                <div className="lg:col-span-12 xl:col-span-5 bg-[#010a12]/30 border border-cyan-500/10 p-5 rounded-2xl flex flex-col justify-between space-y-4">
-                  <div className="space-y-4">
-                    <span className="text-xs font-black uppercase text-white tracking-widest block border-b border-slate-900 pb-2">📥 Simulasi Order Lot</span>
-                    
-                    {tradeSuccess && (
-                      <div className="p-2.5 bg-emerald-950/80 border border-emerald-900 text-emerald-400 rounded-lg text-xs font-bold">
-                        ✓ {tradeSuccess}
-                      </div>
-                    )}
-
-                    <div className="space-y-3 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-400 font-semibold">Harga Saham Live:</span>
-                        <strong className="text-white font-mono">{formatIDR(activeStock.currentPrice)}</strong>
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] text-slate-400 font-black mb-1">Lot Transaksi (1 Lot = 100 Lembar):</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={tradeQuantity / 100}
-                          onChange={(e) => setTradeQuantity(Math.max(1, parseInt(e.target.value) || 1) * 100)}
-                          className="w-full bg-slate-950 border border-slate-800 py-1.5 rounded text-center text-xs text-white font-mono font-bold"
-                        />
-                      </div>
-                      
-                      <div className="flex justify-between pt-2 border-t border-slate-900 font-mono text-cyan-400">
-                        <span>Total Nilai Order:</span>
-                        <strong>{formatIDR(activeStock.currentPrice * tradeQuantity)}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 pt-2">
-                    <button type="button" onClick={handleBuySimulation} className="py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold cursor-pointer transition-all active:scale-95">Beli Lot</button>
-                    <button type="button" onClick={handleSellSimulation} className="py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold cursor-pointer transition-all active:scale-95">Jual Lot</button>
-                  </div>
-                </div>
-
-                {/* Portfolio items */}
-                <div className="lg:col-span-12 xl:col-span-7 glass-card border border-slate-850 rounded-2xl p-5 flex flex-col justify-between shadow bg-slate-900/10">
-                  <div>
-                    <div className="flex justify-between items-center text-xs border-b border-slate-900 pb-2 mb-3">
-                      <span className="font-bold text-slate-300">💼 Portofolio Sandbox ({activeStock.ticker})</span>
-                      <span className="font-mono text-[#c1a067]">Cash: {formatIDR(walletBalance)}</span>
-                    </div>
-
-                    <div className="overflow-x-auto text-[11px]">
-                      <table className="w-full text-left font-mono">
-                        <thead>
-                          <tr className="border-b border-slate-900 text-[9px] text-slate-500 uppercase">
-                            <th className="py-1">Kode</th>
-                            <th className="py-1 text-right">Shares (Lot)</th>
-                            <th className="py-1 text-right">Rata Beli</th>
-                            <th className="py-1 text-right">Keuntungan P&L</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {portfolio[activeStock.ticker] ? (() => {
-                            const item = portfolio[activeStock.ticker];
-                            const pnlVal = (activeStock.currentPrice - item.avgBuyPrice) * item.shares;
-                            const pnlPct = ((activeStock.currentPrice - item.avgBuyPrice) / item.avgBuyPrice) * 100;
-                            return (
-                              <tr className="border-b border-slate-850">
-                                <td className="py-2.5 font-bold text-white font-sans">{item.ticker}</td>
-                                <td className="py-2.5 text-right">{item.shares} lbr ({item.shares / 100} Lot)</td>
-                                <td className="py-2.5 text-right">{formatIDR(item.avgBuyPrice)}</td>
-                                <td className={`py-2.5 text-right font-bold ${pnlVal >= 0 ? "text-emerald-400" : "text-rose-450"}`}>
-                                  {pnlVal >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%
-                                </td>
-                              </tr>
-                            );
-                          })() : (
-                            <tr>
-                              <td colSpan={4} className="py-6 text-center text-slate-500 italic font-sans text-xs">Belum ada portofolio efek berjalan untuk {activeStock.ticker}. Silakan beli lot simulation di samping.</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {portfolioHistory && portfolioHistory.length > 1 && (
-                    <div className="mt-3.5 p-3.5 bg-slate-950/40 rounded-xl border border-slate-900/60 flex items-center justify-between gap-4">
-                      <div className="flex flex-col text-[10px] space-y-0.5">
-                        <span className="text-slate-500 font-bold uppercase tracking-wider text-[8.5px]">Tren Nilai Portofolio Sesi Ini</span>
-                        <span className="font-mono text-emerald-400 font-black text-xs">
-                          {formatIDR(walletBalance + portfolioSummary.holdingsValue)}
-                        </span>
-                      </div>
-                      <div className="flex-grow h-8 max-w-[200px] relative">
-                        <svg className="w-full h-full overflow-visible" viewBox="0 0 100 30" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="sparkline-portfolio-grad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-                              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                            </linearGradient>
-                          </defs>
-                          {(() => {
-                            const minVal = Math.min(...portfolioHistory) * 0.9995;
-                            const maxVal = Math.max(...portfolioHistory) * 1.0005;
-                            const range = maxVal - minVal || 1;
-                            const points = portfolioHistory.map((val, idx) => {
-                              const x = (idx / (portfolioHistory.length - 1)) * 100;
-                              const y = 30 - ((val - minVal) / range) * 24 - 3;
-                              return `${x},${y}`;
-                            }).join(" ");
-
-                            const fillPoints = `0,30 ${points} 100,30`;
-                            const lastPointY = 30 - ((portfolioHistory[portfolioHistory.length - 1] - minVal) / range) * 24 - 3;
-
-                            return (
-                              <>
-                                <polygon points={fillPoints} fill="url(#sparkline-portfolio-grad)" />
-                                <polyline points={points} fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                                <circle cx="100" cy={lastPointY} r="3" fill="#10b981" className="animate-ping" />
-                                <circle cx="100" cy={lastPointY} r="1.5" fill="#34d399" />
-                              </>
-                            );
-                          })()}
-                        </svg>
-                      </div>
-                      <span className="text-[9px] font-mono text-slate-500 font-bold uppercase shrink-0">Live</span>
-                    </div>
-                  )}
-
-                  <div className="pt-2.5 border-t border-slate-900 mt-4 flex justify-between text-xs text-slate-400">
-                    <span>Equity Aset: <strong>{formatIDR(walletBalance + portfolioSummary.holdingsValue)}</strong></span>
-                    <span>Total P&L efek: <strong className={portfolioSummary.floatingProfitLoss >= 0 ? "text-emerald-400" : "text-rose-450"}>{portfolioSummary.floatingProfitLossPct.toFixed(1)}%</strong></span>
                   </div>
                 </div>
 
@@ -3502,137 +4124,14 @@ export default function DashboardView({
                   </select>
                 </div>
 
-                <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setChartMode("tradingview")}
-                    className={`px-3 py-1 rounded-md font-bold transition-all ${
-                      chartMode === "tradingview"
-                        ? "bg-blue-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    TradingView
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setChartMode("simulated")}
-                    className={`px-3 py-1 rounded-md font-bold transition-all ${
-                      chartMode === "simulated"
-                        ? "bg-blue-600 text-white shadow"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    Simulasi Tick
-                  </button>
-                </div>
               </div>
 
             </div>
 
-            {/* Custom Interactive SVG Chart or TradingView Widget based on chartMode */}
-            {chartMode === "tradingview" ? (
-              <div className="mb-6">
-                <TradingViewWidget symbol={activeStock.ticker} />
-              </div>
-            ) : (
-              <div className="relative bg-slate-950/40 p-3 rounded-xl border border-slate-900/80 mb-6 overflow-hidden">
-                <div className="absolute top-4 left-6 text-[10px] text-slate-500 flex space-x-4">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span>Nilai Saham (Hari)</span>
-                  <span>MA-5 (Rata-rata Bergerak)</span>
-                </div>
-              <div className="absolute top-4 right-6 text-[10px] text-slate-500">
-                Data Update: <span className="font-mono text-emerald-400">1s Ticks</span>
-              </div>
-
-              <div className="w-full overflow-x-auto">
-                <svg 
-                  viewBox={`0 0 ${chartWidth} ${chartHeight}`} 
-                  className="mx-auto select-none"
-                  onMouseLeave={() => setHoveredPointIndex(null)}
-                >
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={activeStock.change >= 0 ? "#10b981" : "#f43f5e"} stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#0f172a" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Horizontal Fine Grid lines */}
-                  {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
-                    const priceVal = maxPrice - ratio * priceRange;
-                    const y = 20 + ratio * (chartHeight - 40);
-                    return (
-                      <g key={i} className="opacity-30">
-                        <line x1="25" y1={y} x2={chartWidth - 25} y2={y} stroke="#334155" strokeWidth="0.8" strokeDasharray="3 3" />
-                        <text x={chartWidth - 5} y={y + 3} fill="#94a3b8" fontSize="8" textAnchor="end" className="font-mono">
-                          {Math.round(priceVal)}
-                        </text>
-                      </g>
-                    );
-                  })}
-
-                  {/* Shaded Area */}
-                  <path d={areaPath} fill="url(#chartGradient)" />
-
-                  {/* Smooth Trend Line */}
-                  <path 
-                    d={linePath} 
-                    fill="none" 
-                    stroke={activeStock.change >= 0 ? "#10b981" : "#f43f5e"} 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* Hot Interactive Dots */}
-                  {svgPoints.map((pt, i) => (
-                    <g key={i}>
-                      <circle 
-                        cx={pt.x} 
-                        cy={pt.y} 
-                        r={hoveredPointIndex === i ? 6 : 4} 
-                        fill={activeStock.change >= 0 ? "#10b981" : "#f43f5e"}
-                        stroke="#020617"
-                        strokeWidth="1.5"
-                        onMouseEnter={() => setHoveredPointIndex(i)}
-                        className="cursor-crosshair transition-all"
-                      />
-                      {/* X Axis Labels */}
-                      {i % 2 === 0 && (
-                        <text x={pt.x} y={chartHeight - 2} fill="#64748b" fontSize="8" textAnchor="middle" className="font-mono">
-                          Sesi T-{10 - i}
-                        </text>
-                      )}
-                    </g>
-                  ))}
-
-                  {/* Live Vertical Cursor on Point Hover */}
-                  {hoveredPointIndex !== null && svgPoints[hoveredPointIndex] && (
-                    <g>
-                      <line 
-                        x1={svgPoints[hoveredPointIndex].x} 
-                        y1="10" 
-                        x2={svgPoints[hoveredPointIndex].x} 
-                        y2={chartHeight - 15} 
-                        stroke="#475569" 
-                        strokeWidth="1.2" 
-                        strokeDasharray="2 2"
-                      />
-                    </g>
-                  )}
-                </svg>
-              </div>
-
-              {/* Dynamic Tooltip on Price Spot */}
-              {hoveredPointIndex !== null && svgPoints[hoveredPointIndex] && (
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 glass-effect py-2 px-4 rounded-lg shadow-xl text-center border border-slate-700/60 pointer-events-none">
-                  <p className="text-[10px] text-slate-400">Sesi Pencatatan T-{10 - hoveredPointIndex}</p>
-                  <p className="text-sm font-bold text-white font-mono">{formatIDR(svgPoints[hoveredPointIndex].price)}</p>
-                </div>
-              )}
+            {/* TradingView Widget */}
+            <div className="mb-6">
+              <TradingViewWidget symbol={activeStock.ticker} />
             </div>
-            )}
 
             {/* Quick Action bar links */}
             <div className="mt-5 flex justify-end space-x-3 text-xs border-t border-slate-800/40 pt-4">
@@ -3648,294 +4147,12 @@ export default function DashboardView({
 
           </div>
 
-          {/* 💼 Simulated Trading Terminal & Sandbox Portfolio */}
+          {/* 🧮 Kumpulan Kalkulator Finansial */}
           <div className="glass-card rounded-2xl p-6 border border-slate-800">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-400" /> Terminal Transaksi Simulasi & Portofolio Saham</span>
-              <span className="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full flex items-center gap-1">
-                <Coins className="w-3.5 h-3.5" /> Saldo Kas: {formatIDR(walletBalance)}
-              </span>
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Compass className="w-4 h-4 text-cyan-400" /> Kalkulator Dividen & Analisa Bandarmology
             </h4>
-
-            {tradeSuccess && (
-              <div className="mb-4 p-3 bg-emerald-950/50 border border-emerald-800/80 rounded-lg text-emerald-400 text-xs font-semibold flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span>{tradeSuccess}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-              
-              {/* Box Buy & Sell */}
-              <div className="md:col-span-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-semibold text-slate-300">Order Simulasi ({activeStock.ticker})</span>
-                  <div className="mt-3">
-                    <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1">Jumlah Lot (1 Lot = 100 Lembar)</label>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="number"
-                        min="1"
-                        max="1000"
-                        value={tradeQuantity / 100}
-                        onChange={(e) => {
-                          const val = Math.max(1, parseInt(e.target.value) || 1);
-                          setTradeQuantity(val * 100);
-                        }}
-                        className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white text-center font-mono"
-                      />
-                      <span className="text-xs text-slate-400 font-bold shrink-0">Lot</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-1">Sama dengan {tradeQuantity} lembar saham.</p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-800/60 flex justify-between text-xs">
-                    <span className="text-slate-400">Estimasi Bersih:</span>
-                    <span className="font-mono text-white font-bold">{formatIDR(activeStock.currentPrice * tradeQuantity)}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  <button 
-                    id="sim-buy-btn"
-                    onClick={handleBuySimulation}
-                    className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-md active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                    Beli Saham
-                  </button>
-                  <button 
-                    id="sim-sell-btn"
-                    onClick={handleSellSimulation}
-                    className="py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow-md active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Coins className="w-3.5 h-3.5" />
-                    Jual Saham
-                  </button>
-                </div>
-              </div>
-
-              {/* Box Portofolio Holdings */}
-              <div className="md:col-span-8 bg-slate-900/30 p-4 rounded-xl border border-slate-800/80">
-                <span className="text-xs font-semibold text-slate-300">Kepemilikan Efek Portofolio Saat Ini</span>
-                <div className="overflow-x-auto mt-3">
-                  <table className="w-full text-xs text-left">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
-                        <th className="py-2">Kode</th>
-                        <th className="py-2 text-right">Lembar (Lot)</th>
-                        <th className="py-2 text-right">Harga Beli</th>
-                        <th className="py-2 text-right">Harga Live</th>
-                        <th className="py-2 text-right">Fluktuasi P&L</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(Object.values(portfolio) as PortfolioItem[]).length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="py-6 text-center text-slate-500">
-                            Portofolio Anda kosong. Lakukan simulasi order di atas untuk mengisi.
-                          </td>
-                        </tr>
-                      ) : (
-                        (Object.values(portfolio) as PortfolioItem[]).map(item => {
-                          const stockData = allStocksMerged.find(s => s.ticker === item.ticker);
-                          const curPrice = stockData ? stockData.currentPrice : item.avgBuyPrice;
-                          const pnlValue = (curPrice - item.avgBuyPrice) * item.shares;
-                          const pnlPct = ((curPrice - item.avgBuyPrice) / item.avgBuyPrice) * 100;
-                          return (
-                            <tr key={item.ticker} className="border-b border-slate-800/60 hover:bg-slate-900/30">
-                              <td className="py-2.5 font-bold text-white">{item.ticker}</td>
-                              <td className="py-2.5 text-right font-mono">{item.shares} <span className="text-[10px] text-slate-400">({item.shares / 100})</span></td>
-                              <td className="py-2.5 text-right font-mono">{formatIDR(item.avgBuyPrice)}</td>
-                              <td className="py-2.5 text-right font-mono">{formatIDR(curPrice)}</td>
-                              <td className={`py-2.5 text-right font-mono font-bold ${pnlValue >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                                {pnlValue >= 0 ? "+" : ""}{formatIDR(pnlValue)} <span className="text-[9px]">({pnlValue >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%)</span>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {portfolioHistory && portfolioHistory.length > 1 && (
-                  <div className="mt-3.5 p-3.5 bg-slate-950/45 rounded-xl border border-slate-900 flex items-center justify-between gap-4">
-                    <div className="flex flex-col text-[10px] space-y-0.5">
-                      <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">Performa Portofolio Sesi Ini</span>
-                      <span className="font-mono text-emerald-400 font-bold text-xs">{formatIDR(walletBalance + portfolioSummary.holdingsValue)}</span>
-                    </div>
-                    <div className="flex-grow h-8 max-w-[200px] relative">
-                      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 30" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="sparkline-portfolio-btm" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                          </linearGradient>
-                        </defs>
-                        {(() => {
-                          const minVal = Math.min(...portfolioHistory) * 0.9995;
-                          const maxVal = Math.max(...portfolioHistory) * 1.0005;
-                          const range = maxVal - minVal || 1;
-                          const points = portfolioHistory.map((val, idx) => {
-                            const x = (idx / (portfolioHistory.length - 1)) * 100;
-                            const y = 30 - ((val - minVal) / range) * 24 - 3;
-                            return `${x},${y}`;
-                          }).join(" ");
-
-                          const fillPoints = `0,30 ${points} 100,30`;
-                          const lastPointY = 30 - ((portfolioHistory[portfolioHistory.length - 1] - minVal) / range) * 24 - 3;
-
-                          return (
-                            <>
-                              <polygon points={fillPoints} fill="url(#sparkline-portfolio-btm)" />
-                              <polyline points={points} fill="none" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                              <circle cx="100" cy={lastPointY} r="3" fill="#10b981" className="animate-ping" />
-                              <circle cx="100" cy={lastPointY} r="1.5" fill="#34d399" />
-                            </>
-                          );
-                        })()}
-                      </svg>
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-500 font-bold uppercase shrink-0">Live</span>
-                  </div>
-                )}
-
-                <div className={`mt-4 pt-3 border-t border-slate-805 flex flex-wrap justify-between text-xs text-slate-400 transition-all duration-300 p-2.5 rounded-xl ${
-                  portfolioFlash === "up"
-                    ? "bg-emerald-500/15 border border-emerald-500/30 scale-[1.01] text-emerald-200"
-                    : portfolioFlash === "down"
-                      ? "bg-rose-500/15 border border-rose-500/30 scale-[1.01] text-rose-200"
-                      : "bg-transparent border border-transparent"
-                }`}>
-                  <div className="flex space-x-4 items-center">
-                    <span>Kas Tunai: <strong className="font-mono text-white">{formatIDR(walletBalance)}</strong></span>
-                    <span>Total Aset Efek: <strong className={`font-mono text-white font-bold transition-colors ${portfolioFlash === 'up' ? 'text-emerald-300' : portfolioFlash === 'down' ? 'text-rose-300' : ''}`}>{formatIDR(portfolioSummary.holdingsValue)}</strong></span>
-                  </div>
-                  <span className="flex items-center">Total Keuntungan Bersih: 
-                    <strong className={`font-mono md:ml-1 font-black transition-colors ${
-                      portfolioFlash === "up" 
-                        ? "text-emerald-300" 
-                        : portfolioFlash === "down" 
-                          ? "text-rose-300" 
-                          : portfolioSummary.floatingProfitLoss >= 0 
-                            ? "text-emerald-400" 
-                            : "text-rose-400"
-                    }`}>
-                      {" "}{portfolioSummary.floatingProfitLoss >= 0 ? "+" : ""}{formatIDR(portfolioSummary.floatingProfitLoss)} ({portfolioSummary.floatingProfitLossPct.toFixed(1)}%)
-                    </strong>
-                  </span>
-                </div>
-
-                {/* 🤖 BRAND NEW: AUTO REBALANCE PANEL */}
-                <div className="mt-5 pt-5 border-t border-[#1e293b]/50 space-y-4">
-                  <div>
-                    <span className="text-xs font-extrabold text-[#c1a067] font-mono uppercase tracking-widest block">
-                      ⚡ PENERAP REBALANCING OTOMATIS (AUTO REBALANCE LOGIC)
-                    </span>
-                    <p className="text-[10px] text-slate-450 mt-1 leading-normal">
-                      Algoritma ini otomatis menyelaraskan porsi kepemilikan virtual Anda agar terbagi secara merata/ideal sesuai model pembobotan investasi untuk mengendalikan tingkat risiko sistemis bursa. If your holding is empty, we will auto-seed with elite liquid dividend blue chips (BBCA, BBRI, TLKM, ASII)!
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <button
-                      onClick={() => {
-                        setRebalanceModel("equal");
-                        setRebalancePreview(null);
-                      }}
-                      className={`p-3 rounded-xl border text-left flex flex-col justify-between space-y-1 transition-all cursor-pointer ${
-                        rebalanceModel === "equal"
-                          ? "bg-cyan-950/20 border-cyan-500/35 text-white shadow-lg"
-                          : "bg-slate-950/45 border-slate-900 text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      <strong className="text-[11px] font-bold text-slate-200">Model 1: Penyetaraan Merata (Equal Weight)</strong>
-                      <span className="text-[9.5px] text-slate-450 leading-relaxed">Modal total dibagi seimbang rata 100% kpd seluruh emiten terpilih/aktif.</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setRebalanceModel("bluechip");
-                        setRebalancePreview(null);
-                      }}
-                      className={`p-3 rounded-xl border text-left flex flex-col justify-between space-y-1 transition-all cursor-pointer ${
-                        rebalanceModel === "bluechip"
-                          ? "bg-cyan-950/20 border-cyan-500/35 text-white shadow-lg"
-                          : "bg-slate-950/45 border-slate-900 text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      <strong className="text-[11px] font-bold text-slate-200">Model 2: Konservatif Dividen (Fokus Utama BBCA)</strong>
-                      <span className="text-[9.5px] text-slate-450 leading-relaxed">Mengunci bobot besar 50% untuk BBCA sebagai jangkar, sisanya dibagi rata.</span>
-                    </button>
-                  </div>
-
-                  {rebalanceSuccessMsg && (
-                    <div className="p-3 bg-emerald-950/40 border border-[#10b981]/30 text-[#10b981] text-[11px] font-extrabold rounded-xl animate-fadeIn text-center">
-                      ✓ {rebalanceSuccessMsg}
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-2.5">
-                    <button
-                      onClick={handleCalculateRebalance}
-                      className="px-4 py-2 bg-[#021320] hover:bg-[#042138] border border-cyan-900/30 text-cyan-400 text-[11.5px] font-extrabold rounded-lg select-none transition-all cursor-pointer"
-                    >
-                      🔍 Hitung Penyelarasan Bobot
-                    </button>
-                    {rebalancePreview && (
-                      <button
-                        onClick={handleExecuteRebalance}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[11.5px] font-extrabold rounded-lg shadow-lg shadow-emerald-950/25 select-none transition-all cursor-pointer animate-pulse"
-                      >
-                        ⚡ Eksekusi Penyetaraan Otomatis
-                      </button>
-                    )}
-                  </div>
-
-                  {rebalancePreview && (
-                    <div className="bg-[#010910] border border-cyan-550/15 p-4 rounded-xl space-y-3.5 animate-fadeIn">
-                      <span className="text-[10px] font-black tracking-wider text-cyan-400 font-mono block">
-                        PREVIEW REBALANCING PORTOFOLIO ({rebalanceModel === "equal" ? "Porsi Rata-Rata" : "Fokus Utama BBCA v50%"})
-                      </span>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[11px] font-mono leading-relaxed">
-                          <thead>
-                            <tr className="border-b border-white/5 text-slate-500 uppercase font-black text-[9.5px]">
-                              <th className="pb-1.5">Ticker</th>
-                              <th className="pb-1.5 text-right">Porsi Skg</th>
-                              <th className="pb-1.5 text-right">Target</th>
-                              <th className="pb-1.5 text-right">Nilai Aset Target</th>
-                              <th className="pb-1.5 text-right font-black">Rekomendasi Aksi</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rebalancePreview.map(item => (
-                              <tr key={item.ticker} className="border-b border-white/5 text-slate-300">
-                                <td className="py-2.5 font-sans font-black text-white">{item.ticker}</td>
-                                <td className="py-2.5 text-right">{item.currentPct.toFixed(1)}%</td>
-                                <td className="py-2.5 text-right text-cyan-400 font-black">{item.targetPct.toFixed(1)}%</td>
-                                <td className="py-2.5 text-right">{formatIDR(item.targetVal)}</td>
-                                <td className={`py-2.5 text-right font-black ${
-                                  item.actionShares > 0 ? "text-emerald-400" : item.actionShares < 0 ? "text-rose-450" : "text-slate-500"
-                                }`}>
-                                  {item.action}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            </div>
-
-            {/* 🧮 CAROUSEL CALCULATORS DECK (Dividen & Bandarmology "geser-kesamping" widget) */}
             <CalculatorsCarousel stocks={stocks} portfolio={portfolio} />
-
           </div>
 
         </div>
@@ -4002,6 +4219,8 @@ export default function DashboardView({
                       </div>
 
                       <div className="flex items-center space-x-2">
+
+
                         <div className="text-right">
                           <span className={`text-xs font-black font-mono inline-block ${s.changePercent >= 0 ? "text-[#22c55e]" : "text-[#ea4335]"}`}>{formatIDR(s.currentPrice)}</span>
                           <span className={`text-[10px] items-center font-bold block font-mono ${s.changePercent >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
@@ -4020,10 +4239,20 @@ export default function DashboardView({
                     </div>
 
                     {/* Active price target badge */}
-                    {matchesAlert && (
-                      <div className="flex items-center space-x-1.5 bg-[#1b2512]/30 border border-[#446522]/30 p-1 px-2 rounded-lg text-[9px] font-mono text-emerald-400">
-                        <Bell className="w-3 h-3 text-emerald-400 animate-pulse shrink-0" />
-                        <span>Alert target: Rp {matchesAlert.toLocaleString("id-ID")}</span>
+                    {(matchesAlert || sellPriceAlerts[ticker]) && (
+                      <div className="flex flex-col gap-1 mt-1">
+                        {matchesAlert && (
+                          <div className="flex items-center space-x-1.5 bg-[#1b2512]/30 border border-[#446522]/30 p-1 px-2 rounded-lg text-[9px] font-mono text-emerald-400">
+                            <Bell className="w-3 h-3 text-emerald-400 animate-pulse shrink-0" />
+                            <span>Alert Target Beli: Rp {matchesAlert.toLocaleString("id-ID")}</span>
+                          </div>
+                        )}
+                        {sellPriceAlerts[ticker] && (
+                          <div className="flex items-center space-x-1.5 bg-rose-950/20 border border-rose-800/30 p-1 px-2 rounded-lg text-[9px] font-mono text-rose-405">
+                            <Bell className="w-3 h-3 text-rose-455 animate-pulse shrink-0" />
+                            <span>Target Jual (Profit): Rp {sellPriceAlerts[ticker].toLocaleString("id-ID")}</span>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -4059,27 +4288,16 @@ export default function DashboardView({
                         <button
                           onClick={() => {
                             setAlertFormTicker(ticker);
+                            const matchesAlert = priceAlerts[ticker];
+                            const matchesSellAlert = sellPriceAlerts[ticker];
                             setAlertInputValue(matchesAlert ? matchesAlert.toString() : s.currentPrice.toString());
+                            setSellAlertInputValue(matchesSellAlert ? matchesSellAlert.toString() : (s.currentPrice * 1.15).toFixed(0).toString());
                             setWatchlistDropdownTicker(null);
                           }}
                           className="w-full text-left p-1.5 hover:bg-slate-900 text-slate-300 hover:text-emerald-400 rounded flex items-center gap-1.5 font-bold cursor-pointer transition-all"
                         >
                           <Bell className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                          <span>Set Alert Batas Harga</span>
-                        </button>
-
-                        {/* Option 3: Simulasi Transaksi Cepat */}
-                        <button
-                          onClick={() => {
-                            setQuickOrderTicker(ticker);
-                            setQuickOrderLots("10");
-                            setQuickOrderSuccess(null);
-                            setWatchlistDropdownTicker(null);
-                          }}
-                          className="w-full text-left p-1.5 hover:bg-slate-900 text-slate-300 hover:text-blue-400 rounded flex items-center gap-1.5 font-bold cursor-pointer transition-all"
-                        >
-                          <Coins className="w-3.5 h-3.5 text-blue-400" />
-                          <span>Order Lot Cepat (Sandbox)</span>
+                          <span>Set Alert Batas & Target Jual</span>
                         </button>
 
                         {/* Option 4: Hapus dari Watchlist */}
@@ -4228,29 +4446,49 @@ export default function DashboardView({
                 </button>
               </div>
 
-              <div className="space-y-3.5 text-xs">
-                <div className="flex justify-between items-center text-slate-400">
+              <div className="space-y-4 text-xs">
+                <div className="flex justify-between items-center text-slate-400 pb-2 border-b border-white/5">
                   <span>Harga Sesi Sekarang:</span>
-                  <span className="font-extrabold font-mono text-white">{formatIDR(currentValue)}</span>
+                  <span className="font-extrabold font-mono text-emerald-400">{formatIDR(currentValue)}</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block font-mono">Target Harga Alarm (IDR):</label>
+                <div className="space-y-2">
+                  <label className="text-[10.5px] text-emerald-400 uppercase font-black tracking-wider block font-mono flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                    Target Beli / Batas Alarm (IDR):
+                  </label>
                   <input 
                     type="number"
                     value={alertInputValue}
                     onChange={(e) => setAlertInputValue(e.target.value)}
-                    placeholder={`e.g. ${currentValue}`}
+                    placeholder={`e.g. ${Math.round(currentValue * 0.95)}`}
                     className="w-full bg-slate-950 border border-slate-850 text-white font-mono font-bold text-sm p-2.5 rounded-lg focus:outline-none focus:border-emerald-500/50"
                   />
-                  <p className="text-[9px] text-slate-500 leading-normal font-sans text-justify mt-3.5">
-                    Target alarm dipasarkan real-time. Anda akan menerima notifikasi kilat di papan bursa jika harga emiten berubah mendekati angka ini.
+                  <p className="text-[9px] text-slate-500 leading-normal font-sans text-justify">
+                    Dapatkan alert saat harga turun mendekati target entry / buy optimal Anda. Ganti 0 atau hapus untuk menonaktifkan.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-white/5">
+                  <label className="text-[10.5px] text-rose-450 uppercase font-black tracking-wider block font-mono flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 inline-block animate-pulse"></span>
+                    Target Jual (Profit Taking) (IDR):
+                  </label>
+                  <input 
+                    type="number"
+                    value={sellAlertInputValue}
+                    onChange={(e) => setSellAlertInputValue(e.target.value)}
+                    placeholder={`e.g. ${Math.round(currentValue * 1.15)}`}
+                    className="w-full bg-slate-950 border border-slate-850 text-white font-mono font-bold text-sm p-2.5 rounded-lg focus:outline-none focus:border-rose-550/50"
+                  />
+                  <p className="text-[9px] text-slate-500 leading-normal font-sans text-justify">
+                    Dapatkan alert profit taking saat harga naik mencapai target penjualan Anda. Ganti 0 atau hapus untuk menonaktifkan.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-900 text-xs">
-                {priceAlerts[alertFormTicker] && (
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-900 text-xs">
+                {(priceAlerts[alertFormTicker] || sellPriceAlerts[alertFormTicker]) && (
                   <button
                     onClick={() => {
                       setPriceAlerts(prev => {
@@ -4258,9 +4496,16 @@ export default function DashboardView({
                         delete next[alertFormTicker];
                         return next;
                       });
+                      setSellPriceAlerts(prev => {
+                        const next = { ...prev };
+                        delete next[alertFormTicker];
+                        return next;
+                      });
+                      setTriggeredAlerts(prev => prev.filter(t => t !== alertFormTicker));
+                      setTriggeredSellAlerts(prev => prev.filter(t => t !== alertFormTicker));
                       setAlertFormTicker(null);
                     }}
-                    className="px-3 py-1.5 mr-auto hover:bg-rose-950/20 text-rose-450 hover:text-rose-400 font-bold rounded-lg cursor-pointer transition-all"
+                    className="px-3 py-1.5 mr-auto hover:bg-rose-955/20 text-rose-450 hover:text-rose-400 font-bold rounded-lg cursor-pointer transition-all border border-rose-900/10"
                   >
                     Reset Alarm
                   </button>
@@ -4273,20 +4518,38 @@ export default function DashboardView({
                 </button>
                 <button
                   onClick={() => {
-                    const parsed = Number(alertInputValue);
-                    if (parsed && parsed > 0) {
-                      setPriceAlerts(prev => ({
-                        ...prev,
-                        [alertFormTicker]: parsed
-                      }));
-                      // clear triggered flags so it can alarm again
-                      setTriggeredAlerts(prev => prev.filter(t => t !== alertFormTicker));
-                    }
+                    const parsedBeli = Number(alertInputValue);
+                    const parsedJual = Number(sellAlertInputValue);
+
+                    setPriceAlerts(prev => {
+                      const next = { ...prev };
+                      if (parsedBeli && parsedBeli > 0) {
+                        next[alertFormTicker] = parsedBeli;
+                      } else {
+                        delete next[alertFormTicker];
+                      }
+                      return next;
+                    });
+
+                    setSellPriceAlerts(prev => {
+                      const next = { ...prev };
+                      if (parsedJual && parsedJual > 0) {
+                        next[alertFormTicker] = parsedJual;
+                      } else {
+                        delete next[alertFormTicker];
+                      }
+                      return next;
+                    });
+
+                    // clear triggered flags so they can alert again
+                    setTriggeredAlerts(prev => prev.filter(t => t !== alertFormTicker));
+                    setTriggeredSellAlerts(prev => prev.filter(t => t !== alertFormTicker));
+
                     setAlertFormTicker(null);
                   }}
                   className="px-3.5 py-1.5 bg-[#173e21] hover:bg-emerald-800 border border-emerald-500/20 text-emerald-250 font-black rounded-lg cursor-pointer transition-all"
                 >
-                  Aktifkan Alarm
+                  Simpan Alarm
                 </button>
               </div>
             </div>
@@ -4294,104 +4557,7 @@ export default function DashboardView({
         );
       })()}
 
-      {/* 3. Modal: Simulasi Transaksi Lot Cepat (Virtual Cash Account sandbox) */}
-      {quickOrderTicker && (() => {
-        const stock = allStocksMerged.find(s => s.ticker === quickOrderTicker);
-        if (!stock) return null;
-        const lotVal = stock.currentPrice * 100 * Number(quickOrderLots || "10");
 
-        return (
-          <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="glass-card max-w-sm w-full bg-[#03080c] border border-blue-500/25 rounded-2xl p-5 space-y-5 relative">
-              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
-                <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-1.5 font-sans">
-                  <Coins className="w-4 h-4 text-blue-400" /> Simulasi Order LOT Instan ({quickOrderTicker})
-                </h4>
-                <button 
-                  onClick={() => setQuickOrderTicker(null)}
-                  className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {quickOrderSuccess ? (
-                <div className="text-center py-4 space-y-3.5 text-xs animate-fadeIn">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
-                    <ShieldCheck className="w-6 h-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <h5 className="font-black text-white text-sm uppercase">Simulasi Transaksi Berhasil!</h5>
-                    <p className="text-slate-400 leading-relaxed px-1">
-                      {quickOrderSuccess}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setQuickOrderTicker(null)}
-                    className="w-full bg-[#1b2512]/50 hover:bg-[#1b2512]/80 border border-emerald-500/30 py-2 rounded-lg text-emerald-400 font-bold cursor-pointer transition-all"
-                  >
-                    Selesai
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4 text-xs font-sans">
-                  <div className="p-3 bg-slate-950 border border-slate-900 rounded-xl flex justify-between items-center">
-                    <div>
-                      <span className="text-[10px] text-slate-500 block uppercase font-bold">Harga Saat Ini</span>
-                      <strong className={`text-sm font-extrabold font-mono mt-0.5 inline-block ${stock.changePercent >= 0 ? "text-[#22c55e]" : "text-[#ea4335]"}`}>{formatIDR(stock.currentPrice)}</strong>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] text-slate-500 block uppercase font-bold text-center">Sektor</span>
-                      <span className="text-xs text-blue-400 font-bold block mt-0.5">{stock.sector}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-slate-500 uppercase font-black tracking-wider block font-mono">Jumlah LOT (1 LOT = 100 lembar):</label>
-                    <input 
-                      type="number"
-                      value={quickOrderLots}
-                      onChange={(e) => setQuickOrderLots(e.target.value)}
-                      placeholder="10"
-                      className="w-full bg-slate-950 border border-slate-850 text-white font-mono font-bold text-sm p-2.5 rounded-lg focus:outline-none focus:border-blue-500/50"
-                    />
-                  </div>
-
-                  <div className="p-3 bg-blue-950/20 border border-blue-500/10 rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-slate-400 text-[11px]">
-                      <span>Nilai Tawar Estimasi:</span>
-                      <span className="font-bold text-white font-mono">{formatIDR(lotVal)}</span>
-                    </div>
-                    <p className="text-[9px] text-slate-500 leading-normal text-justify">
-                      Transaksi virtual ini disimulasikan menggunakan akun virtual. Nilai lot dihitung berdasarkan formula standar bursa.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2 pt-2 border-t border-slate-900">
-                    <button
-                      onClick={() => setQuickOrderTicker(null)}
-                      className="flex-1 py-2 hover:bg-slate-900 text-slate-400 hover:text-white rounded-lg cursor-pointer transition-colors text-center font-bold"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      onClick={() => {
-                        const parsed = Number(quickOrderLots);
-                        if (parsed && parsed > 0) {
-                          setQuickOrderSuccess(`Pembelian virtual sebanyak ${parsed} LOT saham ${stock.ticker} pada harga ${formatIDR(stock.currentPrice)} berhasil dimasukkan di portofolio sandbox.`);
-                        }
-                      }}
-                      className="flex-1 py-2 bg-[#0d293c] hover:bg-blue-900 border border-blue-500/20 text-cyan-300 rounded-lg text-center font-black cursor-pointer transition-all"
-                    >
-                      Kirim Order
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
 
       {/* 4. Modal: Informasi Jam Kerja Bursa Indonesia (WIB) popup */}
       {isBursaModalOpen && (

@@ -40,6 +40,44 @@ const renderStockLogo = (ticker: string) => {
   );
 };
 
+interface PriceFlashCellProps {
+  price: number;
+  formatIDR: (val: number) => string;
+}
+
+function PriceFlashCell({ price, formatIDR }: PriceFlashCellProps) {
+  const [flash, setFlash] = useState<"up" | "down" | null>(null);
+  const prevPriceRef = React.useRef<number>(price);
+
+  useEffect(() => {
+    if (price !== prevPriceRef.current) {
+      if (price > prevPriceRef.current) {
+        setFlash("up");
+      } else if (price < prevPriceRef.current) {
+        setFlash("down");
+      }
+      prevPriceRef.current = price;
+
+      const timer = setTimeout(() => {
+        setFlash(null);
+      }, 900);
+      return () => clearTimeout(timer);
+    }
+  }, [price]);
+
+  const flashClass = flash === "up" 
+    ? "bg-emerald-500/25 text-emerald-450 border border-emerald-500/35 rounded scale-[1.04] px-1.5 py-0.5" 
+    : flash === "down" 
+      ? "bg-rose-500/25 text-rose-450 border border-rose-500/25 rounded px-1.5 py-0.5 scale-[1.04]" 
+      : "px-1 text-white group-hover:text-cyan-100";
+
+  return (
+    <span className={`inline-block font-mono font-bold transition-all duration-300 ${flashClass}`}>
+      {formatIDR(price)}
+    </span>
+  );
+}
+
 export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [], onToggleWatchlist, onSelectStock }: ScreenerViewProps) {
   // Screens Mode: Standard Stock Scanner vs Pasar Nego Crossing
   const [screenerMode, setScreenerMode] = useState<"regular" | "nego">("regular");
@@ -332,6 +370,15 @@ export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [
     const list = new Set(stocks.filter(s => s.isReal).map(s => s.sector));
     return ["Semua", ...Array.from(list)];
   }, [stocks]);
+
+  // Consolidate all filtering, sorting, and pagination parameters to trigger remount animation
+  const filterStateKey = useMemo(() => {
+    return `${searchQuery}-${selectedSector}-${peFilter}-${divFilter}-${capFilter}-${pbvFilter}-${roeFilter}-${derFilter}-${syariahFilter}-${volumeFilter}-${priceFilter}-${sortField}-${sortOrder}-${currentPage}-${screenerMode}`;
+  }, [
+    searchQuery, selectedSector, peFilter, divFilter, capFilter, pbvFilter,
+    roeFilter, derFilter, syariahFilter, volumeFilter, priceFilter, sortField,
+    sortOrder, currentPage, screenerMode
+  ]);
 
   // Paginated chunk of filtered stocks
   const paginatedStocks = useMemo(() => {
@@ -839,9 +886,9 @@ export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [
 
                   return (
                     <tr 
-                      key={stock.ticker} 
+                      key={`${stock.ticker}-${filterStateKey}`} 
                       onClick={() => onSelectStock?.(stock.ticker)}
-                      className="group border-b border-slate-900/40 hover:bg-gradient-to-r hover:from-cyan-950/40 hover:via-slate-950/90 hover:to-[#081829]/65 transition-all duration-300 ease-out text-xs cursor-pointer active:scale-[0.998] hover:shadow-xl hover:shadow-[#0c233c]/20"
+                      className="group border-b border-slate-900/40 hover:bg-gradient-to-r hover:from-cyan-950/40 hover:via-slate-950/90 hover:to-[#081829]/65 transition-all duration-300 ease-out text-xs cursor-pointer active:scale-[0.998] hover:shadow-xl hover:shadow-[#0c233c]/20 animate-fadeIn"
                     >
                       {/* 1. Ticker & Logo */}
                       <td className="py-4 px-6 font-display font-medium">
@@ -870,8 +917,8 @@ export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [
                       </td>
 
                       {/* 2. Last price */}
-                      <td className="py-4 px-4 text-right font-mono font-bold text-white group-hover:text-cyan-100 transition-colors duration-300">
-                        {formatIDR(stock.currentPrice)}
+                      <td className="py-4 px-4 text-right">
+                        <PriceFlashCell price={stock.currentPrice} formatIDR={formatIDR} />
                       </td>
 
                       {/* 3. Percentage Shift */}
@@ -972,7 +1019,10 @@ export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [
                       {/* 8. Market Cap size */}
                       <td className="py-4 px-4 text-right font-mono text-slate-350">
                         <span className="text-slate-300 font-bold">{(stock.marketCap / 1000).toFixed(1)} T</span>
-                        <span className="text-[9px] text-slate-500 block">{itemCapPct}</span>
+                        <div className="text-[10px] text-cyan-400 font-medium block whitespace-nowrap mt-0.5">
+                          Rp {stock.marketCap.toLocaleString("id-ID")} Milyar
+                        </div>
+                        <span className="text-[9px] text-slate-500 block mt-0.5">{itemCapPct}</span>
                       </td>
 
                       {/* 9. Sektor text */}
@@ -1092,9 +1142,9 @@ export default function ScreenerView({ stocks, onNavigateToTracer, watchlist = [
                   const isDiscount = item.spreadPct < 0;
                   return (
                     <tr
-                      key={`${item.ticker}-${index}`}
+                      key={`${item.ticker}-${index}-${filterStateKey}`}
                       onClick={() => onSelectStock?.(item.ticker)}
-                      className="border-b border-slate-905 border-slate-900/40 hover:bg-[#061824]/40 hover:-translate-x-0.5 transition-all text-xs cursor-pointer lg:hover:pl-1"
+                      className="border-b border-slate-905 border-slate-900/40 hover:bg-[#061824]/40 hover:-translate-x-0.5 transition-all text-xs cursor-pointer lg:hover:pl-1 animate-fadeIn"
                     >
                       {/* Ticker & Name */}
                       <td className="py-4 px-6 font-display font-medium">

@@ -32,6 +32,8 @@ export interface Stock {
   isAnomali?: boolean;
   statusText?: string;
   source?: string;
+  isFca?: boolean;
+  isSuspended?: boolean;
 }
 
 export interface NewsItem {
@@ -41,6 +43,7 @@ export interface NewsItem {
   time: string;
   source: string;
   sentiment: 'bullish' | 'bearish' | 'neutral';
+  category?: string;
 }
 
 export interface UserSession {

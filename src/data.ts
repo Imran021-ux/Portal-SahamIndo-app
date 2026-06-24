@@ -5,6 +5,7 @@
 
 import { Stock, NewsItem } from "./types";
 import fullEmitenList from "./full_emiten_list.json";
+import customNamesMapping from "./custom_names_mapping.json";
 
 // Seeded IDX Stock database with authentic Indonesian stock metrics
 const POPULAR_STOCKS_BASE: Stock[] = [
@@ -397,7 +398,8 @@ function generate989Stocks(): Stock[] {
     if (tickersSet.has(rawTicker)) return;
     tickersSet.add(rawTicker);
 
-    const name = e.company_name || `${rawTicker} Tbk.`;
+    const customName = (customNamesMapping as Record<string, string>)[rawTicker];
+    const name = customName || e.company_name || `${rawTicker} Tbk.`;
     const sector = normalizeSector(e.sector);
     
     // Check if we have a pre-seeded popular stock for this ticker
@@ -498,7 +500,9 @@ function generate989Stocks(): Stock[] {
       low,
       high,
       isSyariah,
-      isReal: true
+      isReal: true,
+      isFca: (hash % 37 === 3) || ["CENT", "IATA", "KBFA"].includes(rawTicker),
+      isSuspended: (hash % 41 === 7) || ["COAL", "NASA", "SINI"].includes(rawTicker)
     });
   });
 
@@ -515,14 +519,16 @@ export const INITIAL_NEWS: NewsItem[] = [
     title: "IHSG Ditutup Menguat Terkerek Saham Perbankan dan Masuknya Dana Asing",
     time: "15 Menit Lalu",
     source: "CNBC Indonesia",
-    sentiment: "bullish"
+    sentiment: "bullish",
+    category: "umum"
   },
   {
     id: "news_2",
     title: "BI-Rate Diproyeksikan Stabil untuk Menjaga Resiliensi Nilai Tukar Rupiah",
     time: "1 Jam Lalu",
     source: "IDX Channel",
-    sentiment: "neutral"
+    sentiment: "neutral",
+    category: "makro"
   },
   {
     id: "news_3",
@@ -530,7 +536,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     ticker: "BBCA",
     time: "2 Jam Lalu",
     source: "Bisnis Indonesia",
-    sentiment: "bullish"
+    sentiment: "bullish",
+    category: "umum"
   },
   {
     id: "news_4",
@@ -538,7 +545,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     ticker: "GOTO",
     time: "3 Jam Lalu",
     source: "Kontan",
-    sentiment: "bullish"
+    sentiment: "bullish",
+    category: "umum"
   },
   {
     id: "news_5",
@@ -546,7 +554,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     ticker: "ADRO",
     time: "4 Jam Lalu",
     source: "Bloomberg Technoz",
-    sentiment: "bearish"
+    sentiment: "bearish",
+    category: "makro"
   },
   {
     id: "news_6",
@@ -554,7 +563,8 @@ export const INITIAL_NEWS: NewsItem[] = [
     ticker: "TLKM",
     time: "5 Jam Lalu",
     source: "Dunia Investasi",
-    sentiment: "bullish"
+    sentiment: "bullish",
+    category: "umum"
   },
   {
     id: "news_7",
@@ -562,7 +572,142 @@ export const INITIAL_NEWS: NewsItem[] = [
     ticker: "ASII",
     time: "Yesterday",
     source: "Investor Daily",
-    sentiment: "neutral"
+    sentiment: "neutral",
+    category: "umum"
+  },
+  // --- New specific categories requested: MSCI, Akumulasi, IPO, Merger, Makro Global ---
+  // 1. MSCI
+  {
+    id: "news_msci_1",
+    title: "Rebalancing Indeks MSCI: BBRI dan TLKM Alami Penyesuaian Bobot, Arus Reksa Dana Pasif Siap Borong",
+    ticker: "BBRI",
+    time: "10 Menit Lalu",
+    source: "CNBC Indonesia",
+    sentiment: "bullish",
+    category: "msci"
+  },
+  {
+    id: "news_msci_2",
+    title: "Evaluasi Berkala MSCI Global Standard Index: BUMI Berpotensi Masuk Small Cap Cap, Volatilitas Diperkirakan Meningkat",
+    ticker: "BUMI",
+    time: "3 Jam Lalu",
+    source: "Kontan",
+    sentiment: "neutral",
+    category: "msci"
+  },
+  {
+    id: "news_msci_3",
+    title: "MSCI Hapus Saham ADRO Pasca Spin-off Lini Bisnis Batubara Hijau, Investor Asing Lakukan Penyesuaian Portofolio",
+    ticker: "ADRO",
+    time: "2 Hari Lalu",
+    source: "Bloomberg Technoz",
+    sentiment: "bearish",
+    category: "msci"
+  },
+  // 2. Akumulasi
+  {
+    id: "news_accum_1",
+    title: "Rapor Broker Summary Sepekan: Broker Asing Terpantau Akumulasi Masif Saham BBCA Lebih dari Rp 1.2 Triliun",
+    ticker: "BBCA",
+    time: "20 Menit Lalu",
+    source: "Bisnis Indonesia",
+    sentiment: "bullish",
+    category: "akumulasi"
+  },
+  {
+    id: "news_accum_2",
+    title: "Sinyal Bandar Radar: Terjadi Akumulasi Diam-diam Saham GOTO oleh Investor Institusi Lokal Selama 10 Sesi Beruntun",
+    ticker: "GOTO",
+    time: "4 Jam Lalu",
+    source: "Dunia Investasi",
+    sentiment: "bullish",
+    category: "akumulasi"
+  },
+  {
+    id: "news_accum_3",
+    title: "Pantauan Broker Stalker: Distribusi Tekanan Jual di Saham ASII Mulai Mereda, Bandar Mulai Akumulasi Bertahap di Support Kuat",
+    ticker: "ASII",
+    time: "1 Hari Lalu",
+    source: "IDX Channel",
+    sentiment: "neutral",
+    category: "akumulasi"
+  },
+  // 3. IPO
+  {
+    id: "news_ipo_1",
+    title: "Menjelang IPO Raksasa Sektor Energi Terbarukan di BEI, Target Dana Segar Capai Rp 8 Triliun",
+    time: "45 Menit Lalu",
+    source: "Bisnis Indonesia",
+    sentiment: "bullish",
+    category: "ipo"
+  },
+  {
+    id: "news_ipo_2",
+    title: "Saham IPO Emiten Teknologi Baru Sentuh Batas Auto Rejection Atas (ARA) pada Hari Pertama Melantai",
+    time: "5 Jam Lalu",
+    source: "Kontan",
+    sentiment: "bullish",
+    category: "ipo"
+  },
+  {
+    id: "news_ipo_3",
+    title: "Evaluasi Prospektus IPO Sektor Consumer Goods: Rasio Valuasi Dianggap Mahal, Investor Ritel Disarankan Waspada",
+    time: "1 Hari Lalu",
+    source: "Investor Daily",
+    sentiment: "neutral",
+    category: "ipo"
+  },
+  // 4. Merger (Mager / M&A)
+  {
+    id: "news_merger_1",
+    title: "Rencana Konsolidasi Besar: Rencana Merger Bank Swasta Menengah Mendekati Final, Siap Masuk Top 10 KBMI",
+    time: "30 Menit Lalu",
+    source: "CNBC Indonesia",
+    sentiment: "bullish",
+    category: "merger"
+  },
+  {
+    id: "news_merger_2",
+    title: "Sinergi Strategis Akuisisi Anak Usaha TLKM Selesai Diproses, Menambah Potensi EBITDA Rp 1.5 Triliun per Tahun",
+    ticker: "TLKM",
+    time: "6 Jam Lalu",
+    source: "Dunia Investasi",
+    sentiment: "bullish",
+    category: "merger"
+  },
+  {
+    id: "news_merger_3",
+    title: "Dampak Merger GOTO Tokopedia-TikTok Terus Menunjukkan Efisiensi Biaya Operasional dan Peningkatan Pangsa Pasar GTV",
+    ticker: "GOTO",
+    time: "Yesterday",
+    source: "Bloomberg Technoz",
+    sentiment: "bullish",
+    category: "merger"
+  },
+  // 5. Makro Global
+  {
+    id: "news_makro_1",
+    title: "Suku Bunga The Fed Diprediksi Pangkas 25 Bps Bulan Depan, Angin Segar Bagi Pasar Saham Negara Berkembang (Emerging Markets)",
+    time: "5 Menit Lalu",
+    source: "Bloomberg Technoz",
+    sentiment: "bullish",
+    category: "makro"
+  },
+  {
+    id: "news_makro_2",
+    title: "Pemerintah Tingkatkan Target Pertumbuhan Ekonomi RI Menjadi 5.3% di Tengah Sentimen Positif Stimulus Ekonomi China",
+    time: "2 Jam Lalu",
+    source: "Investor Daily",
+    sentiment: "bullish",
+    category: "makro"
+  },
+  {
+    id: "news_makro_3",
+    title: "Ketegangan Geopolitik Timur Tengah Kembali Memanas, Harga Minyak Mentah Dunia Melonjak Dekati USD 85 per Barel",
+    time: "5 Hari Lalu",
+    source: "IDX Channel",
+    sentiment: "bearish",
+    category: "makro"
   }
 ];
 

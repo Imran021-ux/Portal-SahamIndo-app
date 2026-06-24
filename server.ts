@@ -31,8 +31,15 @@ const yahooFinanceCache: Record<string, CacheEntry> = {};
 const CACHE_TTL_MS = 60000; // 60 seconds
 
 function getSectorForTicker(cleanTicker: string): string {
-  let defaultSector = "Sektor Publik IDX";
   const t = cleanTicker.toUpperCase();
+  if (Array.isArray(fullEmitenList)) {
+    const found = fullEmitenList.find((item: any) => item && item.ticker && item.ticker.toUpperCase() === t);
+    if (found && found.sector) {
+      return found.sector;
+    }
+  }
+
+  let defaultSector = "Sektor Publik IDX";
   if (t.startsWith("BB") || t === "BMRI" || t === "BDMN" || t === "PNBN") {
     return "Finansial";
   } else if (t === "TLKM" || t === "JSMR" || t === "EXCL" || t === "ISAT") {
@@ -332,21 +339,7 @@ async function fetchYahooStock(ticker: string) {
   }
 
   // Map sectors based on ticker clues or default from Yahoo Finance
-  let defaultSector = "Sektor Publik IDX";
-  const t = cleanTicker;
-  if (t.startsWith("BB") || t === "BMRI" || t === "BDMN" || t === "PNBN") {
-    defaultSector = "Finansial";
-  } else if (t === "TLKM" || t === "JSMR" || t === "EXCL" || t === "ISAT") {
-    defaultSector = "Infrastruktur";
-  } else if (t === "GOTO" || t === "BUKA" || t === "WIFI") {
-    defaultSector = "Teknologi";
-  } else if (t === "ASII" || t === "UNVR" || t === "ICBP" || t === "INDF" || t === "AMRT" || t === "MIDI") {
-    defaultSector = "Konsumer";
-  } else if (t === "ADRO" || t === "BUMI" || t === "ITMG" || t === "PTBA") {
-    defaultSector = "Energi";
-  } else if (t === "ANTM" || t === "TINS" || t === "INCO") {
-    defaultSector = "Pertambangan";
-  }
+  let defaultSector = getSectorForTicker(cleanTicker);
 
   // Generate high-fidelity realistic fundamental ratios on the fly
   let pbv = 1.25;
@@ -428,8 +421,8 @@ async function fetchYahooStock(ticker: string) {
     history,
     bid: Math.round(finalCurrent * 0.998),
     ask: Math.round(finalCurrent * 1.002),
-    low: Math.min(finalPrev, finalCurrent) * 0.99,
-    high: Math.max(finalPrev, finalCurrent) * 1.015
+    low: Math.min(finalPrev, finalCurrent, (low > 0 ? low : Math.min(finalPrev, finalCurrent) * 0.99)),
+    high: Math.max(finalPrev, finalCurrent, (high > 0 ? high : Math.max(finalPrev, finalCurrent) * 1.015))
   };
 }
 
