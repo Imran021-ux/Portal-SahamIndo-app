@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { UserSession, Stock, PriceAlert } from "./types";
 import { INITIAL_STOCKS, tickStockPrices, REAL_PRICE_LOOKUP } from "./data";
 import PriceAlertsManager from "./components/PriceAlertsManager";
-import { getFormattedDateIndo } from "./utils/date";
+import { getFormattedDateIndo, getFormattedUltraShortDateIndo } from "./utils/date";
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import LoginView from "./components/LoginView";
 import DashboardView from "./components/DashboardView";
@@ -48,6 +48,10 @@ export default function App() {
       localStorage.removeItem("theme");
     } catch (e) {
       console.error("Theme cleanup error:", e);
+    }
+    // Open sidebar by default on desktop/large screens for premium presentation
+    if (window.innerWidth >= 1024) {
+      setIsSidebarOpen(true);
     }
   }, []);
 
@@ -175,14 +179,15 @@ export default function App() {
   }, [stocks]);
 
   // Alert Action Handlers
-  const handleAddAlert = (ticker: string, targetPrice: number, condition: "ABOVE" | "BELOW") => {
+  const handleAddAlert = (ticker: string, targetPrice: number, condition: "ABOVE" | "BELOW", type?: "BUY" | "SELL" | "ALERT") => {
     const newAlert: PriceAlert = {
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       ticker: ticker.toUpperCase(),
       targetPrice,
       condition,
       triggered: false,
-      createdAt: new Date().toLocaleDateString("id-ID")
+      createdAt: new Date().toLocaleDateString("id-ID"),
+      type: type || (condition === "BELOW" ? "BUY" : "ALERT")
     };
     const updated = [newAlert, ...alerts];
     setAlerts(updated);
@@ -596,6 +601,18 @@ export default function App() {
     localStorage.removeItem("idx_trader_session");
   };
 
+  // Prevent underlying page scrolling on mobile when sidebar is open
+  useEffect(() => {
+    if (isSidebarOpen && window.innerWidth < 768) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isSidebarOpen]);
+
   // 📡 Real-time selected ticker Yahoo Finance/Manual synchronizer using DataService & AbortController
   useEffect(() => {
     if (!selectedTicker) return;
@@ -685,108 +702,44 @@ export default function App() {
                 <span>KEMBALI</span>
               </button>
             )}
-            <div className="flex flex-col text-left justify-center">
-              <span className="font-extrabold text-base md:text-lg text-white leading-none tracking-tight uppercase">SAHAM INDO</span>
+            <div 
+              onClick={() => { setActiveView("dashboard"); }}
+              className="flex items-center gap-2 cursor-pointer select-none group"
+              title="Kembali ke Dashboard Utama CuaninAja"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 group-hover:from-emerald-500/30 group-hover:border-emerald-400/40 transition-all duration-300 shadow-lg shadow-emerald-950/20">
+                <TrendingUp className="w-4.5 h-4.5 animate-pulse" />
+              </div>
+              <div className="flex items-baseline font-display">
+                <span className="font-black text-lg md:text-xl text-white tracking-tight group-hover:text-emerald-50 transition-colors duration-300">Cuanin</span>
+                <span className="font-black text-lg md:text-xl bg-gradient-to-r from-emerald-400 via-emerald-300 to-cyan-400 bg-clip-text text-transparent tracking-tight">Aja</span>
+                <span className="font-bold text-xs text-cyan-400/90 ml-0.5 tracking-wider font-mono">.id</span>
+                <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping hidden md:inline-block"></span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Live Index Ticker Banner in header with Sahara/SahamIndo address bar */}
-        <div className="hidden md:flex items-center space-x-3.5 text-xs">
-          <div className="relative group bg-[#020b11] px-3 py-1.5 rounded-md border border-cyan-900/20 flex items-center space-x-2.5 font-mono cursor-help">
-            <span className="text-slate-400 font-bold font-sans text-[10px] uppercase tracking-wider">IHSG Composite:</span>
-            <span className="text-emerald-400 font-black">
-              {ihsgPrice.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <span className={`text-[10px] font-bold ${ihsgPrice >= ihsgPrevClose ? "text-emerald-400" : "text-rose-450"}`}>
-              ({ihsgPrice >= ihsgPrevClose ? "+" : ""}{((ihsgPrice - ihsgPrevClose) / ihsgPrevClose * 100).toFixed(2)}%)
-            </span>
-
-            {/* 1-Week Interactive Area Chart showing past week price movement */}
-            <div className="border-l border-cyan-900/40 pl-3.5 flex items-center gap-2">
-              <span className="text-[9px] text-slate-500 font-sans tracking-tight uppercase leading-none font-bold">Trend 1M</span>
-              <div className="w-24 h-7 relative overflow-visible flex items-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={ihsgWeeklyData}>
-                    <defs>
-                      <linearGradient id="headerIhsgGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={ihsgPrice >= ihsgPrevClose ? "#10b981" : "#ef4444"} stopOpacity={0.25}/>
-                        <stop offset="95%" stopColor={ihsgPrice >= ihsgPrevClose ? "#10b981" : "#ef4444"} stopOpacity={0.0}/>
-                      </linearGradient>
-                    </defs>
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke={ihsgPrice >= ihsgPrevClose ? "#10b981" : "#ef4444"} 
-                      strokeWidth={1.8} 
-                      fill="url(#headerIhsgGrad)"
-                      dot={{ r: 1.5, fill: ihsgPrice >= ihsgPrevClose ? "#10b981" : "#ef4444" }}
-                      activeDot={{ r: 3, fill: "#fff" }}
-                    />
-                    <RechartsTooltip
-                      cursor={{ stroke: "rgba(34,197,94,0.15)", strokeWidth: 1 }}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const val = payload[0].value as number;
-                          const label = payload[0].payload.day;
-                          return (
-                            <div className="bg-slate-950 border border-cyan-800/80 px-1.5 py-0.5 rounded text-[9.5px] font-mono text-cyan-300 font-black -mt-7 shadow-lg">
-                              {label}: {val.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                      position={{ y: -18 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Premium Hover Tooltip */}
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 p-2.5 bg-slate-950 border border-cyan-800/60 rounded-xl shadow-xl shadow-black/80 text-left z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="text-[10px] text-slate-400 font-sans uppercase font-bold text-cyan-400 tracking-wider mb-1">Rincian Perubahan IHSG</div>
-              <div className="space-y-1 font-mono text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Selisih Absolut:</span>
-                  <span className={`font-bold ${(ihsgPrice - ihsgPrevClose) >= 0 ? "text-emerald-400" : "text-rose-450"}`}>
-                    {(ihsgPrice - ihsgPrevClose) >= 0 ? "▲" : "▼"} Rp {Math.abs(ihsgPrice - ihsgPrevClose).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-                <div className="flex justify-between font-sans">
-                  <span className="text-slate-500">Penutupan Kemarin:</span>
-                  <span className="text-slate-300">{ihsgPrevClose.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between border-t border-slate-900 pt-1.5 mt-1.5 text-[10px]">
-                  <span className="text-slate-500">Waktu Tutup:</span>
-                  <span className="text-cyan-400 font-bold">Sabtu, 6 Juni 2026 16:00 WIB</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        {/* Live Index Ticker Banner in header with Sahara/CuaninAja address bar */}
+        <div className="hidden md:flex items-center space-x-3.5 text-xs shrink-0">
           <div 
             onClick={() => setIsDomainModalOpen(true)}
             className="hidden lg:flex items-center space-x-2 bg-slate-950/80 hover:bg-slate-900 border border-slate-900 hover:border-cyan-500/20 rounded-xl px-3.5 py-1.5 cursor-pointer transition-all text-xs text-slate-350 font-mono shadow-inner select-none active:scale-95 group"
-            title="Klik untuk melihat panduan kustom domain SahamIndo.com"
+            title="Klik untuk melihat panduan kustom domain CuaninAja.id"
           >
             <span className="text-emerald-400 font-bold text-[10px] select-none">🔒</span>
-            <span className="font-extrabold text-white text-[11px] group-hover:text-cyan-400 transition-all">SahamIndo.com</span>
+            <span className="font-extrabold text-white text-[11px] group-hover:text-cyan-400 transition-all">CuaninAja.id</span>
             <span className="text-[8px] tracking-wider text-cyan-400 font-bold font-sans px-1.5 py-0.5 bg-cyan-950 text-cyan-400 rounded uppercase">Mapped</span>
           </div>
 
-          <div className="flex items-center space-x-1.5 text-[10px]">
-            <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
-            <span className="text-cyan-450 text-[9.5px] font-extrabold uppercase tracking-wide">IDX LIVE FEED</span>
-          </div>
+
         </div>
 
         {/* User context quick badge and custom Last Updated display matching prompt */}
-        <div className="flex items-center space-x-3 relative">
-          <div className="hidden sm:flex flex-col items-end text-right px-2.5">
-            <span className="text-[8px] text-slate-450 text-cyan-400 font-sans uppercase font-extrabold tracking-widest leading-none">IDX Live Feed Status</span>
-            <span className="text-[10px] text-emerald-400 font-mono font-black mt-1">Aktif: {getFormattedDateIndo()}</span>
+        <div className="flex items-center space-x-3 relative shrink-0">
+          <div className="hidden sm:flex flex-col items-end text-right px-2">
+            <span className="text-[8px] text-cyan-400 font-sans uppercase font-extrabold tracking-widest leading-none whitespace-nowrap">LIVE STATUS</span>
+            <span className="text-[10px] text-emerald-400 font-mono font-black mt-1 whitespace-nowrap">Aktif: {getFormattedUltraShortDateIndo()}</span>
           </div>
 
           <div className="h-4 w-[1px] bg-cyan-900/30 hidden sm:block"></div>
@@ -880,22 +833,22 @@ export default function App() {
         ))}
       </AnimatePresence>
 
-      {/* 🖤 Overlay Backdrop for Mobile Menu Drawer */}
-      {isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-slate-950/80 z-20 md:hidden transition-opacity duration-300 pointer-events-auto"
-        />
-      )}
-
       {/* Main layout container with conditional layout sidebar */}
       <div className="flex-1 flex flex-col md:flex-row relative">
         
+        {/* 🖤 Overlay Backdrop for Mobile Menu Drawer - Moved inside to resolve stacking context intercepting clicks */}
+        {isSidebarOpen && (
+          <div 
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-slate-950/80 z-40 md:hidden transition-opacity duration-300 pointer-events-auto cursor-pointer"
+          />
+        )}
+
         {/* Toggleable Navigation Sidebar */}
         <aside 
-          className={`bg-[#0b0f19] border-r border-slate-850 flex flex-col justify-between shrink-0 transition-all duration-300 absolute md:relative z-25 md:z-10 overflow-y-auto overflow-x-hidden ${
+          className={`bg-[#0b0f19] border-r border-slate-850 flex flex-col justify-between shrink-0 transition-all duration-300 fixed md:relative z-50 md:z-10 overflow-y-auto overflow-x-hidden overscroll-contain ${
             isSidebarOpen 
-              ? "w-72 inset-y-0 left-0 h-[calc(100vh-64px)] translate-x-0 border-r" 
+              ? "w-72 inset-y-0 left-0 md:inset-auto h-screen md:h-[calc(100vh-64px)] translate-x-0 border-r" 
               : "w-0 overflow-hidden border-none pointer-events-none -translate-x-full md:w-0"
           }`}
         >
@@ -1216,18 +1169,18 @@ export default function App() {
         </aside>
 
         {/* Immersive Main Content Pane */}
-        <main className="flex-1 bg-[#030914] p-0 sm:p-4 md:p-6 lg:p-8 space-y-6 overflow-y-auto max-h-[calc(100vh-64px)]">
+        <main className={`flex-1 bg-[#030914] p-0 sm:p-4 md:p-6 lg:p-8 space-y-6 h-[calc(100vh-64px)] overflow-y-auto ${
+          isSidebarOpen ? "max-md:overflow-hidden" : ""
+        }`}>
           
           {/* Dynamic Inner Router Layout with Framer-Motion Transitions */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeView}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.16, ease: "easeOut" }}
-              className="space-y-6 flex-1 flex flex-col"
-            >
+          <motion.div
+            key={activeView}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.1, ease: "easeOut" }}
+            className="space-y-6 flex-1 flex flex-col"
+          >
               {activeView === "dashboard" && (
                 <DashboardView 
                   stocks={stocks} 
@@ -1387,7 +1340,6 @@ export default function App() {
                 />
               )}
             </motion.div>
-          </AnimatePresence>
 
           {/* 💬 Tambahan Chat IHSG di bagian paling bawah hanya tersedia di menu utama (dashboard) */}
           {activeView === "dashboard" && <IHSGChatBox />}
@@ -1396,7 +1348,7 @@ export default function App() {
 
       </div>
 
-      {/* 🌐 CUSTOM DOMAIN MAPPING CONFIGURATION MODAL (SahamIndo.com) */}
+      {/* 🌐 CUSTOM DOMAIN MAPPING CONFIGURATION MODAL (CuaninAja.id) */}
       {isDomainModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-[#03131e] border border-cyan-500/25 p-6 rounded-2xl max-w-lg w-full space-y-4 shadow-2xl relative">
@@ -1413,19 +1365,19 @@ export default function App() {
               </div>
               <div>
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">Registrasi &amp; Pemetaan Domain Kustom</h3>
-                <p className="text-[10px] text-slate-400 font-bold select-all leading-normal">Status internal Applet: SahamIndo.com Ready</p>
+                <p className="text-[10px] text-slate-400 font-bold select-all leading-normal">Status internal Applet: CuaninAja.id Ready</p>
               </div>
             </div>
 
             <div className="space-y-3.5 text-xs text-slate-300 leading-relaxed font-sans">
               <p>
-                Bagian ini menjelaskan secara komplit langkah-langkah untuk memetakan domain kustom terdaftar Anda <strong className="text-white text-cyan-305">SahamIndo.com</strong> agar mengarah ke aplikasi analisis portofolio premium ini:
+                Bagian ini menjelaskan secara komplit langkah-langkah untuk memetakan domain kustom terdaftar Anda <strong className="text-white text-cyan-305">CuaninAja.id</strong> agar mengarah ke aplikasi analisis portofolio premium ini:
               </p>
 
               <div className="space-y-2 border-y border-slate-900 py-3 text-[11px] font-mono">
                 <div className="flex items-start gap-2">
                   <span className="text-cyan-400 font-bold bg-cyan-950 px-1 py-0.5 rounded text-[8px] leading-none">STEP 1</span>
-                  <p className="text-slate-300 leading-normal">Daftarkan domain <strong className="text-white">SahamIndo.com</strong> di penyedia registrasi domain pilihan Anda (seperti Cloudflare, Niagahoster, Rumahweb, Verisign, dll).</p>
+                  <p className="text-slate-300 leading-normal">Daftarkan domain <strong className="text-white">CuaninAja.id</strong> di penyedia registrasi domain pilihan Anda (seperti Cloudflare, Niagahoster, Rumahweb, Verisign, dll).</p>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-cyan-400 font-bold bg-cyan-950 px-1 py-0.5 rounded text-[8px] leading-none">STEP 2</span>
@@ -1442,7 +1394,7 @@ export default function App() {
               </div>
 
               <div className="bg-[#071926]/40 p-3 rounded-xl border border-cyan-950 text-[10.5px] text-slate-400 font-sans">
-                💡 <strong className="text-white">Catatan Teknis Hosting:</strong> Selama masa pengembangan lokal / AI Studio, preview link asli Anda dialokasikan ke domain serverless Cloud Run yang aman. Konfigurasi perutean internal applet kami telah sepenuhnya dimodifikasi agar siap menyambut domain utama <strong className="text-white">SahamIndo.com</strong> Anda saat dirilis!
+                💡 <strong className="text-white">Catatan Teknis Hosting:</strong> Selama masa pengembangan lokal / AI Studio, preview link asli Anda dialokasikan ke domain serverless Cloud Run yang aman. Konfigurasi perutean internal applet kami telah sepenuhnya dimodifikasi agar siap menyambut domain utama <strong className="text-white">CuaninAja.id</strong> Anda saat dirilis!
               </div>
             </div>
 

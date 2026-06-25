@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 interface PriceAlertsManagerProps {
   stocks: Stock[];
   alerts: PriceAlert[];
-  onAddAlert: (ticker: string, targetPrice: number, condition: "ABOVE" | "BELOW") => void;
+  onAddAlert: (ticker: string, targetPrice: number, condition: "ABOVE" | "BELOW", type?: "BUY" | "SELL" | "ALERT") => void;
   onDeleteAlert: (id: string) => void;
   onClearHistory: () => void;
   onClose: () => void;
@@ -22,6 +22,7 @@ export default function PriceAlertsManager({
 }: PriceAlertsManagerProps) {
   const [selectedTicker, setSelectedTicker] = useState<string>(stocks[0]?.ticker || "BBCA");
   const [targetPrice, setTargetPrice] = useState<string>("");
+  const [sellTargetPrice, setSellTargetPrice] = useState<string>("");
   const [condition, setCondition] = useState<"ABOVE" | "BELOW">("ABOVE");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -35,6 +36,7 @@ export default function PriceAlertsManager({
     const stock = stocks.find(s => s.ticker === ticker);
     if (stock) {
       setTargetPrice(stock.currentPrice.toString());
+      setSellTargetPrice(""); // Reset sell target for new stock so user can choose to fill it
     }
   };
 
@@ -49,25 +51,65 @@ export default function PriceAlertsManager({
     e.preventDefault();
     setErrorMessage("");
 
-    const price = parseFloat(targetPrice);
-    if (isNaN(price) || price <= 0) {
-      setErrorMessage("Silakan masukkan nilai harga target yang valid (> 0).");
+    let addedAny = false;
+
+    // 1. Process targetPrice (Beli / Alarm utama)
+    const hasBuyPrice = targetPrice.trim() !== "";
+    let buyPrice = 0;
+    if (hasBuyPrice) {
+      buyPrice = parseFloat(targetPrice);
+      if (isNaN(buyPrice) || buyPrice <= 0) {
+        setErrorMessage("Silakan masukkan nilai harga target beli yang valid (> 0).");
+        return;
+      }
+
+      if (condition === "ABOVE" && buyPrice <= currentPriceDisplay) {
+        setErrorMessage(`Harga target (≥ Rp ${buyPrice.toLocaleString()}) harus lebih besar dari harga saat ini (Rp ${currentPriceDisplay.toLocaleString()})`);
+        return;
+      }
+
+      if (condition === "BELOW" && buyPrice >= currentPriceDisplay) {
+        setErrorMessage(`Harga target (≤ Rp ${buyPrice.toLocaleString()}) harus lebih kecil dari harga saat ini (Rp ${currentPriceDisplay.toLocaleString()})`);
+        return;
+      }
+    }
+
+    // 2. Process sellTargetPrice (Target Jual)
+    const hasSellPrice = sellTargetPrice.trim() !== "";
+    let sellPrice = 0;
+    if (hasSellPrice) {
+      sellPrice = parseFloat(sellTargetPrice);
+      if (isNaN(sellPrice) || sellPrice <= 0) {
+        setErrorMessage("Silakan masukkan nilai target jual yang valid (> 0).");
+        return;
+      }
+
+      if (sellPrice <= currentPriceDisplay) {
+        setErrorMessage(`Target jual (Rp ${sellPrice.toLocaleString()}) harus lebih besar dari harga saat ini (Rp ${currentPriceDisplay.toLocaleString()}) untuk profit taking.`);
+        return;
+      }
+    }
+
+    if (!hasBuyPrice && !hasSellPrice) {
+      setErrorMessage("Silakan isi setidaknya satu target harga (Harga Target atau Target Jual).");
       return;
     }
 
-    if (condition === "ABOVE" && price <= currentPriceDisplay) {
-      setErrorMessage(`Harga target (≥ Rp ${price.toLocaleString()}) harus lebih besar dari harga saat ini (Rp ${currentPriceDisplay.toLocaleString()})`);
-      return;
+    // Call onAddAlert
+    if (hasBuyPrice) {
+      onAddAlert(selectedTicker, buyPrice, condition, condition === "BELOW" ? "BUY" : "ALERT");
+      addedAny = true;
     }
 
-    if (condition === "BELOW" && price >= currentPriceDisplay) {
-      setErrorMessage(`Harga target (≤ Rp ${price.toLocaleString()}) harus lebih kecil dari harga saat ini (Rp ${currentPriceDisplay.toLocaleString()})`);
-      return;
+    if (hasSellPrice) {
+      onAddAlert(selectedTicker, sellPrice, "ABOVE", "SELL");
+      addedAny = true;
     }
 
-    onAddAlert(selectedTicker, price, condition);
-    setErrorMessage("");
-    // Optional feedback or reset
+    if (addedAny) {
+      setErrorMessage("");
+      setSellTargetPrice(""); // reset sell target input
+    }
   };
 
   const activeAlerts = alerts.filter(a => !a.triggered);
@@ -124,29 +166,50 @@ export default function PriceAlertsManager({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] text-slate-450 uppercase font-bold tracking-wider mb-1">Kondisi:</label>
-                <select 
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value as "ABOVE" | "BELOW")}
-                  className="w-full bg-[#02090e] border border-cyan-900/40 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 font-sans transition-all"
-                >
-                  <option value="ABOVE">Naik Melewati (≥)</option>
-                  <option value="BELOW">Turun Melewati (≤)</option>
-                </select>
-              </div>
+            <div className="p-2.5 bg-[#01090f] rounded-lg border border-cyan-950/40 space-y-2.5">
+              <span className="text-[9px] text-cyan-500 uppercase font-black tracking-widest block">1. ALARM UTAMA / BELI</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] text-slate-450 uppercase font-bold tracking-wider mb-1">Kondisi:</label>
+                  <select 
+                    value={condition}
+                    onChange={(e) => setCondition(e.target.value as "ABOVE" | "BELOW")}
+                    className="w-full bg-[#02090e] border border-cyan-900/40 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 font-sans transition-all"
+                  >
+                    <option value="ABOVE">Naik Melewati (≥)</option>
+                    <option value="BELOW">Turun Melewati (≤)</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-[10px] text-slate-450 uppercase font-bold tracking-wider mb-1">Harga Target (Rp):</label>
-                <input 
-                  type="number"
-                  value={targetPrice}
-                  onChange={(e) => setTargetPrice(e.target.value)}
-                  className="w-full bg-[#02090e] border border-cyan-900/40 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
-                  placeholder={currentPriceDisplay.toString()}
-                />
+                <div>
+                  <label className="block text-[10px] text-slate-450 uppercase font-bold tracking-wider mb-1">Harga Target (Rp):</label>
+                  <input 
+                    type="number"
+                    value={targetPrice}
+                    onChange={(e) => setTargetPrice(e.target.value)}
+                    className="w-full bg-[#02090e] border border-cyan-900/40 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
+                    placeholder="Harga target beli..."
+                  />
+                </div>
               </div>
+            </div>
+
+            {/* Target Jual (Sell Target) secara terpisah */}
+            <div className="p-2.5 bg-[#010a0e] rounded-lg border border-emerald-950/40 space-y-2">
+              <label className="block text-[10px] text-emerald-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+                <span>2. TARGET JUAL / SELL TARGET (Rp):</span>
+              </label>
+              <input 
+                type="number"
+                value={sellTargetPrice}
+                onChange={(e) => setSellTargetPrice(e.target.value)}
+                className="w-full bg-[#02090e] border border-emerald-900/30 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                placeholder={`e.g. ${Math.round(currentPriceDisplay * 1.15).toString()}`}
+              />
+              <span className="text-[9px] text-slate-500 block leading-normal font-sans">
+                Opsional. Set target jual di atas Rp {currentPriceDisplay.toLocaleString("id-ID")} untuk alarm auto-profit taking.
+              </span>
             </div>
 
             {errorMessage && (
@@ -160,7 +223,7 @@ export default function PriceAlertsManager({
               className="w-full py-2 rounded-lg bg-cyan-650 hover:bg-cyan-550 border border-cyan-450/40 text-xs text-white font-bold transition-all hover:shadow-md hover:shadow-cyan-500/10 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Bell className="w-3.5 h-3.5" />
-              <span>Pasang Alarm Harga {selectedTicker}</span>
+              <span>Simpan Alarm Harga {selectedTicker}</span>
             </button>
           </form>
         </div>
@@ -182,16 +245,19 @@ export default function PriceAlertsManager({
               {activeAlerts.map((alert) => {
                 const stock = stocks.find(s => s.ticker === alert.ticker);
                 const currentPrice = stock ? stock.currentPrice : alert.targetPrice;
+                const isSell = alert.type === "SELL";
                 return (
-                  <div key={alert.id} className="flex items-center justify-between bg-[#020b11] border border-cyan-900/20 px-3 py-2.5 rounded-xl hover:border-cyan-500/25 transition-all group">
+                  <div key={alert.id} className={`flex items-center justify-between bg-[#020b11] border ${isSell ? "border-emerald-500/20 hover:border-emerald-500/40" : "border-cyan-900/20 hover:border-cyan-500/25"} px-3 py-2.5 rounded-xl transition-all group`}>
                     <div className="flex items-center space-x-2.5">
                       <div className="flex flex-col">
                         <span className="text-xs font-black text-white font-mono">{alert.ticker}</span>
-                        <span className="text-[9.5px] text-slate-500 uppercase font-bold tracking-tight">Kondisi Target</span>
+                        <span className="text-[9.5px] text-slate-500 uppercase font-bold tracking-tight">
+                          {alert.type === "SELL" ? "🎯 Target Jual" : alert.type === "BUY" ? "🟢 Target Beli" : "🔔 Alarm Harga"}
+                        </span>
                       </div>
                       <div className="h-6 w-[1px] bg-cyan-900/20"></div>
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-cyan-400 font-mono">
+                        <span className={`text-xs font-black font-mono ${isSell ? "text-emerald-400" : "text-cyan-400"}`}>
                           {alert.condition === "ABOVE" ? "≥" : "≤"} Rp {alert.targetPrice.toLocaleString("id-ID")}
                         </span>
                         <span className="text-[9.5px] text-slate-400">
@@ -217,7 +283,7 @@ export default function PriceAlertsManager({
         <div>
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-widest font-sans flex items-center gap-1.5">
-              🎯 Alaram Terpicu ({triggeredAlerts.length})
+              🎯 Alarm Terpicu ({triggeredAlerts.length})
             </h4>
             {triggeredAlerts.length > 0 && (
               <button 
@@ -235,29 +301,40 @@ export default function PriceAlertsManager({
             </p>
           ) : (
             <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
-              {triggeredAlerts.map((alert) => (
-                <div key={alert.id} className="bg-emerald-950/10 border border-emerald-500/20 p-2.5 rounded-xl flex items-start gap-2.5 relative">
-                  <div className="w-6 h-6 rounded-md bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-emerald-400 font-mono">{alert.ticker}</span>
-                      <span className="text-[9px] text-slate-500 font-mono">{alert.triggeredAt || "Baru saja"}</span>
+              {triggeredAlerts.map((alert) => {
+                const isSell = alert.type === "SELL";
+                return (
+                  <div key={alert.id} className="bg-emerald-950/10 border border-emerald-500/20 p-2.5 rounded-xl flex items-start gap-2.5 relative">
+                    <div className="w-6 h-6 rounded-md bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                     </div>
-                    <p className="text-[10px] text-slate-300 leading-normal mt-0.5">
-                      Telah menembus target harga <span className="font-bold text-white font-mono">Rp {alert.targetPrice.toLocaleString("id-ID")}</span> {alert.condition === "ABOVE" ? "ke atas (bullish)" : "ke bawah (bearish)"}.
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-emerald-400 font-mono">{alert.ticker}</span>
+                        <span className="text-[9px] text-slate-500 font-mono">{alert.triggeredAt || "Baru saja"}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-300 leading-normal mt-0.5">
+                        {isSell ? (
+                          <>
+                            Target jual (profit taking) <span className="font-bold text-emerald-400 font-mono">Rp {alert.targetPrice.toLocaleString("id-ID")}</span> telah tertembus ke atas! 🎉
+                          </>
+                        ) : (
+                          <>
+                            Telah menembus target harga <span className="font-bold text-white font-mono">Rp {alert.targetPrice.toLocaleString("id-ID")}</span> {alert.condition === "ABOVE" ? "ke atas (bullish)" : "ke bawah (bearish)"}.
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => onDeleteAlert(alert.id)}
+                      className="p-1 rounded-md text-slate-500 hover:text-white transition-all cursor-pointer self-start shrink-0"
+                      title="Hapus riwayat ini"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => onDeleteAlert(alert.id)}
-                    className="p-1 rounded-md text-slate-500 hover:text-white transition-all cursor-pointer self-start shrink-0"
-                    title="Hapus riwayat ini"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -267,7 +344,7 @@ export default function PriceAlertsManager({
       {/* Footer info lock */}
       <div className="border-t border-cyan-900/20 pt-3 mt-4 text-[9.5px] text-slate-500 font-mono text-center flex items-center justify-center gap-1">
         <Smartphone className="w-3.5 h-3.5 text-cyan-500/50" />
-        <span>Sistem Notifikasi Dashboard Realtime SahamIndo</span>
+        <span>Sistem Notifikasi Dashboard Realtime CuaninAja</span>
       </div>
     </motion.div>
   );

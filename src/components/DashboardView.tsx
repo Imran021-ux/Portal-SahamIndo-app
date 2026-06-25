@@ -25,7 +25,7 @@ import { marketData } from "../marketData";
 import { DataService } from "../dataService";
 import { getStockPrice, StockPriceData, getStockHistory, StockHistoricalData } from "../lib/api";
 import { 
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid 
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ComposedChart, Bar, Cell 
 } from "recharts";
 
 interface DashboardViewProps {
@@ -135,6 +135,38 @@ const getRatingBadge = (changePercent: number, type?: 'gainer' | 'loser' | 'acti
   );
 };
 
+const CustomCandlestickTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const isUp = data.close >= data.open;
+    return (
+      <div className="bg-[#03070c]/95 border border-cyan-500/20 p-3 rounded-xl shadow-2xl font-mono text-xs text-slate-200 space-y-1 z-50">
+        <div className="text-slate-400 font-bold border-b border-white/5 pb-1 mb-1">
+          Waktu: {data.time} WIB
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <span className="text-slate-400">Open:</span>
+          <span className="font-bold text-slate-100">{Math.round(data.open).toLocaleString("id-ID")}</span>
+          <span className="text-slate-400">Close:</span>
+          <span className={`font-bold ${isUp ? "text-emerald-400" : "text-rose-400"}`}>
+            {Math.round(data.close).toLocaleString("id-ID")}
+          </span>
+          <span className="text-slate-400">High:</span>
+          <span className="font-bold text-emerald-400">{Math.round(data.high).toLocaleString("id-ID")}</span>
+          <span className="text-slate-400">Low:</span>
+          <span className="font-bold text-rose-400">{Math.round(data.low).toLocaleString("id-ID")}</span>
+        </div>
+        <div className="pt-1.5 border-t border-white/5 mt-1 text-[9px] text-slate-500 text-center">
+          Perubahan: <span className={isUp ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+            {(data.close - data.open) >= 0 ? "+" : ""}{(data.close - data.open).toFixed(2)}
+          </span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function DashboardView({ 
   stocks, 
   onSelectStock, 
@@ -205,6 +237,7 @@ export default function DashboardView({
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
   const [hoveredIHSGIndex, setHoveredIHSGIndex] = useState<number | null>(null);
   const [isBursaModalOpen, setIsBursaModalOpen] = useState<boolean>(false);
+  const [ihsgChartMode, setIhsgChartMode] = useState<"area" | "candlestick">("candlestick");
   const [showDetailHub, setShowDetailHub] = useState<boolean>(false);
 
   // States & trigger for portfolio values background-flash animations on price updates
@@ -1997,8 +2030,32 @@ export default function DashboardView({
                 </div>
               </div>
 
-              {/* Countdown or active status controls */}
-              <div className="flex items-center gap-3 self-start md:self-auto text-[10.5px] font-mono">
+              {/* Countdown or active status controls & Chart Mode Toggles */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start md:self-auto text-[10.5px] font-mono">
+                {/* Mode Selector */}
+                <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-cyan-900/40">
+                  <button
+                    onClick={() => setIhsgChartMode("area")}
+                    className={`px-2.5 py-1 rounded text-[9.5px] font-bold uppercase transition-all ${
+                      ihsgChartMode === "area" 
+                        ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30" 
+                        : "text-slate-400 hover:text-slate-200 border border-transparent"
+                    }`}
+                  >
+                    Area JATS
+                  </button>
+                  <button
+                    onClick={() => setIhsgChartMode("candlestick")}
+                    className={`px-2.5 py-1 rounded text-[9.5px] font-bold uppercase transition-all ${
+                      ihsgChartMode === "candlestick" 
+                        ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30" 
+                        : "text-slate-400 hover:text-slate-200 border border-transparent"
+                    }`}
+                  >
+                    Candlestick
+                  </button>
+                </div>
+
                 <div className="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-cyan-900/40 select-none">
                   <span className="text-slate-500 font-bold uppercase">Sesi Sebelumnya:</span>{" "}
                   <strong className="text-slate-300">{prevAssetPrice.toLocaleString("id-ID", { minimumFractionDigits: 2 })}</strong>
@@ -2013,155 +2070,224 @@ export default function DashboardView({
               </div>
             </div>
 
-            {/* SVG Interactive Area Chart (Grafik Area Interaktif) */}
-            <div className="relative h-[160px] w-full bg-[#02070c]/50 rounded-xl p-3 border border-slate-900/80">
-              <div className="absolute top-2 left-2 text-[8px] uppercase font-mono tracking-widest text-[#475569] pointer-events-none select-none flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${isPositive ? "bg-emerald-400" : "bg-rose-500"}`}></span> Live JATS Tick Updates (Minute Interval Close)
-              </div>
-              
-              <svg 
-                className="w-full h-full cursor-crosshair pb-1"
-                viewBox="0 0 800 145" 
-                preserveAspectRatio="none"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const xPos = e.clientX - rect.left;
-                  const ratio = xPos / rect.width;
-                  const idx = Math.min(99, Math.max(0, Math.round(ratio * 99)));
-                  setHoveredIHSGIndex(idx);
-                }}
-                onTouchMove={(e) => {
-                  if (e.touches.length > 0) {
+            {ihsgChartMode === "area" ? (
+              /* SVG Interactive Area Chart (Grafik Area Interaktif) */
+              <div className="relative h-[160px] w-full bg-[#02070c]/50 rounded-xl p-3 border border-slate-900/80">
+                <div className="absolute top-2 left-2 text-[8px] uppercase font-mono tracking-widest text-[#475569] pointer-events-none select-none flex items-center gap-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isPositive ? "bg-emerald-400" : "bg-rose-500"}`}></span> Live JATS Tick Updates (Minute Interval Close)
+                </div>
+                
+                <svg 
+                  className="w-full h-full cursor-crosshair pb-1"
+                  viewBox="0 0 800 145" 
+                  preserveAspectRatio="none"
+                  onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
-                    const xPos = e.touches[0].clientX - rect.left;
+                    const xPos = e.clientX - rect.left;
                     const ratio = xPos / rect.width;
                     const idx = Math.min(99, Math.max(0, Math.round(ratio * 99)));
                     setHoveredIHSGIndex(idx);
-                  }
-                }}
-                onMouseLeave={() => setHoveredIHSGIndex(null)}
-                onTouchEnd={() => setHoveredIHSGIndex(null)}
-              >
-                <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={trendColor} stopOpacity="0.38" />
-                    <stop offset="100%" stopColor={trendColor} stopOpacity="0.00" />
-                  </linearGradient>
-                  
-                  {/* Glowing Filter configuration */}
-                  <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-
-                {/* Grid lines benchmarks references */}
-                <line x1="0" y1="15" x2="715" y2="15" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
-                <line x1="0" y1="67.5" x2="715" y2="67.5" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
-                <line x1="0" y1="120" x2="715" y2="120" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
-
-                {/* Prev close line (dashed) */}
-                <line 
-                  x1="0" 
-                  y1={supportY} 
-                  x2="715" 
-                  y2={supportY} 
-                  stroke="rgba(148, 163, 184, 0.22)" 
-                  strokeWidth="1.2" 
-                  strokeDasharray="4 3" 
-                />
-
-                {/* Area Transparent Gradient Fill */}
-                <motion.path 
-                  d={areaPath} 
-                  fill={`url(#${gradientId})`}
-                  animate={{ d: areaPath }}
-                  transition={{ type: "spring", stiffness: 60, damping: 15 }}
-                />
-
-                {/* Glowing neon line (warna cyan/green if up, magenta/red if down - clean dual path glow layer simulating bloom filter without browser hardware noise artifacts) */}
-                <motion.path 
-                  d={linePath} 
-                  fill="none" 
-                  stroke={trendColor} 
-                  strokeWidth="6" 
-                  strokeLinecap="butt" 
-                  strokeLinejoin="round"
-                  opacity="0.15"
-                  className="pointer-events-none"
-                  animate={{ d: linePath }}
-                  transition={{ type: "spring", stiffness: 60, damping: 15 }}
-                />
-
-                <motion.path 
-                  d={linePath} 
-                  fill="none" 
-                  stroke={trendColor} 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  className="pointer-events-none"
-                  animate={{ d: linePath }}
-                  transition={{ type: "spring", stiffness: 60, damping: 15 }}
-                />
-
-                {/* Clean terminal price endpoint dot (no outer pulsing shadow rings/waves as requested) */}
-                {svgPoints.length > 0 && (
-                  <g>
-                    <circle 
-                      cx={svgPoints[svgPoints.length - 1].x} 
-                      cy={svgPoints[svgPoints.length - 1].y} 
-                      r="4.5" 
-                      fill={trendColor} 
-                    />
-                  </g>
-                )}
-
-                {/* Hover line indicators & crosshairs */}
-                {activePoint && (
-                  <>
-                    <line x1={activePoint.x} y1="0" x2={activePoint.x} y2="145" stroke="rgba(255, 255, 255, 0.18)" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="0" y1={activePoint.y} x2="715" y2={activePoint.y} stroke="rgba(255, 255, 255, 0.18)" strokeWidth="1" strokeDasharray="3 3" />
-                    <circle cx={activePoint.x} cy={activePoint.y} r="5" fill={trendColor} />
-                    <circle cx={activePoint.x} cy={activePoint.y} r="11" fill="none" stroke={trendColor} strokeWidth="1.2" className="animate-ping" />
-                  </>
-                )}
-
-                {/* Y-axis metrics markings right side - neatly offsetted with font updates to avoid overlap */}
-                {tickValues.map((tick, tIdx) => {
-                  const tickY = 15 + (1 - (tick - minVal) / range) * 105;
-                  return (
-                    <g key={tIdx}>
-                      <text x="724" y={tickY + 3} fill="#64748b" fontSize="8.5" className="font-mono font-bold" textAnchor="start">
-                        {tick.toLocaleString("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Interactive Info overlay metadata bubble */}
-              {hoveredIHSGIndex !== null && activePoint && (
-                <div 
-                  className={`absolute bg-slate-950/95 border border-slate-900 rounded-xl p-3 shadow-2xl z-20 pointer-events-none text-xs font-mono space-y-1 transition-all text-slate-200`}
-                  style={{
-                    left: `${(hoveredIHSGIndex / 99) * 88 + 1.5}%`,
-                    transform: `translateX(${hoveredIHSGIndex > 65 ? '-103%' : '5%'})`,
-                    top: "15px"
                   }}
+                  onTouchMove={(e) => {
+                    if (e.touches.length > 0) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const xPos = e.touches[0].clientX - rect.left;
+                      const ratio = xPos / rect.width;
+                      const idx = Math.min(99, Math.max(0, Math.round(ratio * 99)));
+                      setHoveredIHSGIndex(idx);
+                    }
+                  }}
+                  onMouseLeave={() => setHoveredIHSGIndex(null)}
+                  onTouchEnd={() => setHoveredIHSGIndex(null)}
                 >
-                  <div className="flex items-center gap-1.5 text-[8.5px] text-slate-450 uppercase">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-450" />
-                    <span>Waktu: <strong className="text-slate-350">{getMockTimeForIHSG(hoveredIHSGIndex)} WIB</strong></span>
+                  <defs>
+                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={trendColor} stopOpacity="0.38" />
+                      <stop offset="100%" stopColor={trendColor} stopOpacity="0.00" />
+                    </linearGradient>
+                    
+                    {/* Glowing Filter configuration */}
+                    <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3.5" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+
+                  {/* Grid lines benchmarks references */}
+                  <line x1="0" y1="15" x2="715" y2="15" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+                  <line x1="0" y1="67.5" x2="715" y2="67.5" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+                  <line x1="0" y1="120" x2="715" y2="120" stroke="rgba(255, 255, 255, 0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+
+                  {/* Prev close line (dashed) */}
+                  <line 
+                    x1="0" 
+                    y1={supportY} 
+                    x2="715" 
+                    y2={supportY} 
+                    stroke="rgba(148, 163, 184, 0.22)" 
+                    strokeWidth="1.2" 
+                    strokeDasharray="4 3" 
+                  />
+
+                  {/* Area Transparent Gradient Fill */}
+                  <motion.path 
+                    d={areaPath} 
+                    fill={`url(#${gradientId})`}
+                    animate={{ d: areaPath }}
+                    transition={{ type: "spring", stiffness: 60, damping: 15 }}
+                  />
+
+                  {/* Glowing neon line (warna cyan/green if up, magenta/red if down - clean dual path glow layer simulating bloom filter without browser hardware noise artifacts) */}
+                  <motion.path 
+                    d={linePath} 
+                    fill="none" 
+                    stroke={trendColor} 
+                    strokeWidth="6" 
+                    strokeLinecap="butt" 
+                    strokeLinejoin="round"
+                    opacity="0.15"
+                    className="pointer-events-none"
+                    animate={{ d: linePath }}
+                    transition={{ type: "spring", stiffness: 60, damping: 15 }}
+                  />
+
+                  <motion.path 
+                    d={linePath} 
+                    fill="none" 
+                    stroke={trendColor} 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="pointer-events-none"
+                    animate={{ d: linePath }}
+                    transition={{ type: "spring", stiffness: 60, damping: 15 }}
+                  />
+
+                  {/* Clean terminal price endpoint dot (no outer pulsing shadow rings/waves as requested) */}
+                  {svgPoints.length > 0 && (
+                    <g>
+                      <circle 
+                        cx={svgPoints[svgPoints.length - 1].x} 
+                        cy={svgPoints[svgPoints.length - 1].y} 
+                        r="4.5" 
+                        fill={trendColor} 
+                      />
+                    </g>
+                  )}
+
+                  {/* Hover line indicators & crosshairs */}
+                  {activePoint && (
+                    <>
+                      <line x1={activePoint.x} y1="0" x2={activePoint.x} y2="145" stroke="rgba(255, 255, 255, 0.18)" strokeWidth="1" strokeDasharray="3 3" />
+                      <line x1="0" y1={activePoint.y} x2="715" y2={activePoint.y} stroke="rgba(255, 255, 255, 0.18)" strokeWidth="1" strokeDasharray="3 3" />
+                      <circle cx={activePoint.x} cy={activePoint.y} r="5" fill={trendColor} />
+                      <circle cx={activePoint.x} cy={activePoint.y} r="11" fill="none" stroke={trendColor} strokeWidth="1.2" className="animate-ping" />
+                    </>
+                  )}
+
+                  {/* Y-axis metrics markings right side - neatly offsetted with font updates to avoid overlap */}
+                  {tickValues.map((tick, tIdx) => {
+                    const tickY = 15 + (1 - (tick - minVal) / range) * 105;
+                    return (
+                      <g key={tIdx}>
+                        <text x="724" y={tickY + 3} fill="#64748b" fontSize="8.5" className="font-mono font-bold" textAnchor="start">
+                          {tick.toLocaleString("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+
+                {/* Interactive Info overlay metadata bubble */}
+                {hoveredIHSGIndex !== null && activePoint && (
+                  <div 
+                    className={`absolute bg-slate-950/95 border border-slate-900 rounded-xl p-3 shadow-2xl z-20 pointer-events-none text-xs font-mono space-y-1 transition-all text-slate-200`}
+                    style={{
+                      left: `${(hoveredIHSGIndex / 99) * 88 + 1.5}%`,
+                      transform: `translateX(${hoveredIHSGIndex > 65 ? '-103%' : '5%'})`,
+                      top: "15px"
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5 text-[8.5px] text-slate-450 uppercase">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-450" />
+                      <span>Waktu: <strong className="text-slate-350">{getMockTimeForIHSG(hoveredIHSGIndex)} WIB</strong></span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <span className="text-sm font-black text-white">
+                        {activePoint.price.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-sm font-black text-white">
-                      {activePoint.price.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
+                )}
+              </div>
+            ) : (() => {
+              const formattedCandleData = ihsgCandles.map((c) => {
+                const isUp = c.close >= c.open;
+                return {
+                  ...c,
+                  wick: [c.low, c.high],
+                  body: [Math.min(c.open, c.close), Math.max(c.open, c.close)],
+                  isUp,
+                };
+              });
+              return (
+                /* Interactive Recharts Candlestick Chart */
+                <div className="relative h-[180px] w-full bg-[#02070c]/50 rounded-xl p-3 border border-slate-900/80">
+                  <div className="absolute top-2 left-2 text-[8px] uppercase font-mono tracking-widest text-[#475569] pointer-events-none select-none flex items-center gap-1 z-10">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isPositive ? "bg-emerald-400" : "bg-rose-500"}`}></span> Interactive IHSG OHLC Candlestick (Interaktif Recharts)
                   </div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={formattedCandleData} margin={{ top: 18, right: 10, left: 10, bottom: 5 }}>
+                      <XAxis 
+                        dataKey="time" 
+                        stroke="#475569" 
+                        fontSize={8.5} 
+                        tickLine={false} 
+                        axisLine={false} 
+                        dy={4}
+                        className="font-mono font-medium"
+                      />
+                      <YAxis 
+                        domain={["auto", "auto"]} 
+                        stroke="#475569" 
+                        fontSize={8.5} 
+                        tickLine={false} 
+                        axisLine={false} 
+                        orientation="right" 
+                        dx={4}
+                        className="font-mono font-medium"
+                        tickFormatter={(val) => Math.round(val).toLocaleString("id-ID")}
+                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.2} vertical={false} />
+                      <Tooltip 
+                        content={<CustomCandlestickTooltip />} 
+                        cursor={{ stroke: '#1e293b', strokeWidth: 1 }}
+                      />
+                      {/* Wick (Low-High Shadow Line) */}
+                      <Bar dataKey="wick" barSize={1.5} fill="none" legendType="none">
+                        {formattedCandleData.map((entry, idx) => (
+                          <Cell 
+                            key={`wick-${idx}`} 
+                            fill={entry.isUp ? "#10b981" : "#ef4444"} 
+                            stroke={entry.isUp ? "#10b981" : "#ef4444"} 
+                          />
+                        ))}
+                      </Bar>
+                      {/* Body (Open-Close Rect) */}
+                      <Bar dataKey="body" barSize={12} legendType="none">
+                        {formattedCandleData.map((entry, idx) => (
+                          <Cell 
+                            key={`body-${idx}`} 
+                            fill={entry.isUp ? "#10b981" : "#ef4444"} 
+                            stroke={entry.isUp ? "#10b981" : "#ef4444"} 
+                          />
+                        ))}
+                      </Bar>
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
         );
       })()}
@@ -2275,69 +2401,45 @@ export default function DashboardView({
         </div>
 
       </div>
-      {/* 🔮 FITUR REKOMENDASI SAHAM • KATEGORI AKUMULASI, DISTRIBUSI & HOLD SEMUA EMITEN IDX */}
-      <div id="bsjp-section-header" className="bg-[#010a11] border border-cyan-500/15 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 scroll-mt-20">
+           <div id="bsjp-section-header" className="bg-[#010a11] border border-cyan-500/15 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 scroll-mt-20">
         
         {/* Glow visual effects */}
         <div className="absolute top-0 right-0 w-80 h-40 bg-cyan-500/5 blur-3xl pointer-events-none rounded-full" />
         
         <div className="space-y-4">
           
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-950/40 pb-3">
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-black tracking-widest text-[#c1a067] uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse animate-duration-1000"></span>
-                <span className="font-mono text-[11px]">Rekomendasi Scanner Saham Pilihan bursa efek indonesia</span>
-                <span className="text-[10px] bg-slate-950 font-mono text-emerald-400 px-2.5 py-0.5 rounded border border-cyan-900/40">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span className="text-[10px] bg-slate-950 font-mono text-emerald-400 px-2.5 py-0.5 rounded border border-cyan-900/40 font-bold uppercase tracking-wider">
                   Update: {autoUpdateInfo}
                 </span>
               </div>
-              <h2 className="text-lg font-black text-white tracking-wider font-display uppercase mt-1">
-                DETEKTOR ALIRAN DANA: AKUMULASI & DISTRIBUSI EMITEN (Terkoneksi 100% IDX)
+              <h2 className="text-base font-black text-white tracking-widest font-display uppercase mt-1.5">
+                DETEKTOR ALIRAN DANA
               </h2>
             </div>
             
-            {/* In-Panel Search Bar + Price Filter for All IDX Stocks */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-              {/* Price Filter Selection */}
-              <div className="flex items-center space-x-2 bg-slate-950/85 border border-[#1e293b]/70 rounded-xl px-2.5 py-1.5 shrink-0 select-none">
-                <span className="text-[10px] uppercase font-bold text-slate-400 font-mono pl-0.5">Filter Harga:</span>
-                <select
-                  value={bsjpPriceFilter}
-                  onChange={(e) => setBsjpPriceFilter(e.target.value)}
-                  className="bg-transparent border-none text-[11.5px] text-cyan-400 font-black focus:outline-none focus:ring-0 font-mono pr-2 cursor-pointer"
-                >
-                  <option value="all" className="bg-[#020a10] text-slate-300">Semua Harga</option>
-                  <option value="under500" className="bg-[#020a10] text-slate-300">&lt; Rp500 (Penny)</option>
-                  <option value="500-2000" className="bg-[#020a10] text-slate-300">Rp500 - Rp2.000</option>
-                  <option value="2000-5000" className="bg-[#020a10] text-slate-300">Rp2.000 - Rp5.000</option>
-                  <option value="above5000" className="bg-[#020a10] text-slate-300">&gt; Rp5.000 (Blue Chip)</option>
-                </select>
-              </div>
-
-              <div className="flex items-center space-x-2 bg-slate-950/85 border border-[#1e293b]/70 rounded-xl px-3 py-1.5 w-full lg:w-64 shadow-inner">
-                <Search className="w-4 h-4 text-cyan-500" />
-                <input
-                  type="text"
-                  placeholder="Cari kode/nama emiten bursa..."
-                  value={bsjpSearchQuery}
-                  onChange={(e) => setBsjpSearchQuery(e.target.value)}
-                  className="bg-transparent border-none text-xs text-white placeholder-slate-500 font-bold focus:outline-none w-full"
-                />
-                {bsjpSearchQuery && (
-                  <button 
-                    onClick={() => setBsjpSearchQuery("")} 
-                    className="text-slate-500 hover:text-white font-bold text-xs"
-                  >
-                    X
-                  </button>
-                )}
-              </div>
+            {/* Simple Price Filter for All IDX Stocks */}
+            <div className="flex items-center space-x-2 bg-slate-950/85 border border-[#1e293b]/70 rounded-xl px-2.5 py-1.5 select-none shrink-0">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono pl-0.5">Filter Harga:</span>
+              <select
+                value={bsjpPriceFilter}
+                onChange={(e) => setBsjpPriceFilter(e.target.value)}
+                className="bg-transparent border-none text-[11.5px] text-cyan-400 font-black focus:outline-none focus:ring-0 font-mono pr-2 cursor-pointer"
+              >
+                <option value="all" className="bg-[#020a10] text-slate-300">Semua Harga</option>
+                <option value="under500" className="bg-[#020a10] text-slate-300">&lt; Rp500</option>
+                <option value="500-2000" className="bg-[#020a10] text-slate-300">Rp500 - Rp2.000</option>
+                <option value="2000-5000" className="bg-[#020a10] text-slate-300">Rp2.000 - Rp5.000</option>
+                <option value="above5000" className="bg-[#020a10] text-slate-300">&gt; Rp5.000</option>
+              </select>
             </div>
           </div>
 
-          {/* Sinyal Tabs: AKUMULASI, DISTRIBUSI, HOLD */}
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          {/* Simplified Tabs: AKUMULASI, DISTRIBUSI, HOLD */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             {(["AKUMULASI", "DISTRIBUSI", "HOLD"] as const).map((tab) => {
               const count = tab === "AKUMULASI" 
                 ? bsjpPartitionedStocks.akumulasi.length 
@@ -2349,16 +2451,16 @@ export default function DashboardView({
                 <button
                   key={tab}
                   onClick={() => setBsjpActiveTab(tab)}
-                  className={`py-2 px-1.5 rounded-xl font-black tracking-widest text-[10.5px] sm:text-[11px] border transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 ${
+                  className={`py-1.5 px-4 rounded-full font-black tracking-wider text-[11px] border transition-all cursor-pointer flex items-center gap-1.5 ${
                     bsjpActiveTab === tab
-                      ? "bg-[#0b2b3e] border-cyan-500/80 text-cyan-300 shadow-md shadow-cyan-500/5 font-extrabold"
-                      : "bg-[#020b12] border-cyan-950/40 text-cyan-700 hover:text-cyan-400 hover:bg-[#041522]"
+                      ? "bg-cyan-950/40 border-cyan-500/50 text-cyan-400 shadow shadow-cyan-500/5"
+                      : "bg-[#020b12] border-cyan-950/40 text-slate-500 hover:text-slate-350"
                   }`}
                 >
                   <span>{tab}</span>
-                  <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono ${
+                  <span className={`px-2 py-0.2 rounded-full text-[9px] font-mono font-bold ${
                     bsjpActiveTab === tab
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                      ? "bg-cyan-500/15 text-cyan-400"
                       : "bg-slate-900 text-slate-500"
                   }`}>
                     {count}
@@ -2368,317 +2470,190 @@ export default function DashboardView({
             })}
           </div>
 
-          {/* DYNAMIC SCROLLABLE LIST OF 2-BOX EMITEN CARDS */}
+          {/* DYNAMIC HORIZONTAL SCROLLABLE LIST OF EMITEN CARDS */}
           {filteredBsjpList.length === 0 ? (
             <div className="text-center py-10 bg-[#020b12] rounded-2xl border border-dashed border-cyan-950/60">
-              <span className="text-xs text-slate-500 font-mono block">Tidak ada emiten cocok untuk kata kunci pencarian &quot;{bsjpSearchQuery}&quot; di kategori {bsjpActiveTab}</span>
-              <button 
-                onClick={() => setBsjpSearchQuery("")}
-                className="mt-3 text-xs text-cyan-400 font-bold hover:underline"
-              >
-                Reset Pencarian
-              </button>
+              <span className="text-xs text-slate-500 font-mono block">Tidak ada emiten cocok di kategori {bsjpActiveTab}</span>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-[10.5px] text-slate-400 font-mono px-1">
-                <span className="flex items-center gap-1.5 text-cyan-400 font-medium font-bold uppercase tracking-wider text-[10px] animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                  <span>Tampilan Panel Grid Full Screen</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono px-1">
+                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[9.5px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span>Geser Samping Untuk Melihat Semua</span>
                 </span>
                 <span>Total: <strong className="text-cyan-400">{filteredBsjpList.length}</strong> Emiten</span>
               </div>
 
-              {(() => {
-                const pageSize = 4;
-                const totalBsjpPages = Math.ceil(filteredBsjpList.length / pageSize);
-                const startIndex = (bsjpPage - 1) * pageSize;
-                const paginatedBsjpList = filteredBsjpList.slice(startIndex, startIndex + pageSize);
+              {/* Horizontal Scrollable Row */}
+              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 w-full scrollbar-thin scrollbar-thumb-cyan-500/20 scrollbar-track-transparent">
+                {filteredBsjpList.map((stock, idx) => {
+                  const globalIdx = idx + 1;
+                  const isUp = stock.changePercent >= 0;
+                  const charCodeSum = stock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+                  
+                  // Theme parameters to mirror top entry colors
+                  let borderHoverClass = "hover:border-emerald-500/35";
+                  let topGradientClass = "from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400";
+                  let textColorClass = "group-hover:text-emerald-300";
+                  let badgeBgClass = "bg-emerald-950 text-emerald-400";
+                  let priceBoxBgClass = "bg-[#06110a]/50 border border-emerald-950/50";
+                  let changeTextColor = isUp ? "text-emerald-400" : "text-rose-400";
+                  let progressFillClass = "bg-gradient-to-r from-emerald-600 to-emerald-400";
+                  let customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.2).toFixed(1);
+                  let flowString = `+Rp ${customNetFlow}B`;
+                  let flowColor = "text-emerald-400";
+                  let bandarStrength = "HEAVY ACCUM";
+                  let signalMagnitude = Math.round(75 + (stock.ticker.charCodeAt(0) % 20));
 
-                return (
-                  <div className="space-y-5">
-                    {/* Adaptive grid of exactly 4 cards per page */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center pb-1 pt-1 w-full">
-                      {paginatedBsjpList.map((stock, idx) => {
-                        const originalIdx = startIndex + idx;
-                        const globalIdx = originalIdx + 1;
-                        const isUp = stock.changePercent >= 0;
-                        const charCodeSum = stock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-                        
-                        // Theme parameters to mirror top entry colors
-                        let borderHoverClass = "hover:border-emerald-500/35";
-                        let topGradientClass = "from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400";
-                        let textColorClass = "group-hover:text-emerald-300";
-                        let badgeBgClass = "bg-emerald-950 text-emerald-400";
-                        let priceBoxBgClass = "bg-[#06110a]/50 border border-emerald-950/50";
-                        let changeTextColor = isUp ? "text-emerald-400" : "text-rose-400";
-                        let progressFillClass = "bg-gradient-to-r from-emerald-600 to-emerald-400";
-                        let customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.2).toFixed(1);
-                        let flowString = `+Rp ${customNetFlow}B`;
-                        let flowColor = "text-emerald-400";
-                        let bandarStrength = "HEAVY ACCUM";
-                        let signalMagnitude = Math.round(75 + (stock.ticker.charCodeAt(0) % 20));
+                  if (bsjpActiveTab === "DISTRIBUSI") {
+                    borderHoverClass = "hover:border-rose-500/35";
+                    topGradientClass = "from-yellow-500/30 via-rose-500/40 to-transparent group-hover:from-yellow-400 group-hover:via-rose-400";
+                    textColorClass = "group-hover:text-rose-300";
+                    badgeBgClass = "bg-rose-950 text-rose-400";
+                    priceBoxBgClass = "bg-[#14050a]/50 border border-rose-955/50";
+                    changeTextColor = isUp ? "text-emerald-400" : "text-[#ef4444]";
+                    progressFillClass = "bg-gradient-to-r from-rose-600 to-rose-400";
+                    customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.8).toFixed(1);
+                    flowString = `-Rp ${customNetFlow}B`;
+                    flowColor = "text-rose-400";
+                    bandarStrength = "MASSIVE DISTRIB";
+                    signalMagnitude = Math.round(70 + (stock.ticker.charCodeAt(0) % 25));
+                  } else if (bsjpActiveTab === "HOLD") {
+                    borderHoverClass = "hover:border-amber-500/35";
+                    topGradientClass = "from-cyan-500/30 via-amber-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-amber-400";
+                    textColorClass = "group-hover:text-amber-300";
+                    badgeBgClass = "bg-amber-950 text-amber-400";
+                    priceBoxBgClass = "bg-[#141005]/50 border border-amber-955/50";
+                    changeTextColor = isUp ? "text-emerald-400" : "text-amber-400";
+                    progressFillClass = "bg-gradient-to-r from-amber-600 to-amber-400";
+                    customNetFlow = ((stock.ticker.charCodeAt(1) % 3) + 0.2).toFixed(1);
+                    flowString = `+Rp ${customNetFlow}B`;
+                    flowColor = "text-amber-400";
+                    bandarStrength = "STABLE SIDEWAYS";
+                    signalMagnitude = Math.round(80 - (charCodeSum % 18));
+                  }
 
-                        if (bsjpActiveTab === "DISTRIBUSI") {
-                          borderHoverClass = "hover:border-rose-500/35";
-                          topGradientClass = "from-yellow-500/30 via-rose-500/40 to-transparent group-hover:from-yellow-400 group-hover:via-rose-400";
-                          textColorClass = "group-hover:text-rose-300";
-                          badgeBgClass = "bg-rose-950 text-rose-400";
-                          priceBoxBgClass = "bg-[#14050a]/50 border border-rose-955/50";
-                          changeTextColor = isUp ? "text-emerald-400" : "text-[#ef4444]";
-                          progressFillClass = "bg-gradient-to-r from-rose-600 to-rose-400";
-                          customNetFlow = ((stock.ticker.charCodeAt(1) % 4) + 1.8).toFixed(1);
-                          flowString = `-Rp ${customNetFlow}B`;
-                          flowColor = "text-rose-400";
-                          bandarStrength = "MASSIVE DISTRIB";
-                          signalMagnitude = Math.round(70 + (stock.ticker.charCodeAt(0) % 25));
-                        } else if (bsjpActiveTab === "HOLD") {
-                          borderHoverClass = "hover:border-amber-500/35";
-                          topGradientClass = "from-cyan-500/30 via-amber-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-amber-400";
-                          textColorClass = "group-hover:text-amber-300";
-                          badgeBgClass = "bg-amber-950 text-amber-400";
-                          priceBoxBgClass = "bg-[#141005]/50 border border-amber-955/50";
-                          changeTextColor = isUp ? "text-emerald-400" : "text-amber-400";
-                          progressFillClass = "bg-gradient-to-r from-amber-600 to-amber-400";
-                          customNetFlow = ((stock.ticker.charCodeAt(1) % 3) + 0.2).toFixed(1);
-                          flowString = `+Rp ${customNetFlow}B`;
-                          flowColor = "text-amber-400";
-                          bandarStrength = "STABLE SIDEWAYS";
-                          signalMagnitude = Math.round(80 - (charCodeSum % 18));
-                        }
+                  const accumSignals = [
+                    "Deteksi Broker Akumulasi Agung",
+                    "Volume Spike Breakout MA50",
+                    "Aktivitas Volume Block Order",
+                    "Institutional Net Buy Momentum",
+                    "Aggressive Bid Support Absorption",
+                    "Sideways Squeeze Accumulation",
+                    "Smart Money Flow Bullish"
+                  ];
+                  const distSignals = [
+                    "Deteksi Distribusi Broker Pekat",
+                    "Volume Spike Bearish Breakdown",
+                    "Aktivitas Block Order Selling",
+                    "Institutional Profit Taking",
+                    "Aggressive Ask Supply Distribution",
+                    "Bearish Trend Continuation Flow",
+                    "Smart Money Exit Distribution"
+                  ];
+                  const holdSignals = [
+                    "Konsolidasi Harga Sideways No-Trend",
+                    "Volume Compression Squeeze",
+                    "Balanced Supply and Demand",
+                    "Trading Range Boundary Stable",
+                    "Institutional Passive Hold State",
+                    "Low Volatility Bollinger Squeeze",
+                    "Sideways Channel Range Bound"
+                  ];
+                  const signalReason = bsjpActiveTab === "AKUMULASI" 
+                    ? accumSignals[charCodeSum % accumSignals.length] 
+                    : bsjpActiveTab === "DISTRIBUSI" 
+                      ? distSignals[charCodeSum % distSignals.length] 
+                      : holdSignals[charCodeSum % holdSignals.length];
 
-                        // Sinyal text lists based on context
-                        const accumSignals = [
-                          "Deteksi Broker Akumulasi Agung",
-                          "Volume Spike Breakout MA50",
-                          "Aktivitas Volume Block Order",
-                          "Institutional Net Buy Momentum",
-                          "Aggressive Bid Support Absorption",
-                          "Sideways Squeeze Accumulation",
-                          "Smart Money Flow Bullish"
-                        ];
-                        const distSignals = [
-                          "Deteksi Distribusi Broker Pekat",
-                          "Volume Spike Bearish Breakdown",
-                          "Aktivitas Block Order Selling",
-                          "Institutional Profit Taking",
-                          "Aggressive Ask Supply Distribution",
-                          "Bearish Trend Continuation Flow",
-                          "Smart Money Exit Distribution"
-                        ];
-                        const holdSignals = [
-                          "Konsolidasi Harga Sideways No-Trend",
-                          "Volume Compression Squeeze",
-                          "Balanced Supply and Demand",
-                          "Trading Range Boundary Stable",
-                          "Institutional Passive Hold State",
-                          "Low Volatility Bollinger Squeeze",
-                          "Sideways Channel Range Bound"
-                        ];
-                        const signalReason = bsjpActiveTab === "AKUMULASI" 
-                          ? accumSignals[charCodeSum % accumSignals.length] 
-                          : bsjpActiveTab === "DISTRIBUSI" 
-                            ? distSignals[charCodeSum % distSignals.length] 
-                            : holdSignals[charCodeSum % holdSignals.length];
-
-                        return (
-                          <motion.div
-                            key={stock.ticker}
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: idx * 0.04 }}
-                            onClick={() => {
-                              setPopupStock(stock);
-                            }}
-                            className={`bg-slate-950/80 border border-slate-900/80 ${borderHoverClass} hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg w-full`}
-                          >
-                            {/* Top Accent Gradient Border */}
-                            <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${topGradientClass} transition-all duration-300`} />
-                            
-                            {/* Header Box */}
-                            <div className="space-y-1 text-left">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-baseline gap-1.5 min-w-0">
-                                  <span className={`text-sm font-black text-white font-mono uppercase tracking-wide ${textColorClass} transition-colors block truncate`}>
-                                    {stock.ticker}
-                                  </span>
-                                  <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]" title={stock.sector}>
-                                    {stock.sector || "IDX"}
-                                  </span>
-                                </div>
-                                <span className={`text-[9px] ${badgeBgClass} font-extrabold px-1.5 py-0.5 rounded font-mono shrink-0`}>
-                                  Rank #{globalIdx}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-slate-400 truncate font-sans font-medium" title={stock.name}>
-                                {stock.name}
-                              </p>
-                            </div>
-
-                            {/* Price and Rise Estimation Summary */}
-                            <div className={`p-2 ${priceBoxBgClass} rounded-lg flex items-center justify-between font-mono`}>
-                              <div className="text-left">
-                                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Live</span>
-                                <span className="text-[11px] font-bold text-white block mt-0.5">Rp{Math.round(stock.currentPrice).toLocaleString("id-ID")}</span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal 1D</span>
-                                <span className={`text-[11px] font-black ${changeTextColor} block mt-0.5`}>
-                                  {stock.changePercent >= 0 ? "▲ +" : "▼ "}{Math.abs(stock.changePercent).toFixed(1)}%
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Volume, Frequency and Bandar Accumulation info! */}
-                            <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans text-left">
-                              <div className="flex justify-between items-center text-slate-450">
-                                <span className="text-slate-500 font-medium">Market Cap:</span>
-                                <span className="font-mono font-bold text-slate-200">{(stock.marketCap / 1000).toFixed(1)}T IDR</span>
-                              </div>
-                              <div className="flex justify-between items-center text-slate-455">
-                                <span className="text-slate-500 font-medium">Volume Lot:</span>
-                                <span className="font-mono font-bold text-sky-400">{(stock.volume / 100).toLocaleString("id-ID")} Lot</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-550 font-medium font-sans">Net Bandar Flow:</span>
-                                <span className={`font-mono font-black ${flowColor}`}>{flowString}</span>
-                              </div>
-                              <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
-                                <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
-                                <span className={`text-[8.5px] font-black rounded px-1.5 py-0.2 font-mono ${badgeBgClass}`}>
-                                  {bandarStrength}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Radar trigger description */}
-                            <div className="space-y-1 text-left">
-                              <span className="text-[8px] text-slate-505 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
-                              <p className="text-[10px] text-slate-350 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
-                                <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {signalReason}
-                              </p>
-                            </div>
-
-                            {/* Action buttons inside card */}
-                            <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
-                              <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
-                              <span className="text-slate-505 font-mono font-bold">Akurasi {signalMagnitude}%</span>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Highly Polished Navigation Buttons */}
-                    {totalBsjpPages > 1 && (
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-cyan-500/10 text-xs text-slate-400">
-                        <div className="text-slate-400 font-mono text-center sm:text-left select-none">
-                          Halaman <strong className="text-cyan-400">{bsjpPage}</strong> dari <strong className="text-white">{totalBsjpPages}</strong>
-                          <span className="text-[10px] text-slate-500 ml-2">({filteredBsjpList.length} emiten total)</span>
-                        </div>
-                        
-                        <div className="flex flex-wrap items-center justify-center gap-1.5">
-                          <button
-                            type="button"
-                            disabled={bsjpPage === 1}
-                            onClick={() => {
-                              setBsjpPage(1);
-                              const el = document.getElementById("bsjp-section-header");
-                              if (el) {
-                                el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }
-                            }}
-                            className="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-900 border border-cyan-900/40 text-cyan-405 text-cyan-400 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition font-black uppercase text-[9.5px]"
-                          >
-                            &lsaquo;&lsaquo; First
-                          </button>
-                          <button
-                            type="button"
-                            disabled={bsjpPage === 1}
-                            onClick={() => {
-                              setBsjpPage(prev => Math.max(1, prev - 1));
-                              const el = document.getElementById("bsjp-section-header");
-                              if (el) {
-                                el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }
-                            }}
-                            className="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-900 border border-cyan-900/40 text-cyan-405 text-cyan-400 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition font-black uppercase text-[9.5px]"
-                          >
-                            &larr; Prev
-                          </button>
-                          
-                          <div className="flex items-center gap-1 select-none">
-                            {Array.from({ length: totalBsjpPages }, (_, i) => i + 1)
-                              .filter(pageNum => {
-                                return (
-                                  pageNum === 1 ||
-                                  pageNum === totalBsjpPages ||
-                                  Math.abs(pageNum - bsjpPage) <= 1
-                                );
-                              })
-                              .map((pageNum, idx, arr) => {
-                                return (
-                                  <React.Fragment key={pageNum}>
-                                    {idx > 0 && arr[idx - 1] !== pageNum - 1 && (
-                                      <span className="text-slate-600 px-0.5">...</span>
-                                    )}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setBsjpPage(pageNum);
-                                        const el = document.getElementById("bsjp-section-header");
-                                        if (el) {
-                                          el.scrollIntoView({ behavior: "smooth", block: "start" });
-                                        }
-                                      }}
-                                      className={`w-7 h-7 flex items-center justify-center rounded-lg border text-[10px] font-mono font-black transition ${
-                                        bsjpPage === pageNum
-                                          ? "bg-cyan-500 text-white border-cyan-400 shadow shadow-cyan-900/30"
-                                          : "bg-slate-950/65 border-cyan-900/20 text-slate-400 hover:text-white hover:bg-slate-900"
-                                      }`}
-                                    >
-                                      {pageNum}
-                                    </button>
-                                  </React.Fragment>
-                                );
-                              })
-                            }
+                  return (
+                    <motion.div
+                      key={stock.ticker}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: Math.min(idx, 8) * 0.03 }}
+                      onClick={() => {
+                        setPopupStock(stock);
+                      }}
+                      className={`bg-slate-950/80 border border-slate-900/80 ${borderHoverClass} hover:scale-[1.01] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg w-72 md:w-80 shrink-0 snap-start`}
+                    >
+                      {/* Top Accent Gradient Border */}
+                      <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${topGradientClass} transition-all duration-300`} />
+                      
+                      {/* Header Box */}
+                      <div className="space-y-1 text-left">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-baseline gap-1.5 min-w-0">
+                            <span className={`text-sm font-black text-white font-mono uppercase tracking-wide ${textColorClass} transition-colors block truncate`}>
+                              {stock.ticker}
+                            </span>
+                            <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]" title={stock.sector}>
+                              {stock.sector || "IDX"}
+                            </span>
                           </div>
+                          <span className={`text-[9px] ${badgeBgClass} font-extrabold px-1.5 py-0.5 rounded font-mono shrink-0`}>
+                            Rank #{globalIdx}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 truncate font-sans font-medium" title={stock.name}>
+                          {stock.name}
+                        </p>
+                      </div>
 
-                          <button
-                            type="button"
-                            disabled={bsjpPage === totalBsjpPages}
-                            onClick={() => {
-                              setBsjpPage(prev => Math.min(totalBsjpPages, prev + 1));
-                              const el = document.getElementById("bsjp-section-header");
-                              if (el) {
-                                el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }
-                            }}
-                            className="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-900 border border-cyan-900/40 text-cyan-405 text-cyan-400 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition font-black uppercase text-[9.5px]"
-                          >
-                            Next &rarr;
-                          </button>
-                          <button
-                            type="button"
-                            disabled={bsjpPage === totalBsjpPages}
-                            onClick={() => {
-                              setBsjpPage(totalBsjpPages);
-                              const el = document.getElementById("bsjp-section-header");
-                              if (el) {
-                                el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              }
-                            }}
-                            className="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-900 border border-cyan-900/40 text-cyan-405 text-cyan-400 rounded-lg disabled:opacity-20 disabled:pointer-events-none transition font-black uppercase text-[9.5px]"
-                          >
-                            Last &rsaquo;&rsaquo;
-                          </button>
+                      {/* Price and Rise Estimation Summary */}
+                      <div className={`p-2 ${priceBoxBgClass} rounded-lg flex items-center justify-between font-mono`}>
+                        <div className="text-left">
+                          <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Harga Live</span>
+                          <span className="text-[11px] font-bold text-white block mt-0.5">Rp{Math.round(stock.currentPrice).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider font-sans">Sinyal 1D</span>
+                          <span className={`text-[11px] font-black ${changeTextColor} block mt-0.5`}>
+                            {stock.changePercent >= 0 ? "▲ +" : "▼ "}{Math.abs(stock.changePercent).toFixed(1)}%
+                          </span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })()}
+
+                      {/* Volume, Frequency and Bandar Accumulation info! */}
+                      <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans text-left">
+                        <div className="flex justify-between items-center text-slate-400">
+                          <span className="text-slate-500 font-medium">Market Cap:</span>
+                          <span className="font-mono font-bold text-slate-200">{(stock.marketCap / 1000).toFixed(1)}T IDR</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-400">
+                          <span className="text-slate-500 font-medium">Volume Lot:</span>
+                          <span className="font-mono font-bold text-sky-400">{(stock.volume / 100).toLocaleString("id-ID")} Lot</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500 font-medium">Net Bandar Flow:</span>
+                          <span className={`font-mono font-black ${flowColor}`}>{flowString}</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
+                          <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
+                          <span className={`text-[8.5px] font-black rounded px-1.5 py-0.2 font-mono ${badgeBgClass}`}>
+                            {bandarStrength}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Radar trigger description */}
+                      <div className="space-y-1 text-left">
+                        <span className="text-[8px] text-slate-500 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
+                        <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
+                          <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {signalReason}
+                        </p>
+                      </div>
+
+                      {/* Action buttons inside card */}
+                      <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
+                        <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
+                        <span className="text-slate-500 font-mono font-bold">Akurasi {signalMagnitude}%</span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -2694,33 +2669,35 @@ export default function DashboardView({
       </div>
 
       {/* 🔮 PREDITOR SIGNAL: TOP ENTRY */}
-      <div id="haka-section" className="bg-gradient-to-r from-emerald-950/25 via-slate-900/60 to-slate-900/40 p-5 rounded-2xl border border-emerald-500/20 space-y-4 shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="p-1 px-2.5 text-[8.5px] font-black bg-emerald-500 text-slate-950 rounded uppercase tracking-widest font-mono">
-                TOP ENTRY RADAR
-              </span>
-              <span className="text-[10px] text-slate-400 font-bold tracking-wider font-sans flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> SINYAL ENTRY CERDAS TERDETEKSI
-              </span>
-            </div>
-            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5 font-sans mt-0.5">
-              <Sparkles className="w-5 h-5 text-emerald-400" /> TOP ENTRY (Volume, Transaksi & Akumulasi Bandar)
-            </h3>
-            <p className="text-[11px] text-slate-400 leading-normal font-sans">
-              Daftar saham prioritas terbaik berdasarkan volume raksasa terbanyak, transaksi frekuensi sangat ramai, atau saham yang sedang diakumulasi oleh bandar/institutional besar guna mengoptimalkan momentum entry Anda.
-            </p>
-          </div>
+      <div id="haka-section" className="bg-[#010a11] border border-emerald-500/15 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 scroll-mt-20">
+        
+        {/* Glow visual effects */}
+        <div className="absolute top-0 right-0 w-80 h-40 bg-emerald-500/5 blur-3xl pointer-events-none rounded-full" />
+        
+        <div className="space-y-4">
           
-          <div className="border border-white/5 rounded-xl px-4 py-2.5 bg-slate-950/70 font-mono text-center sm:text-right flex flex-col justify-center shrink-0">
-            <span className="text-[9px] text-slate-500 uppercase font-black block">RATE AKURASI HISTORIS ENTRY</span>
-            <span className="text-sm font-black text-emerald-400 block mt-0.5 font-mono">91.2% Success Rate</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-950/40 pb-3">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span className="text-[10px] bg-slate-950 font-mono text-emerald-400 px-2.5 py-0.5 rounded border border-cyan-900/40 font-bold uppercase tracking-wider">
+                  Sinyal Entry Cerdas Terdeteksi
+                </span>
+              </div>
+              <h2 className="text-base font-black text-white tracking-widest font-display uppercase mt-1.5">
+                TOP ENTRY RADAR
+              </h2>
+            </div>
+            
+            <div className="border border-white/5 rounded-xl px-4 py-1.5 bg-slate-950/70 font-mono text-center sm:text-right flex flex-col justify-center shrink-0">
+              <span className="text-[9px] text-slate-500 uppercase font-black block">Rate Akurasi Historis</span>
+              <span className="text-xs font-black text-emerald-400 block mt-0.5 font-mono">91.2% Success</span>
+            </div>
           </div>
         </div>
 
         {/* 🏷️ FILTER RANGE HARGA, PERIODE & KRITERIA */}
-        <div className="p-3 bg-slate-950/50 border border-slate-900/80 rounded-xl space-y-3.5">
+        <div className="p-3 bg-slate-950/30 border border-slate-900/60 rounded-xl space-y-3.5">
           {/* Row 1: Kategori Entry */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
             <span className="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider flex items-center gap-1 font-sans shrink-0">
@@ -2853,7 +2830,7 @@ export default function DashboardView({
           )}
         </div>
 
-        {/* Prediction Cards Grid or Empty State */}
+        {/* Prediction Cards Horizontal Scroll or Empty State */}
         {tomorrowBreakouts.length === 0 ? (
           <div className="bg-slate-950/50 border border-slate-900 p-8 rounded-xl text-center space-y-3.5">
             <div className="w-12 h-12 rounded-full bg-[#1b0a0a] border border-rose-950/50 flex items-center justify-center mx-auto text-rose-500 animate-pulse">
@@ -2881,106 +2858,92 @@ export default function DashboardView({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {paginatedBreakouts.map((b) => (
-              <div 
-                key={b.ticker}
-                onClick={() => handleSelectStock(b.ticker)}
-                className="bg-slate-950/80 border border-slate-900/80 hover:border-emerald-500/35 hover:scale-[1.02] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg"
-              >
-                {/* Top Accent Gradient Border */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400 transition-all duration-300" />
-                
-                {/* Header Box */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-sm font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors">{b.ticker}</span>
-                      <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]">{b.sector}</span>
-                    </div>
-                    <span className="text-[9px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
-                      Conf. {b.probability}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 truncate font-sans font-medium">{b.name}</p>
-                </div>
-
-                {/* Price and Rise Estimation Summary */}
-                <div className="p-2 bg-[#06110a]/50 border border-emerald-950/50 rounded-lg flex items-center justify-between">
-                  <div>
-                    <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Harga Penutupan</span>
-                    <span className="text-[11px] font-bold text-white font-mono block mt-0.5">Rp{b.currentPrice.toLocaleString("id-ID")}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[8px] text-emerald-500 block uppercase font-bold tracking-wider">Proj. Kenaikan</span>
-                    <span className="text-[11px] font-black text-emerald-400 font-mono block mt-0.5">{b.targetRise}</span>
-                  </div>
-                </div>
-
-                {/* Volume, Frequency and Bandar Accumulation info! */}
-                <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans">
-                  <div className="flex justify-between items-center text-slate-400">
-                    <span className="text-slate-500 font-medium">Volume Lot:</span>
-                    <span className="font-mono font-bold text-slate-200">{b.volumeLot.toLocaleString("id-ID")} Lot</span>
-                  </div>
-                  <div className="flex justify-between items-center text-slate-400">
-                    <span className="text-slate-500 font-medium">Transaksi (Freq):</span>
-                    <span className="font-mono font-bold text-sky-400">{b.frequencyVal.toLocaleString("id-ID")} x</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-medium font-sans">Net Buy Bandar:</span>
-                    <span className="font-mono font-black text-emerald-400">+Rp {b.accumVal.toFixed(1)}M</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
-                    <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
-                    <span className="text-[8.5px] font-black rounded px-1.5 py-0.2 bg-emerald-950/80 text-emerald-400 font-mono">
-                      {b.bandarStrength}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Radar trigger description */}
-                <div className="space-y-1">
-                  <span className="text-[8px] text-slate-500 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
-                  <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
-                    <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {b.signalReason}
-                  </p>
-                </div>
-
-                {/* Action buttons inside card */}
-                <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
-                  <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
-                  <span className="text-slate-500 font-mono font-bold">{b.periodLabel}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Pagination Controls for Breakout Cards */}
-        {totalBreakoutsPages > 1 && (
-          <div className="flex flex-col sm:flex-row justify-between items-center bg-[#07131d]/30 border border-slate-900 px-4 py-2.5 rounded-xl gap-3 text-xs font-mono">
-            <span className="text-slate-450 font-sans text-slate-400">
-              Menampilkan <strong className="text-emerald-400">{(breakoutsPage - 1) * 4 + 1} - {Math.min(breakoutsPage * 4, tomorrowBreakouts.length)}</strong> dari <strong className="text-[#03a9f4]">{tomorrowBreakouts.length}</strong> emiten bursa terdeteksi radar
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setBreakoutsPage(prev => Math.max(1, prev - 1))}
-                disabled={breakoutsPage === 1}
-                className="px-3 py-1 rounded bg-[#07131d] hover:bg-[#0b2030] disabled:opacity-40 disabled:hover:bg-[#07131d] text-slate-300 cursor-pointer disabled:cursor-not-allowed border border-slate-800/80 transition-all font-bold"
-              >
-                ← Prev (Kiri)
-              </button>
-              <span className="text-slate-350">
-                Halaman <strong className="text-amber-400">{breakoutsPage}</strong> dari <strong className="text-slate-200">{totalBreakoutsPages}</strong>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono px-1">
+              <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[9.5px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Geser Samping Untuk Melihat Semua</span>
               </span>
-              <button
-                onClick={() => setBreakoutsPage(prev => Math.min(totalBreakoutsPages, prev + 1))}
-                disabled={breakoutsPage === totalBreakoutsPages}
-                className="px-3 py-1 rounded bg-[#07131d] hover:bg-[#0b2030] disabled:opacity-40 disabled:hover:bg-[#07131d] text-slate-300 cursor-pointer disabled:cursor-not-allowed border border-slate-800/80 transition-all font-bold"
-              >
-                Next (Kanan) →
-              </button>
+              <span>Total: <strong className="text-emerald-400">{tomorrowBreakouts.length}</strong> Emiten</span>
+            </div>
+
+            {/* Horizontal Scrollable Row */}
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 w-full scrollbar-thin scrollbar-thumb-emerald-500/20 scrollbar-track-transparent">
+              {tomorrowBreakouts.map((b, idx) => (
+                <motion.div 
+                  key={b.ticker}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2, delay: Math.min(idx, 8) * 0.03 }}
+                  onClick={() => handleSelectStock(b.ticker)}
+                  className="bg-slate-950/80 border border-slate-900/80 hover:border-emerald-500/35 hover:scale-[1.01] p-4 rounded-xl flex flex-col justify-between space-y-3.5 cursor-pointer transition-all relative overflow-hidden group shadow-lg w-72 md:w-80 shrink-0 snap-start"
+                >
+                  {/* Top Accent Gradient Border */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500/30 via-emerald-500/40 to-transparent group-hover:from-cyan-400 group-hover:via-emerald-400 transition-all duration-300" />
+                  
+                  {/* Header Box */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-baseline gap-1.5 font-mono">
+                        <span className="text-sm font-black text-white uppercase tracking-wide group-hover:text-emerald-300 transition-colors">{b.ticker}</span>
+                        <span className="text-[9px] text-slate-500 font-bold truncate max-w-[80px]">{b.sector}</span>
+                      </div>
+                      <span className="text-[9px] bg-emerald-950 text-emerald-400 font-extrabold px-1.5 py-0.5 rounded font-mono">
+                        Conf. {b.probability}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 truncate font-sans font-medium">{b.name}</p>
+                  </div>
+
+                  {/* Price and Rise Estimation Summary */}
+                  <div className="p-2 bg-[#06110a]/50 border border-emerald-950/50 rounded-lg flex items-center justify-between">
+                    <div>
+                      <span className="text-[8px] text-slate-500 block uppercase font-bold tracking-wider">Harga Penutupan</span>
+                      <span className="text-[11px] font-bold text-white font-mono block mt-0.5">Rp{b.currentPrice.toLocaleString("id-ID")}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[8px] text-emerald-500 block uppercase font-bold tracking-wider">Proj. Kenaikan</span>
+                      <span className="text-[11px] font-black text-emerald-400 font-mono block mt-0.5">{b.targetRise}</span>
+                    </div>
+                  </div>
+
+                  {/* Volume, Frequency and Bandar Accumulation info! */}
+                  <div className="bg-slate-900/45 border border-white/[0.02] rounded-lg p-2.5 space-y-1.5 text-[10px] font-sans">
+                    <div className="flex justify-between items-center text-slate-400">
+                      <span className="text-slate-500 font-medium">Volume Lot:</span>
+                      <span className="font-mono font-bold text-slate-200">{b.volumeLot.toLocaleString("id-ID")} Lot</span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-400">
+                      <span className="text-slate-500 font-medium">Transaksi (Freq):</span>
+                      <span className="font-mono font-bold text-sky-400">{b.frequencyVal.toLocaleString("id-ID")} x</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 font-medium font-sans">Net Buy Bandar:</span>
+                      <span className="font-mono font-black text-emerald-400">+Rp {b.accumVal.toFixed(1)}M</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 border-t border-white/[0.04]">
+                      <span className="text-slate-500 font-sans text-[8px] font-bold uppercase tracking-wide">Analisa Aliran Dana:</span>
+                      <span className="text-[8.5px] font-black rounded px-1.5 py-0.2 bg-emerald-950/80 text-emerald-400 font-mono">
+                        {b.bandarStrength}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Radar trigger description */}
+                  <div className="space-y-1">
+                    <span className="text-[8px] text-slate-500 block uppercase font-extrabold tracking-wider font-sans">Sinyal Sistem Terkonfirmasi</span>
+                    <p className="text-[10px] text-slate-300 font-medium font-sans leading-relaxed line-clamp-1 flex items-center gap-1.5">
+                      <Zap className="w-3 h-3 text-cyan-400 shrink-0" /> {b.signalReason}
+                    </p>
+                  </div>
+
+                  {/* Action buttons inside card */}
+                  <div className="flex items-center justify-between text-[9px] pt-1.5 border-t border-white/[0.03]">
+                    <span className="text-cyan-400 group-hover:underline font-extrabold font-sans">Detail Analisa &rarr;</span>
+                    <span className="text-slate-500 font-mono font-bold">{b.periodLabel}</span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         )}

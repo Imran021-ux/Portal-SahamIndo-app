@@ -12,6 +12,78 @@ interface LoginViewProps {
   onLoginSuccess: (session: UserSession) => void;
 }
 
+function CuaninAjaLogo({ className = "w-16 h-16" }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 200 200" 
+      className={className} 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Candlesticks on a grid structure */}
+      <line x1="10" y1="160" x2="190" y2="160" stroke="#1e293b" strokeWidth="1" strokeDasharray="3 3" />
+      <line x1="10" y1="110" x2="190" y2="110" stroke="#1e293b" strokeWidth="1" strokeDasharray="3 3" />
+      <line x1="10" y1="60" x2="190" y2="60" stroke="#1e293b" strokeWidth="1" strokeDasharray="3 3" />
+
+      {/* Light Blue Candlestick (Left) */}
+      <rect x="52" y="75" width="2" height="40" fill="#38bdf8" />
+      <rect x="47" y="85" width="12" height="20" rx="1" fill="#38bdf8" />
+
+      {/* Blue-Teal Candlestick (Middle-left) */}
+      <rect x="78" y="55" width="2" height="45" fill="#0ea5e9" />
+      <rect x="73" y="65" width="12" height="25" rx="1" fill="#0ea5e9" />
+
+      {/* Medium Green Candlestick (Middle) */}
+      <rect x="104" y="60" width="2" height="35" fill="#10b981" />
+      <rect x="99" y="68" width="12" height="18" rx="1" fill="#10b981" />
+
+      {/* Tall Green Candlestick (Right) */}
+      <rect x="130" y="35" width="2" height="60" fill="#22c55e" />
+      <rect x="125" y="48" width="12" height="40" rx="1" fill="#22c55e" />
+
+      {/* Swooping Green Upward Arrow */}
+      <path 
+        d="M25 125 C 45 120, 65 110, 85 118 C 105 125, 125 105, 165 48" 
+        stroke="url(#arrow-grad)" 
+        strokeWidth="9" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+      {/* Arrowhead */}
+      <path 
+        d="M142 46 L167 45 L164 70" 
+        stroke="url(#arrow-grad)" 
+        strokeWidth="9" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+
+      {/* Rp Circular Emblem */}
+      <circle cx="148" cy="118" r="17" fill="#022c22" stroke="#22c55e" strokeWidth="2.5" />
+      <text 
+        x="148" 
+        y="122" 
+        fill="#22c55e" 
+        fontSize="11" 
+        fontWeight="900" 
+        fontFamily="system-ui, sans-serif" 
+        textAnchor="middle"
+      >
+        Rp
+      </text>
+
+      {/* Gradients */}
+      <defs>
+        <linearGradient id="arrow-grad" x1="25" y1="125" x2="165" y2="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#0ea5e9" />
+          <stop offset="40%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#22c55e" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 export default function LoginView({ onLoginSuccess }: LoginViewProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -181,17 +253,14 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
 
       {/* Header Brand */}
       <div className="mb-8 flex items-center space-x-3.5 z-10">
-        <img
-          src={logoUrl}
-          alt="SahamIndo Logo"
-          referrerPolicy="no-referrer"
-          className="w-16 h-16 object-cover rounded-xl shadow-lg border border-slate-800 ring-2 ring-white/10"
-        />
+        <div className="w-16 h-16 flex items-center justify-center bg-slate-900/50 rounded-2xl shadow-xl border border-slate-800/80 ring-2 ring-white/5 overflow-hidden">
+          <CuaninAjaLogo className="w-14 h-14" />
+        </div>
         <div>
-          <h1 className="text-2xl font-bold font-display tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            IDX SAHAM REALTIME
+          <h1 className="text-2xl font-black font-display tracking-tight bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 bg-clip-text text-transparent">
+            CUANINAJA
           </h1>
-          <p className="text-xs text-slate-400 tracking-wider">INDONESIAN EQUITY ANALYTICAL PORTAL</p>
+          <p className="text-xs text-slate-400 font-medium tracking-wide">Screneer IHSG Berbasis AI</p>
         </div>
       </div>
 
@@ -199,7 +268,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
       <div className="w-full max-w-md glass-card rounded-2xl p-8 shadow-2xl relative z-10 border border-slate-800">
         <div className="text-center mb-6">
           <h2 className="text-xl font-semibold text-white tracking-tight leading-relaxed">
-            {isLogin ? "Selamat Datang di Portal Saham Indo" : "Daftar Akun"}
+            {isLogin ? "Selamat Datang Di Cuanin Aja" : "Daftar Akun"}
           </h2>
           {!isLogin && (
             <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
@@ -380,7 +449,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
               {!isAddingCustomGoogle ? (
                 <>
                   <h3 className="text-base font-bold text-white mt-4 font-sans text-slate-100">Pilih akun</h3>
-                  <p className="text-xs text-slate-400 mt-1">untuk melanjutkan ke SahamIndo</p>
+                  <p className="text-xs text-slate-400 mt-1">untuk melanjutkan ke CuaninAja.id</p>
                 </>
               ) : (
                 <>
@@ -622,7 +691,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                 <div className="p-3.5 bg-blue-950/20 border border-blue-900/30 rounded-xl space-y-1">
                   <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-blue-305">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping"></span>
-                    KODE VERIFIKASI IDX SAHAMINDO
+                    KODE VERIFIKASI IDX CUANINAJA
                   </div>
                   <p className="text-[10px] text-slate-400 leading-relaxed">
                     Sistem otomatis mengirimkan kode verifikasi 6-digit ke email pendaftaran Anda. Gunakan kode demo aktif: {" "}

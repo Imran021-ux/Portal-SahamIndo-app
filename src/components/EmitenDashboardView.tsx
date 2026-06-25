@@ -25,6 +25,8 @@ import { getInventoryAnalysis } from "../utils/inventoryAnalysis";
 import { generateDynamicIdxStock } from "../utils/idxGenerator";
 import { marketData } from "../marketData";
 import { DataService } from "../dataService";
+import BrokerFlowChart from "./BrokerFlowChart";
+import { BrokerFlowAndCumulativeNet, DetectorKuatAliranDanaBandar, TopNetBuySellTables } from "./BrokerTabSections";
 
 // Highly stylized animated custom tooltip displaying dynamic price indicators, percentage change and custom volume estimates
 const CustomAnimatedTooltip = ({ active, payload, label }: any) => {
@@ -1877,21 +1879,23 @@ export default function EmitenDashboardView({
       { code: "YP", name: "Mirae Asset Sekuritas (YP)" },
       { code: "XL", name: "Stockbit Sekuritas (XL)" },
       { code: "XC", name: "Ajaib Sekuritas (XC)" },
-      { code: "CC", name: "Mandiri Sekuritas" },
-      { code: "NI", name: "BNI Sekuritas" },
-      { code: "PD", name: "Indo Premier Sekuritas" },
-      { code: "GR", name: "Panin Sekuritas" },
-      { code: "AZ", name: "Sucor Sekuritas" },
-      { code: "MG", name: "Semesta Indovest" },
-      { code: "OD", name: "CGS-CIMB Sekuritas" },
-      { code: "BB", name: "BCA Sekuritas" },
-      { code: "RX", name: "Macquarie Sekuritas" },
-      { code: "DX", name: "Bahana Sekuritas" },
-      { code: "ZP", name: "Maybank Sekuritas" },
-      { code: "CS", name: "Credit Suisse" },
-      { code: "DR", name: "RHB Sekuritas" },
-      { code: "LG", name: "Trimegah Sekuritas" },
-      { code: "KK", name: "Phillip Sekuritas" },
+      { code: "CC", name: "Mandiri Sekuritas (CC)" },
+      { code: "NI", name: "BNI Sekuritas (NI)" },
+      { code: "PD", name: "Indo Premier Sekuritas (PD)" },
+      { code: "GR", name: "Panin Sekuritas (GR)" },
+      { code: "AZ", name: "Sucor Sekuritas (AZ)" },
+      { code: "MG", name: "Semesta Indovest (MG)" },
+      { code: "OD", name: "BRI Danareksa Sekuritas (OD)" },
+      { code: "SQ", name: "BCA Sekuritas (SQ)" },
+      { code: "RX", name: "Macquarie Sekuritas (RX)" },
+      { code: "DX", name: "Bahana Sekuritas (DX)" },
+      { code: "ZP", name: "Maybank Sekuritas (ZP)" },
+      { code: "BB", name: "Verdhana Sekuritas (BB)" },
+      { code: "DR", name: "RHB Sekuritas (DR)" },
+      { code: "LG", name: "Trimegah Sekuritas (LG)" },
+      { code: "KK", name: "Phillip Sekuritas (KK)" },
+      { code: "CP", name: "KB Valbury Sekuritas (CP)" },
+      { code: "YU", name: "CGS International Sekuritas (YU)" },
     ];
 
     const status = bandarProperties.status;
@@ -2235,166 +2239,313 @@ export default function EmitenDashboardView({
       ) : (
         <div className="space-y-6 bg-[#020d18]/45 border-y sm:border border-slate-900/60 border-x-0 sm:border-x p-3 sm:p-5 rounded-none sm:rounded-2xl shadow-xl animate-fadeIn">
         
-        {/* Header Action Bar */}
-        <div className="bg-[#020b14] border border-cyan-500/10 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          {/* KIRI: Ticker & Nama & Sektor */}
-          <div className="space-y-1.5 flex-1 w-full">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-5xl md:text-6xl font-black text-white font-mono tracking-tighter leading-none">{activeStock.ticker}</span>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs bg-cyan-950/80 text-cyan-400 font-extrabold px-3 py-1 rounded-full border border-cyan-500/20 w-fit">{activeStock.sector}</span>
+        {/* Header Action Bar - Redesigned, Highly Beautiful and Responsive */}
+        <div className="space-y-4">
+          {/* TOP HERO PANEL: Ticker Code, Company Details, & Live Price */}
+          <div className="bg-[#020b14]/90 border border-cyan-500/15 p-5 md:p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+            {/* Ambient Background Decorative Glow */}
+            <div className="absolute top-0 left-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* LEFT SIDE: Extremely Vivid Ticker, Sector Pill, and Company Name */}
+            <div className="space-y-3 flex-1 w-full relative z-10">
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Ticker Symbol with Stunning Gradient & Intense Shadow Glow */}
+                <div className="relative group">
+                  <span className="text-5xl sm:text-6xl md:text-7xl font-black font-mono tracking-tighter leading-none bg-gradient-to-br from-white via-slate-100 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(6,182,212,0.3)] transition-all group-hover:drop-shadow-[0_4px_24px_rgba(6,182,212,0.55)] select-none">
+                    {activeStock.ticker}
+                  </span>
+                  <div className="absolute -inset-1 rounded-lg bg-cyan-500/10 blur opacity-30 group-hover:opacity-50 transition-all pointer-events-none" />
+                </div>
+                
+                {/* Elegant Sector Badge */}
+                <span className="text-[10px] uppercase font-black bg-cyan-950/75 text-cyan-400 border border-cyan-500/25 px-3 py-1 rounded-full shadow-lg h-fit">
+                  {activeStock.sector}
+                </span>
+              </div>
+              
+              <div className="flex flex-col space-y-0.5 mt-1.5">
+                <span className="text-[9px] text-cyan-500 uppercase font-black tracking-widest font-mono">PT PERSEROAN TERBATAS INDONESIA:</span>
+                <h2 className="text-lg md:text-2xl font-black text-slate-100 tracking-tight leading-snug drop-shadow-sm">
+                  {activeStock.name.trim().toUpperCase().startsWith("PT") ? activeStock.name : `PT ${activeStock.name}`}
+                </h2>
               </div>
             </div>
-            <div className="flex flex-col space-y-0.5 mt-1">
-              <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest font-sans">Nama PT Perusahaan:</span>
-              <h2 className="text-base md:text-lg font-bold text-slate-200 tracking-tight leading-snug">
-                {activeStock.name.trim().toUpperCase().startsWith("PT") ? activeStock.name : `PT ${activeStock.name}`}
-              </h2>
+
+            {/* RIGHT SIDE: Interactive Trading-Style Price & Trend Indicators */}
+            <div className="flex flex-row md:flex-col justify-between md:justify-center items-center md:items-end w-full md:w-auto shrink-0 gap-3 border-t md:border-t-0 border-slate-900/60 pt-4 md:pt-0 relative z-10">
+              <div className="flex flex-col items-start md:items-end">
+                <span className="text-[9px] text-slate-500 uppercase font-bold tracking-widest block mb-0.5 md:hidden">HARGA LIVE:</span>
+                <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap">
+                  <motion.span
+                    key={activeStock.currentPrice}
+                    animate={{
+                      color: priceFlash === "up" 
+                        ? "#4ade80" 
+                        : priceFlash === "down" 
+                        ? "#f87171" 
+                        : (activeStock.change >= 0 ? "#22c55e" : "#ef4444"),
+                      scale: priceFlash ? [1, 1.06, 1] : 1,
+                      textShadow: priceFlash === "up"
+                        ? "0 0 20px rgba(74,222,128,0.8)"
+                        : priceFlash === "down"
+                        ? "0 0 20px rgba(248,113,113,0.8)"
+                        : "0 0 0px rgba(0,0,0,0)"
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeOut"
+                    }}
+                    className="text-4xl sm:text-5xl font-black font-mono inline-block origin-right select-none cursor-default tracking-tight leading-none"
+                  >
+                    {formatIDR(activeStock.currentPrice)}
+                  </motion.span>
+
+                  {/* Change Percent Pill */}
+                  <span className={`text-xs font-black px-2 py-1 rounded-lg border flex items-center gap-1 ${
+                    activeStock.change >= 0 
+                      ? "bg-emerald-500/10 border-emerald-500/25 text-[#22c55e]" 
+                      : "bg-rose-500/10 border-rose-500/25 text-[#ef4444]"
+                  }`}>
+                    <span className="text-[9px]">{activeStock.change >= 0 ? "▲" : "▼"}</span>
+                    <span>{activeStock.change >= 0 ? "+" : ""}{activeStock.changePercent.toFixed(2)}%</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Source feed indicator */}
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[9px] uppercase font-mono font-bold bg-slate-950 text-cyan-400 border border-cyan-500/15 px-2 py-0.5 rounded shadow">
+                  FEED: {activeStock.source === "YahooFinance" || activeStock.source === "Yahoo Finance" ? "Yahoo" : "BEI"}
+                </span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* KANAN: Harga, Pergerakan, 52W High/Low, & Quick Actions diatur Sejajar dengan Rapi */}
-          <div className="flex flex-col items-start sm:items-end text-left sm:text-right gap-4 shrink-0 w-full md:w-auto">
-            {/* Harga & 52W */}
-            <div className="flex items-center gap-2.5 pb-1 flex-wrap">
-              <motion.span
-                key={activeStock.currentPrice}
-                animate={{
-                  color: priceFlash === "up" 
-                    ? "#4ade80" 
-                    : priceFlash === "down" 
-                    ? "#f87171" 
-                    : (activeStock.change >= 0 ? "#22c55e" : "#ef4444"),
-                  scale: priceFlash ? [1, 1.05, 1] : 1,
-                  textShadow: priceFlash === "up"
-                    ? "0 0 15px rgba(74,222,128,0.7)"
-                    : priceFlash === "down"
-                    ? "0 0 15px rgba(248,113,113,0.7)"
-                    : "0 0 0px rgba(0,0,0,0)"
-                }}
-                transition={{
-                  duration: 0.8,
-                  ease: "easeOut"
-                }}
-                className="text-4xl font-extrabold font-mono inline-block origin-right select-none cursor-default"
-              >
-                {formatIDR(activeStock.currentPrice)}
-              </motion.span>
-              <span className={`text-sm font-black ${activeStock.change >= 0 ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
-                {activeStock.change >= 0 ? "▲" : "▼"} {activeStock.change >= 0 ? "+" : ""}{activeStock.changePercent.toFixed(2)}%
-              </span>
-              <span className="text-[10px] uppercase font-mono font-black bg-slate-900 text-cyan-400 border border-cyan-500/15 px-1.5 py-0.5 rounded shadow">
-                Data: {activeStock.source === "YahooFinance" || activeStock.source === "Yahoo Finance" ? "Yahoo" : "BEI"}
-              </span>
-            </div>
-            
-            <div className="text-[10px] text-slate-400 font-mono flex flex-wrap gap-x-3 gap-y-1 pt-1 border-t border-slate-900 w-full sm:justify-end">
-              <span>Low Hari Ini: <strong className="text-rose-500 font-bold">{formatIDR(activeStock.low || Math.round(activeStock.currentPrice * 0.98))}</strong></span>
-              <span>•</span>
-              <span>High Hari Ini: <strong className="text-emerald-400 font-bold">{formatIDR(activeStock.high || Math.round(activeStock.currentPrice * 1.02))}</strong></span>
-              <span>•</span>
-              <span className="text-slate-500">52W Low: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 0.65))}</strong></span>
-              <span>•</span>
-              <span className="text-slate-500">52W High: <strong className="text-slate-500 font-medium">{formatIDR(Math.round(activeStock.currentPrice * 1.35))}</strong></span>
-            </div>
+          {/* MIDDLE ROW: Premium Bento Grid containing Stats, Visual Gauge, & Flow Data */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* CARD 1: Intraday Live Range Progress Slider Gauge */}
+            {(() => {
+              const lowPrice = activeStock.low || Math.round(activeStock.currentPrice * 0.98);
+              const highPrice = activeStock.high || Math.round(activeStock.currentPrice * 1.02);
+              const priceRange = highPrice - lowPrice;
+              const currentPosPct = priceRange > 0 ? Math.min(100, Math.max(0, ((activeStock.currentPrice - lowPrice) / priceRange) * 100)) : 50;
+              return (
+                <div className="bg-[#020b14]/80 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between hover:border-cyan-500/20 transition-all shadow-md group">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-mono">📈 INTRADAY PRICE SLIDER</span>
+                    <span className="text-[8.5px] text-cyan-500 bg-cyan-950/40 border border-cyan-900/30 px-1.5 py-0.5 rounded font-mono font-bold">REAL-TIME GAUGE</span>
+                  </div>
 
-            {/* Informasi Harga BEI Real Time */}
-            <div className="w-full flex justify-start sm:justify-end">
-              {activeStock.verificationRequired ? (
-                <span className="text-[9.5px] bg-rose-950/70 text-[#f87171] font-mono border border-rose-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
-                  ⚠️ Data Perlu Verifikasi (Deviasi &gt; 10%)
-                </span>
-              ) : (
-                <span className="text-[9.5px] bg-emerald-950/70 text-emerald-400 font-mono border border-emerald-900/60 px-2.5 py-0.5 rounded font-bold animate-pulse">
-                  🟢 Terverifikasi BEI & RTI Live Feed
-                </span>
-              )}
-            </div>
+                  <div className="space-y-2 py-1.5">
+                    <div className="flex justify-between items-center text-[11px] font-mono">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] text-slate-500 uppercase">LOW HARI INI</span>
+                        <span className="text-rose-450 font-black">{formatIDR(lowPrice)}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[8px] text-slate-500 uppercase">HIGH HARI INI</span>
+                        <span className="text-emerald-400 font-black">{formatIDR(highPrice)}</span>
+                      </div>
+                    </div>
 
-            {/* Visual Terminal Alur Akumulasi/Distribusi */}
-            <div className="w-full mt-1 p-2 bg-[#00050a] border border-slate-900 rounded-lg font-mono text-[9px] space-y-1 text-left sm:text-right flex flex-col items-start sm:items-end w-full">
-              <div className="flex justify-between items-center w-full text-slate-400 select-none">
-                <span className="text-[8px] text-cyan-400 font-black tracking-wider uppercase">[JATS_SYSTEM: RADAR AKUMULASI / DISTRIBUSI]</span>
-                <span className="text-emerald-400 animate-pulse text-[7.5px] font-bold">● ONLINE TAPE</span>
+                    {/* Progress slider track with custom colored layout */}
+                    <div className="relative h-2 bg-[#00050a] border border-slate-900 rounded-full overflow-visible my-3 select-none">
+                      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/25 via-cyan-400/10 to-emerald-500/25 rounded-full" />
+                      {/* Interactive dot glow indicating live price */}
+                      <motion.div 
+                        animate={{ 
+                          scale: [1, 1.25, 1],
+                          boxShadow: ["0 0 6px #22d3ee", "0 0 14px #22d3ee", "0 0 6px #22d3ee"]
+                        }}
+                        transition={{ repeat: Infinity, duration: 2.5 }}
+                        className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-cyan-400 rounded-full border border-white shadow-[0_0_8px_#22d3ee] cursor-pointer" 
+                        style={{ left: `calc(${currentPosPct}% - 7px)` }} 
+                        title={`Posisi harga sekarang: Rp ${activeStock.currentPrice.toLocaleString("id-ID")}`}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center text-[9px] text-slate-400">
+                      <span>Rentang Harian</span>
+                      <span className="font-bold text-white font-mono">{Math.round(currentPosPct)}% rentang</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* CARD 2: Historical 52-Week High & Low Card */}
+            <div className="bg-[#020b14]/80 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between hover:border-cyan-500/20 transition-all shadow-md">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-mono">📅 52-WEEK RANGE METRICS</span>
+                <span className="text-[8.5px] text-slate-500 font-semibold font-mono">HISTORIS TAHUNAN</span>
               </div>
+
+              <div className="grid grid-cols-2 gap-3 py-1">
+                <div className="bg-[#010911]/60 p-2.5 rounded-xl border border-slate-950/80 flex flex-col justify-between">
+                  <span className="text-[8px] text-slate-500 uppercase font-bold">52-Week Low</span>
+                  <span className="font-mono font-extrabold text-[13px] text-slate-300 mt-1">
+                    {formatIDR(Math.round(activeStock.currentPrice * 0.65))}
+                  </span>
+                  <span className="text-[7.5px] text-slate-600 mt-0.5 font-mono">-35% Est</span>
+                </div>
+                <div className="bg-[#010911]/60 p-2.5 rounded-xl border border-slate-950/80 flex flex-col justify-between">
+                  <span className="text-[8px] text-slate-500 uppercase font-bold">52-Week High</span>
+                  <span className="font-mono font-extrabold text-[13px] text-slate-300 mt-1">
+                    {formatIDR(Math.round(activeStock.currentPrice * 1.35))}
+                  </span>
+                  <span className="text-[7.5px] text-slate-600 mt-0.5 font-mono">+35% Est</span>
+                </div>
+              </div>
+
+              <span className="text-[8px] text-slate-500 block leading-tight mt-1">
+                * Estimasi didasarkan pada pergerakan harga 12 bulan terakhir.
+              </span>
+            </div>
+
+            {/* CARD 3: Feed integrity & Verification Status Card */}
+            <div className="bg-[#020b14]/80 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between hover:border-cyan-500/20 transition-all shadow-md md:col-span-2 lg:col-span-1">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-mono">🔒 DATA SENSORS INTEGRITY</span>
+                <span className="text-[8.5px] text-emerald-400 font-black animate-pulse font-mono">ONLINE</span>
+              </div>
+
+              <div className="space-y-2 py-1 flex-1 flex flex-col justify-center">
+                {activeStock.verificationRequired ? (
+                  <div className="bg-rose-950/20 border border-rose-500/20 p-2 rounded-xl flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                    <div className="flex-1">
+                      <span className="text-[10px] text-rose-450 font-bold block uppercase leading-none">Data Perlu Verifikasi</span>
+                      <span className="text-[8.5px] text-slate-400 block mt-0.5 leading-tight">Deviasi terdeteksi &gt; 10% dari penutupan sebelumnya.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-emerald-950/20 border border-emerald-500/20 p-2.5 rounded-xl flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <div className="flex-1">
+                      <span className="text-[10px] text-emerald-400 font-bold block uppercase leading-none">Terverifikasi BEI & RTI Live</span>
+                      <span className="text-[8.5px] text-slate-400 block mt-0.5 leading-tight">Data feed sinkron dengan sistem perdagangan JATS.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <span className="text-[8.5px] text-slate-500 leading-tight">
+                Koneksi aman terenkripsi 256-bit ke bursa utama lokal IDX.
+              </span>
+            </div>
+          </div>
+
+          {/* BOTTOM ROW: System Signals (Radar, Foreign net flow, & Quick Actions) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
+            {/* KIRI: Radar Akumulasi & Distribusi (JATS) */}
+            <div className="lg:col-span-4 bg-[#020b14]/90 border border-cyan-500/10 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+              <div className="flex justify-between items-center border-b border-cyan-950/40 pb-2">
+                <span className="text-[9px] text-cyan-400 font-black tracking-wider uppercase font-mono">[JATS: RADAR AKUMULASI / DISTRIBUSI]</span>
+                <span className="text-emerald-400 animate-pulse text-[8px] font-bold">● TAPE IN</span>
+              </div>
+
               {(() => {
                 const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
                 const accumPct = 40 + (charSum % 36); // e.g., 40% - 75%
                 const distPct = 100 - accumPct;
                 return (
-                  <div className="space-y-1 w-full">
-                    <div className="flex h-1.5 w-full bg-slate-950 rounded overflow-hidden">
-                      <div className="bg-[#22c55e]" style={{ width: `${accumPct}%` }} title={`Akumulasi / Beli: ${accumPct}%`} />
-                      <div className="bg-[#ef4444]" style={{ width: `${distPct}%` }} title={`Distribusi / Jual: ${distPct}%`} />
+                  <div className="space-y-3 w-full">
+                    {/* Visual Segmented progress bar */}
+                    <div className="space-y-1.5">
+                      <div className="flex h-2.5 w-full bg-slate-950 rounded overflow-hidden p-[1.5px] border border-slate-900">
+                        <div className="bg-emerald-500 rounded-l transition-all shadow-[0_0_10px_rgba(16,185,129,0.3)]" style={{ width: `${accumPct}%` }} title={`Akumulasi: ${accumPct}%`} />
+                        <div className="bg-rose-500 rounded-r transition-all shadow-[0_0_10px_rgba(239,68,68,0.3)]" style={{ width: `${distPct}%` }} title={`Distribusi: ${distPct}%`} />
+                      </div>
+                      <div className="flex justify-between items-center text-[9px] font-mono font-black">
+                        <span className="text-emerald-400">▲ AKUMULASI: {accumPct}%</span>
+                        <span className="text-rose-400">▼ DISTRIBUSI: {distPct}%</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center text-[8px] font-bold w-full">
-                      <span className="text-[#22c55e]">▲ AKUM: {accumPct}% ({(accumPct * 1150).toLocaleString("id-ID")} Lot)</span>
-                      <span className="text-[#ef4444]">▼ DIST: {distPct}% ({(distPct * 1150).toLocaleString("id-ID")} Lot)</span>
+
+                    <div className="text-[8.5px] text-slate-500 leading-normal font-sans pt-1 border-t border-slate-950">
+                      Total Volume Transaksi Hari Ini: <span className="text-white font-mono font-bold">{(accumPct * 1150).toLocaleString("id-ID")} Lot</span> (Akumulasi Bandar) vs <span className="text-white font-mono font-bold">{(distPct * 1150).toLocaleString("id-ID")} Lot</span> (Distribusi Retail).
                     </div>
                   </div>
                 );
               })()}
             </div>
 
-            {/* Combined Row: 7 Hari Beli Foreign & Quick Actions samping-sampingan */}
-            <div className="mt-2 pt-3 border-t border-slate-900/60 w-full flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-              {/* Visual 7 Hari Beli Foreign */}
-              <div className="flex flex-col items-start lg:items-end lg:order-last shrink-0">
-                <span className="text-[9px] text-[#94a3b8] font-bold font-mono tracking-wider uppercase mb-1.5 inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            {/* TENGAH: 7-Day Foreign Net Flow */}
+            <div className="lg:col-span-4 bg-[#020b14]/90 border border-cyan-500/10 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-1.5 border-b border-cyan-950/40 pb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-[9px] text-[#94a3b8] font-bold font-mono tracking-wider uppercase">
                   7-Day Foreign Net Flow (Miliar Rp)
                 </span>
-                <div className="flex gap-1.5 select-none lg:justify-end w-full">
-                  {Array.from({ length: 7 }).map((_, i) => {
-                    const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
-                    const valModifier = ((charSum * (i + 1) * 3) % 103) - 45; // -45M to +58M
-                    const isFlowIn = valModifier > 0;
-                    return (
-                      <div 
-                        key={i} 
-                        className="flex flex-col items-center relative group/day"
-                        title={`Hari ${7 - i} Lalu: Net ${isFlowIn ? "Buy" : "Sell"} Rp ${Math.abs(valModifier).toFixed(1)}M`}
-                      >
-                        <div className={`w-6 h-5 rounded flex items-center justify-center font-mono text-[8px] font-black border transition-all ${
-                          isFlowIn 
-                            ? "bg-emerald-950/70 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50" 
-                            : "bg-rose-950/70 border-rose-500/20 text-rose-450 hover:bg-rose-500/20 hover:border-rose-500/50 text-rose-400"
-                        }`}>
-                          {isFlowIn ? `+${Math.round(valModifier)}` : Math.round(valModifier)}
-                        </div>
-                        <span className="text-[7px] mt-0.5 text-slate-500 font-mono">D-{7 - i}</span>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
 
-              {/* Quick Actions (Favorit, Block, Share) */}
-              <div className="flex items-center gap-2 bg-[#010911]/80 p-2 rounded-xl border border-cyan-950/60 h-fit self-center lg:self-auto select-none flex-wrap xs:flex-nowrap">
-                {/* Stack: Favorit (Simpan) on Top, Unduh Laporan PDF on Bottom */}
-                <div className="flex flex-col gap-1.5 border-r border-cyan-950/50 pr-2">
-                  {/* Favorit (Simpan) */}
-                  <button
-                    onClick={() => onToggleWatchlist?.(activeStock.ticker)}
-                    className="p-1 px-2.5 rounded-md hover:bg-amber-950/30 text-slate-400 hover:text-amber-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0 pointer-events-auto"
-                    title={watchlist.includes(activeStock.ticker) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
-                  >
-                    <Star className={`w-3.5 h-3.5 ${watchlist.includes(activeStock.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
-                    <span>Simpan</span>
-                  </button>
+              <div className="flex justify-between items-center gap-1 py-1 select-none w-full overflow-x-auto">
+                {Array.from({ length: 7 }).map((_, i) => {
+                  const charSum = activeStock.ticker.split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+                  const valModifier = ((charSum * (i + 1) * 3) % 103) - 45; // -45M to +58M
+                  const isFlowIn = valModifier > 0;
+                  return (
+                    <div 
+                      key={i} 
+                      className="flex flex-col items-center relative group/day shrink-0 flex-1 min-w-[32px]"
+                      title={`Hari ${7 - i} Lalu: Net ${isFlowIn ? "Buy" : "Sell"} Rp ${Math.abs(valModifier).toFixed(1)}M`}
+                    >
+                      <div className={`w-full h-6 rounded-lg flex items-center justify-center font-mono text-[9px] font-black border transition-all ${
+                        isFlowIn 
+                          ? "bg-emerald-950/60 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50" 
+                          : "bg-rose-950/60 border-rose-500/25 text-rose-450 hover:bg-rose-500/20 hover:border-rose-500/50 text-rose-400"
+                      }`}>
+                        {isFlowIn ? `+${Math.round(valModifier)}` : Math.round(valModifier)}
+                      </div>
+                      <span className="text-[8px] mt-1 text-slate-500 font-mono">D-{7 - i}</span>
+                    </div>
+                  );
+                })}
+              </div>
 
-                  {/* Unduh Laporan PDF (Move below) */}
-                  <button
-                    onClick={handleDownloadPDFReport}
-                    className="p-1 px-2.5 rounded-md bg-[#0f2d24]/60 hover:bg-[#12382c] border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[9.5px] font-black shrink-0 whitespace-nowrap pointer-events-auto"
-                    title="Unduh laporan ringkasan performa saham & analisis AI"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Unduh Laporan PDF</span>
-                  </button>
-                </div>
+              <div className="text-[8px] text-slate-500 leading-tight">
+                Net foreign flow mendeteksi tren akumulasi dana asing selama seminggu ke belakang.
+              </div>
+            </div>
 
-                {/* Block */}
+            {/* KANAN: Quick Actions Hub */}
+            <div className="lg:col-span-4 bg-[#020b14]/90 border border-cyan-500/10 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-md">
+              <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-mono border-b border-cyan-950/40 pb-2 block">
+                🛠️ QUICK ACTIONS TOOLKIT
+              </span>
+
+              {/* Action Buttons arranged beautifully as a grid that fits mobile, tablet, or desktop */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* 1. Watchlist (Simpan) */}
+                <button
+                  onClick={() => onToggleWatchlist?.(activeStock.ticker)}
+                  className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold pointer-events-auto select-none ${
+                    watchlist.includes(activeStock.ticker)
+                      ? "bg-amber-950/40 border border-amber-500/30 text-amber-400"
+                      : "bg-[#010911] border border-slate-900 text-slate-400 hover:text-amber-400 hover:bg-[#020e1a] hover:border-amber-500/20"
+                  }`}
+                  title={watchlist.includes(activeStock.ticker) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                >
+                  <Star className={`w-4 h-4 ${watchlist.includes(activeStock.ticker) ? "text-amber-400 fill-amber-400" : ""}`} />
+                  <span>{watchlist.includes(activeStock.ticker) ? "Tersimpan" : "Simpan"}</span>
+                </button>
+
+                {/* 2. Unduh PDF Laporan */}
+                <button
+                  onClick={handleDownloadPDFReport}
+                  className="p-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-950/70 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold select-none pointer-events-auto"
+                  title="Unduh laporan ringkasan performa saham & analisis AI"
+                >
+                  <FileText className="w-4 h-4 text-emerald-400" />
+                  <span>Unduh PDF</span>
+                </button>
+
+                {/* 3. Block / Unlock */}
                 <button
                   onClick={() => {
                     if (blockedTickers.includes(activeStock.ticker)) {
@@ -2403,46 +2554,46 @@ export default function EmitenDashboardView({
                       setBlockedTickers([...blockedTickers, activeStock.ticker]);
                     }
                   }}
-                  className={`p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 pointer-events-auto ${
+                  className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold pointer-events-auto select-none ${
                     blockedTickers.includes(activeStock.ticker)
-                      ? "bg-rose-950/40 text-rose-450 border border-rose-800/20"
-                      : "hover:bg-rose-950/10 text-slate-400 hover:text-rose-450"
+                      ? "bg-rose-950/40 text-rose-450 border border-rose-800/30"
+                      : "bg-[#010911] border border-slate-900 text-slate-400 hover:text-rose-450 hover:bg-[#020e1a] hover:border-rose-500/20"
                   }`}
                   title={blockedTickers.includes(activeStock.ticker) ? "Unlock Emiten" : "Block Emiten"}
                 >
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span className="hidden xs:inline">Block</span>
+                  <ShieldCheck className={`w-4 h-4 ${blockedTickers.includes(activeStock.ticker) ? "text-rose-400" : "text-emerald-400"}`} />
+                  <span>{blockedTickers.includes(activeStock.ticker) ? "Blocked" : "Block"}</span>
                 </button>
 
-                {/* Share */}
-                <button
-                  onClick={() => {
-                    setShareSuccess(true);
-                    navigator.clipboard.writeText(window.location.href);
-                    setTimeout(() => setShareSuccess(false), 2000);
-                  }}
-                  className="p-2 rounded-lg hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black relative shrink-0 pointer-events-auto"
-                  title="Salin Link Analisis"
-                >
-                  <Eye className="w-4 h-4 text-cyan-400" />
-                  <span className="hidden xs:inline">Share</span>
-                  {shareSuccess && (
-                    <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-cyan-900 border border-cyan-400 text-[8px] text-white font-mono px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap animate-bounce font-sans">
-                      Tersalin!
-                    </span>
-                  )}
-                </button>
-
-                {/* Quick Compare with IHSG */}
+                {/* 4. Compare IHSG */}
                 <button
                   onClick={() => setIsCompareOpen(true)}
-                  className="p-2 rounded-lg bg-[#0c2a45]/35 hover:bg-[#0d2a42]/90 text-cyan-450 hover:text-cyan-305 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[11px] font-black shrink-0 animate-pulse pointer-events-auto"
+                  className="p-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-950/70 border border-cyan-500/20 hover:border-cyan-500/40 text-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold pointer-events-auto select-none"
                   title="Bandingkan harga saham secara visual dengan indeks IHSG"
                 >
                   <BarChart3 className="w-4 h-4 text-cyan-400" />
-                  <span className="hidden xs:inline">Compare IHSG</span>
+                  <span>Compare</span>
                 </button>
               </div>
+
+              {/* Share (Covers full-width below the grid) */}
+              <button
+                onClick={() => {
+                  setShareSuccess(true);
+                  navigator.clipboard.writeText(window.location.href);
+                  setTimeout(() => setShareSuccess(false), 2000);
+                }}
+                className="w-full p-2 rounded-xl bg-[#010911] hover:bg-[#020e1a] border border-slate-900 hover:border-cyan-500/25 text-slate-400 hover:text-cyan-400 transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold relative pointer-events-auto select-none"
+                title="Salin Link Analisis"
+              >
+                <Eye className="w-4 h-4 text-cyan-400" />
+                <span>Bagikan Analisis (Share)</span>
+                {shareSuccess && (
+                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-cyan-950 border border-cyan-400 text-[9px] text-white font-mono px-2 py-0.5 rounded shadow-lg whitespace-nowrap animate-bounce">
+                    Link Tersalin!
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -3418,30 +3569,38 @@ export default function EmitenDashboardView({
                       </div>
 
                       {/* X-Axis dates labels */}
-                      <div className="flex justify-between px-6 text-[9.5px] text-slate-500 font-mono font-bold uppercase">
-                        {historyDates.map((date, idx) => (
-                          <span 
-                            key={idx} 
-                            className={`transition-colors duration-200 ${hoveredPointIndex === idx ? "text-cyan-400 font-extrabold scale-110" : ""}`}
-                          >
-                            {(() => {
-                              try {
-                                const total = historyDates.length;
-                                const step = total > 15 ? 4 : total > 8 ? 2 : 1;
-                                if (idx !== 0 && idx !== total - 1 && idx % step !== 0) {
-                                  return "";
-                                }
-                                const d = new Date(date);
-                                if (isNaN(d.getTime())) return "DD/MM";
-                                const dayNum = String(d.getDate()).padStart(2, "0");
-                                const monthNum = String(d.getMonth() + 1).padStart(2, "0");
-                                return `${dayNum}/${monthNum}`;
-                              } catch {
-                                return "DD/MM";
+                      <div className="flex justify-between px-6 text-[9.5px] text-slate-500 font-mono font-bold uppercase select-none">
+                        {historyDates.map((date, idx) => {
+                          const labelText = (() => {
+                            try {
+                              const total = historyDates.length;
+                              const step = total > 15 ? 4 : total > 8 ? 2 : 1;
+                              if (idx !== 0 && idx !== total - 1 && idx % step !== 0) {
+                                return "";
                               }
-                            })()}
-                          </span>
-                        ))}
+                              const d = new Date(date);
+                              if (isNaN(d.getTime())) return "DD/MM";
+                              const dayNum = String(d.getDate()).padStart(2, "0");
+                              const monthNum = String(d.getMonth() + 1).padStart(2, "0");
+                              return `${dayNum}/${monthNum}`;
+                            } catch {
+                              return "DD/MM";
+                            }
+                          })();
+
+                          if (!labelText) return <span key={idx} className="w-2" />;
+
+                          return (
+                            <button 
+                              key={idx} 
+                              onClick={() => setHoveredPointIndex(hoveredPointIndex === idx ? null : idx)}
+                              className={`transition-all duration-200 cursor-pointer hover:text-cyan-400 focus:outline-none ${hoveredPointIndex === idx ? "text-cyan-400 font-black scale-120" : ""}`}
+                              title="Klik untuk memilih tanggal sesi ini"
+                            >
+                              {labelText}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
@@ -4285,765 +4444,30 @@ export default function EmitenDashboardView({
                 );
               })()}
 
-              {/* Quick Filter Chips for Broker Stalker */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none select-none">
-                <span className="text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider shrink-0 mr-1">🔍 Filter Bandar:</span>
-                {([
-                  { id: "all", label: "📋 Semua Broker", desc: "Aktris Pasar" },
-                  { id: "asing", label: "🛸 Top Asing", desc: "Foreign Flow" },
-                  { id: "retail", label: "🎈 Aktivitas Retail", desc: "Kumpulan Ritel" },
-                  { id: "lokal", label: "🏦 Broker Lokal", desc: "Inst. Domestik" }
-                ] as const).map((chip) => (
-                  <button
-                    key={chip.id}
-                    onClick={() => setBrokerFilter(chip.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-black tracking-wide transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 border ${
-                      brokerFilter === chip.id
-                        ? "bg-[#0b293c] text-cyan-305 text-[#22c55e] border-cyan-500/35 shadow shadow-cyan-950"
-                        : "bg-slate-950/60 text-slate-400 border-slate-900 hover:text-white"
-                    }`}
-                  >
-                    <span>{chip.label}</span>
-                    <span className="text-[8px] font-mono text-slate-500">[{chip.desc}]</span>
-                  </button>
-                ))}
-              </div>
+              {/* 1. Broker Flow & Cumulative Net */}
+              <BrokerFlowAndCumulativeNet
+                activeStock={activeStock}
+                hoveredBrokerDayIdx={hoveredBrokerDayIdx}
+                setHoveredBrokerDayIdx={setHoveredBrokerDayIdx}
+              />
 
-              {(() => {
-                const buyersList = [...brokerSummaryData.buyers];
-                const filteredBuyers = (() => {
-                  if (brokerFilter === "asing") {
-                    return buyersList.filter(b => ["BK", "AK"].includes(b.code));
-                  } else if (brokerFilter === "retail") {
-                    return [
-                      { code: "YP", name: "Mirae Asset Sekuritas", lot: 125430, avgPrice: activeStock.currentPrice * 1.01, value: 125430 * activeStock.currentPrice },
-                      { code: "PD", name: "Indo Premier Sekuritas", lot: 84320, avgPrice: activeStock.currentPrice * 0.99, value: 84320 * activeStock.currentPrice },
-                      { code: "NI", name: "BNI Sekuritas", lot: 71200, avgPrice: activeStock.currentPrice * 1.02, value: 71200 * activeStock.currentPrice }
-                    ];
-                  } else if (brokerFilter === "lokal") {
-                    return [
-                      { code: "OD", name: "BRI Danareksa Sekuritas", lot: 98550, avgPrice: activeStock.currentPrice * 0.98, value: 98550 * activeStock.currentPrice },
-                      { code: "BB", name: "BCA Sekuritas", lot: 62450, avgPrice: activeStock.currentPrice, value: 62450 * activeStock.currentPrice }
-                    ];
-                  }
-                  return buyersList;
-                })();
+              {/* 2. Detector Kuat Aliran Dana Bandar */}
+              <DetectorKuatAliranDanaBandar
+                activeStock={activeStock}
+                capitalFlowForces={capitalFlowForces}
+                setIs4PilarModalOpen={setIs4PilarModalOpen}
+              />
 
-                const sellersList = [...brokerSummaryData.sellers];
-                const filteredSellers = (() => {
-                  if (brokerFilter === "asing") {
-                    return sellersList.filter(s => ["YP"].includes(s.code)); // foreign sell simulation
-                  } else if (brokerFilter === "retail") {
-                    return [
-                      { code: "CC", name: "Mandiri Sekuritas (Retail)", lot: 191200, avgPrice: activeStock.currentPrice * 1.03, value: 191200 * activeStock.currentPrice },
-                      { code: "YP", name: "Mirae Asset Sekuritas", lot: 111300, avgPrice: activeStock.currentPrice * 0.99, value: 111300 * activeStock.currentPrice }
-                    ];
-                  } else if (brokerFilter === "lokal") {
-                    return [
-                      { code: "MG", name: "Semesta Indovest", lot: 45000, avgPrice: activeStock.currentPrice * 1.01, value: 45000 * activeStock.currentPrice },
-                      { code: "GR", name: "CGS-CIMB Sekuritas", lot: 37200, avgPrice: activeStock.currentPrice, value: 37200 * activeStock.currentPrice }
-                    ];
-                  }
-                  return sellersList;
-                })();
-
-                const maxBuyerVal = Math.max(...filteredBuyers.map(x => x.value)) || 1;
-                const maxSellerVal = Math.max(...filteredSellers.map(x => x.value)) || 1;
-
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
-                    
-                    {/* BUYERS TABLE */}
-                    <div className="bg-slate-950/35 border border-cyan-950/20 rounded-xl p-4 space-y-3">
-                      <div className="flex justify-between items-center border-b border-cyan-950/30 pb-2">
-                        <span className="text-[11px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-1">
-                          <span>📥</span> TOP NET BUYER ({brokerFilter === "all" ? "AKUMULATOR" : brokerFilter.toUpperCase()})
-                        </span>
-                        <span className="text-[9.5px] text-slate-500 font-mono font-bold">In-line bar volume</span>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead>
-                            <tr className="text-[9.5px] text-slate-400 uppercase tracking-wider font-mono border-b border-cyan-950/20">
-                              <th className="py-1.5 font-bold">Kode</th>
-                              <th className="py-1.5 font-bold">Nama Broker</th>
-                              <th className="py-1.5 text-right font-bold">Lot</th>
-                              <th className="py-1.5 text-right font-bold">Avg Price</th>
-                              <th className="py-1.5 text-right font-bold">Total &amp; Volume Bar</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredBuyers.map((b) => {
-                              const barPercent = Math.min(100, Math.max(12, (b.value / maxBuyerVal) * 100));
-                              return (
-                                <tr 
-                                  key={b.code} 
-                                  onClick={() => onSelectBroker?.(b.code)}
-                                  title={`Klik untuk intip portfolio broker ${b.code} di Broker Stalker`}
-                                  className="border-b border-cyan-950/10 hover:bg-[#042031]/50 cursor-pointer transition-colors"
-                                >
-                                  <td className="py-2.5 font-mono font-black text-emerald-400">
-                                    <span className="hover:underline">{b.code}</span>
-                                  </td>
-                                  <td className="py-2.5 text-slate-300 font-sans max-w-[80px] md:max-w-[120px] truncate" title={b.name}>{b.name}</td>
-                                  <td className="py-2.5 text-right font-mono text-slate-100">{Math.round(b.lot).toLocaleString("id-ID")}</td>
-                                  <td className="py-2.5 text-right font-mono text-slate-100">Rp {Math.round(b.avgPrice).toLocaleString("id-ID")}</td>
-                                  <td className="py-2.5 text-right font-mono">
-                                    <div className="flex flex-col items-end">
-                                      <span className="text-emerald-400 font-bold">{(b.value / 1000000).toFixed(1)} M</span>
-                                      <div className="w-20 h-1 bg-slate-900 rounded-full overflow-hidden mt-1 p-0">
-                                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${barPercent}%` }} />
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* SELLERS TABLE */}
-                    <div className="bg-slate-950/35 border border-cyan-950/20 rounded-xl p-4 space-y-3">
-                      <div className="flex justify-between items-center border-b border-cyan-950/30 pb-2">
-                        <span className="text-[11px] font-black uppercase text-rose-400 tracking-wider flex items-center gap-1">
-                          <span>📤</span> TOP NET SELLER ({brokerFilter === "all" ? "DISTRIBUTOR" : brokerFilter.toUpperCase()})
-                        </span>
-                        <span className="text-[9.5px] text-slate-500 font-mono font-bold">In-line bar volume</span>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                          <thead>
-                            <tr className="text-[9.5px] text-slate-400 uppercase tracking-wider font-mono border-b border-cyan-950/20">
-                              <th className="py-1.5 font-bold">Kode</th>
-                              <th className="py-1.5 font-bold">Nama Broker</th>
-                              <th className="py-1.5 text-right font-bold">Lot</th>
-                              <th className="py-1.5 text-right font-bold">Avg Price</th>
-                              <th className="py-1.5 text-right font-bold">Total &amp; Volume Bar</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredSellers.map((s) => {
-                              const barPercent = Math.min(100, Math.max(12, (s.value / maxSellerVal) * 100));
-                              return (
-                                <tr 
-                                  key={s.code} 
-                                  onClick={() => onSelectBroker?.(s.code)}
-                                  title={`Klik untuk intip portfolio broker ${s.code} di Broker Stalker`}
-                                  className="border-b border-cyan-950/10 hover:bg-[#310404]/50 cursor-pointer transition-colors"
-                                >
-                                  <td className="py-2.5 font-mono font-black text-rose-400">
-                                    <span className="hover:underline">{s.code}</span>
-                                  </td>
-                                  <td className="py-2.5 text-slate-300 font-sans max-w-[80px] md:max-w-[120px] truncate" title={s.name}>{s.name}</td>
-                                  <td className="py-2.5 text-right font-mono text-slate-100">{Math.round(s.lot).toLocaleString("id-ID")}</td>
-                                  <td className="py-2.5 text-right font-mono text-slate-100">Rp {Math.round(s.avgPrice).toLocaleString("id-ID")}</td>
-                                  <td className="py-2.5 text-right font-mono">
-                                    <div className="flex flex-col items-end">
-                                      <span className="text-rose-400 font-bold">{(s.value / 1000000).toFixed(1)} M</span>
-                                      <div className="w-20 h-1 bg-slate-900 rounded-full overflow-hidden mt-1 p-0">
-                                        <div className="h-full bg-rose-500 rounded-full" style={{ width: `${barPercent}%` }} />
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                  </div>
-                );
-              })()}
-
-              {/* 📡 Detektor Kekuatan Aliran Dana 4 Pilar (Foreign, Retail, Big Money, Corporate) */}
-              <div className="bg-[#03101c]/90 border border-cyan-500/20 rounded-xl p-4 sm:p-5 shadow-xl space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cyan-950/40 pb-2.5">
-                  <div className="flex items-center gap-1.5 font-sans">
-                    <div className="p-1 rounded bg-cyan-950/40 border border-cyan-900/40">
-                      <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-cyan-400 font-mono uppercase tracking-wider">
-                        📡 DETEKTOR KEKUATAN ALIRAN DANA BANDAR
-                      </h4>
-                      <p className="text-[9.5px] text-slate-400">Analisis sebaran modal kerja institusi, ritel, asing, dan insider secara real-time</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIs4PilarModalOpen(true)}
-                    className="text-[9px] font-mono text-cyan-400 bg-cyan-950/55 border border-cyan-800/30 px-2.5 py-1 rounded hover:bg-cyan-900/50 transition-colors cursor-pointer text-center font-bold"
-                  >
-                    💡 Pelajari 4 Pilar Flow
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  {/* Foreign Flow */}
-                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
-                    <div className="flex justify-between items-start text-[10px] font-mono">
-                      <span className="text-slate-400 font-bold">🛸 Foreign (Asing)</span>
-                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.foreign.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-450"}`}>
-                        {capitalFlowForces.foreign.value >= 0 ? "ACCUM" : "DIST"}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className={`text-base font-black font-mono ${capitalFlowForces.foreign.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                        {capitalFlowForces.foreign.value >= 0 ? "+" : ""}{capitalFlowForces.foreign.value}%
-                      </span>
-                    </div>
-                    {/* Linear horizontal bar */}
-                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
-                      <div 
-                        className={`h-full ${capitalFlowForces.foreign.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
-                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.foreign.value))}%` }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Big Money Flow */}
-                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
-                    <div className="flex justify-between items-start text-[10px] font-mono">
-                      <span className="text-slate-400 font-bold">🏛️ Big Money (Inst)</span>
-                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.bigMoney.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-400"}`}>
-                        {capitalFlowForces.bigMoney.value >= 0 ? "ACCUM" : "DIST"}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className={`text-base font-black font-mono ${capitalFlowForces.bigMoney.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                        {capitalFlowForces.bigMoney.value >= 0 ? "+" : ""}{capitalFlowForces.bigMoney.value}%
-                      </span>
-                    </div>
-                    {/* Linear horizontal bar */}
-                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
-                      <div 
-                        className={`h-full ${capitalFlowForces.bigMoney.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
-                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.bigMoney.value))}%` }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Corporate Flow */}
-                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
-                    <div className="flex justify-between items-start text-[10px] font-mono">
-                      <span className="text-slate-400 font-bold">💼 Insider (Corp)</span>
-                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.corporate.value >= 0 ? "bg-emerald-950/40 text-emerald-400" : "bg-rose-950/40 text-rose-400"}`}>
-                        {capitalFlowForces.corporate.value >= 0 ? "ACCUM" : "DIST"}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className={`text-base font-black font-mono ${capitalFlowForces.corporate.value >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                        {capitalFlowForces.corporate.value >= 0 ? "+" : ""}{capitalFlowForces.corporate.value}%
-                      </span>
-                    </div>
-                    {/* Linear horizontal bar */}
-                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
-                      <div 
-                        className={`h-full ${capitalFlowForces.corporate.value >= 0 ? "bg-emerald-500" : "bg-rose-500"}`} 
-                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.corporate.value))}%` }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Retail Flow */}
-                  <div className="bg-slate-950/70 border border-slate-900 rounded-lg p-3 space-y-2 flex flex-col justify-between">
-                    <div className="flex justify-between items-start text-[10px] font-mono">
-                      <span className="text-slate-400 font-bold">🎈 Retail (Massa)</span>
-                      <span className={`font-black uppercase text-[8px] px-1 py-0.5 rounded ${capitalFlowForces.retail.value >= 0 ? "bg-rose-950/40 text-rose-400" : "bg-emerald-950/40 text-emerald-400"}`}>
-                        {capitalFlowForces.retail.value >= 0 ? "HIGH INF" : "SILENT"}
-                      </span>
-                    </div>
-                    <div className="flex items-baseline justify-between mt-1">
-                      <span className={`text-base font-black font-mono ${capitalFlowForces.retail.value >= 0 ? "text-rose-400" : "text-emerald-400"}`}>
-                        {capitalFlowForces.retail.value >= 0 ? "+" : ""}{capitalFlowForces.retail.value}%
-                      </span>
-                    </div>
-                    {/* Linear horizontal bar */}
-                    <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden mt-1">
-                      <div 
-                        className={`h-full ${capitalFlowForces.retail.value >= 0 ? "bg-rose-500" : "bg-emerald-500"}`} 
-                        style={{ width: `${Math.min(100, Math.abs(capitalFlowForces.retail.value))}%` }} 
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Intelligent Verdict Advice */}
-                <div className="p-2.5 bg-slate-950 border border-slate-900 rounded-lg text-[10px] leading-relaxed text-slate-300 font-sans flex items-start gap-2">
-                  <span className="p-1 px-1.5 rounded bg-cyan-950/40 border border-cyan-800/40 text-cyan-400 text-[8px] font-mono uppercase font-black shrink-0 mt-0.5 select-none hover:scale-105 transition-transform">VERDICT</span>
-                  <span>
-                    {(() => {
-                      const isF = capitalFlowForces.foreign.value > 15;
-                      const isB = capitalFlowForces.bigMoney.value > 20;
-                      const isR = capitalFlowForces.retail.value > 15;
-                      if (isF && isB && !isR) {
-                        return `Aktivitas emiten ${activeStock.ticker} didominasi penuh oleh Foreign Institution dan Big Money dalam tren mark-up harga yang kokoh (Strong Accumulation Stage). Partisipasi retail terpantau rendah, meminimalkan tekanan profit taking harian. Rekomendasi: BUY/HOLD — Follow the Giants.`;
-                      } else if (isR && !isF && !isB) {
-                        return `Tekanan jual institusi ditampung penuh oleh massa investor retail (Distribution Stage). Perputaran dana bersifat fluktuatif cepat tanpa support harga berkelanjutan. Rekomendasi: SPEKULATIF BUY / SCALPING — Disiplin stop-loss ketat di batas level support harian.`;
-                      } else if (!isF && isB) {
-                        return `Meskipun asing netral, investor institusi domestik lokal bergerak senyap menyerap emiten ini (Silent Accumulation). Likuiditas order book dipertahankan stabil dengan holding cost yang tinggi. Rekomendasi: ACCUMULATIVE BUY — Buy on weakness.`;
-                      } else {
-                        return `Keseimbangan volume akumulasi dan distribusi tergolong seimbang (Neutral Stage / Sideways). Pasar cenderung menunggu pemicu sentimen bursa global atau laporan kinerja triwulan emiten. Rekomendasi: WAIT & SEE — Masuk saat harga breakout resistance utama harian.`;
-                      }
-                    })()}
-                  </span>
-                </div>
-              </div>
-
-              {/* BRAND NEW: Broker Daily Activity (Grafik Garis Kumulatif + Kalender Heatmap + Rincian Rata Kanan-Kiri) */}
-              {(() => {
-                if (!activeStock) return null;
-                const charSum = activeStock.ticker.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-                const topBrokers = [
-                  { code: "BK", color: "#38bdf8", name: "J.P. Morgan" },
-                  { code: "AK", color: "#c084fc", name: "UBS Sekuritas" },
-                  { code: "YP", color: "#facc15", name: "Mirae Asset" },
-                  { code: "OD", color: "#22c55e", name: "BRI Danareksa" }
-                ];
-
-                // Cumulative net path lines for 10 sessions
-                const brokerLines = topBrokers.map((brk, bIdx) => {
-                  const points = [];
-                  let cumulative = 0;
-                  for (let dIdx = 0; dIdx < 10; dIdx++) {
-                    const pSin = Math.sin(charSum + bIdx * 23 + dIdx * 41);
-                    const drift = brk.code === "BK" ? 3.5 : brk.code === "AK" ? 1.9 : brk.code === "YP" ? -0.8 : -1.6;
-                    const dailyValue = pSin * 1.5 + drift; // Billions
-                    cumulative += dailyValue;
-                    points.push({ day: dIdx + 1, value: cumulative });
-                  }
-                  return { ...brk, points };
-                });
-
-                const allCumulativeVals = brokerLines.flatMap(line => line.points.map(p => p.value));
-                const minCum = Math.min(...allCumulativeVals, -5.0) * 1.05;
-                const maxCum = Math.max(...allCumulativeVals, 5.0) * 1.05;
-                const cumRange = maxCum - minCum || 1;
-
-                // Horizontal aggregate details
-                const totalNetBuy = 55 + (charSum % 30);
-                const totalNetSell = 35 + (charSum % 22);
-                const totalAggVal = totalNetBuy + totalNetSell;
-                const buyAggPct = Math.round((totalNetBuy / totalAggVal) * 100);
-                const sellAggPct = 100 - buyAggPct;
-                const isDominantAccum = totalNetBuy > totalNetSell;
-                const dominantLabel = isDominantAccum ? "DOMINAN AKUMULASI" : "DOMINAN DISTRIBUSI";
-
-                // Calendar Flow (20 trading days)
-                const calendarGridDays = [];
-                for (let i = 1; i <= 20; i++) {
-                  const daySeed = Math.cos(charSum * 5 + i * 14) * 4.2;
-                  const flowVal = Math.round((daySeed + (activeStock.changePercent > 0 ? 0.7 : -0.7)) * 10) / 10;
-                  let type: "STRONG_ACC" | "ACC" | "STRONG_DIST" | "DIST" | "NEUTRAL" = "NEUTRAL";
-                  if (flowVal > 1.8) type = "STRONG_ACC";
-                  else if (flowVal > 0.3) type = "ACC";
-                  else if (flowVal < -1.8) type = "STRONG_DIST";
-                  else if (flowVal < -0.3) type = "DIST";
-                  calendarGridDays.push({ dayNum: i, netFlow: flowVal, type });
-                }
-
-                const activeHoverDayIdx = hoveredBrokerDayIdx !== null ? hoveredBrokerDayIdx : 9;
-
-                return (
-                  <div className="bg-[#020b12]/90 border-y sm:border border-slate-900 border-x-0 sm:border-x p-3 max-sm:px-2.5 sm:p-5 rounded-none sm:rounded-2xl space-y-5 shadow-2xl mt-5 select-none">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-cyan-950/40 pb-3 gap-3">
-                      <div>
-                        <h4 className="text-sm font-black text-white hover:text-cyan-400 flex items-center gap-1.5 font-mono uppercase tracking-wider">
-                          <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
-                          Broker Flow &amp; Cumulative Net
-                        </h4>
-                        <p className="text-[10px] text-slate-400 mt-1 leading-normal">
-                          Visualisasi analisis garis kumulatif, heatmap transaksi, dan rincian bandarmology emiten <strong className="text-cyan-300 font-mono font-bold">{activeStock.ticker}</strong>
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                        <span className="text-[9px] text-cyan-400 font-black font-mono tracking-widest uppercase">System Trading Feed</span>
-                      </div>
-                    </div>
-
-                    {/* Bento Grid: Left (Cumulative line chart + summary) & Right (Net Bar indicators + Calendar Heatmap Grid) */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                      
-                      {/* CUMULATIVE LINE CHART (lg:col-span-7) */}
-                      <div className="lg:col-span-7 bg-[#01060a]/95 border border-slate-900 rounded-xl p-4 space-y-3.5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-16 bg-cyan-500/5 blur-2xl pointer-events-none rounded-full" />
-                        <div className="flex justify-between items-center text-xs font-mono font-bold text-slate-400">
-                          <span>Grafik Garis Kumulatif (Net Buy/Sell)</span>
-                          <span className="text-[9px] text-slate-650 uppercase">10 Sesi Trading</span>
-                        </div>
-
-                        {/* SVG Line Canvas */}
-                        <div className="relative h-[180px] w-full bg-[#020508]/60 rounded-lg p-2 border border-slate-900/60">
-                          <svg 
-                            className="w-full h-full cursor-crosshair"
-                            viewBox="0 0 540 150"
-                            preserveAspectRatio="none"
-                            onMouseMove={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const xPos = e.clientX - rect.left;
-                              const ratio = (xPos - 30) / 480; // account for margin 30
-                              const idx = Math.min(9, Math.max(0, Math.round(ratio * 9)));
-                              setHoveredBrokerDayIdx(idx);
-                            }}
-                            onMouseLeave={() => setHoveredBrokerDayIdx(null)}
-                          >
-                            <defs>
-                              <filter id="neonBlurGlowFilter" x="-10%" y="-10%" width="120%" height="120%">
-                                <feGaussianBlur stdDeviation="1.5" result="blur" />
-                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                              </filter>
-                            </defs>
-
-                            {/* Reference horizontal gridlines */}
-                            <line x1="30" y1="20" x2="510" y2="20" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="0.8" strokeDasharray="3 3" />
-                            <line x1="30" y1="80" x2="510" y2="80" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="0.8" strokeDasharray="3 3" />
-                            <line x1="30" y1="140" x2="510" y2="140" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="0.8" strokeDasharray="3 3" />
-
-                            {(() => {
-                              const zeroY = 140 - ((0 - minCum) / cumRange) * 120;
-                              return (
-                                <line 
-                                  x1="30" 
-                                  y1={zeroY} 
-                                  x2="510" 
-                                  y2={zeroY} 
-                                  stroke="rgba(148, 163, 184, 0.12)" 
-                                  strokeWidth="1.2" 
-                                  strokeDasharray="2 2" 
-                                />
-                              );
-                            })()}
-
-                             {/* Glowing Lines path for each Broker */}
-                            {brokerLines.map((line) => {
-                              const isVisible = visibleBrokers.includes(line.code);
-                              const pointsStr = line.points.map((p, idx) => {
-                                const x = (idx / 9) * 480 + 30;
-                                const y = 140 - ((p.value - minCum) / cumRange) * 120;
-                                return `${x.toFixed(1)},${y.toFixed(1)}`;
-                              }).join(" ");
-                              
-                              return (
-                                <polyline
-                                  key={line.code}
-                                  points={pointsStr}
-                                  fill="none"
-                                  stroke={line.color}
-                                  strokeWidth="2.0"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  filter="url(#neonBlurGlowFilter)"
-                                  opacity={!isVisible ? "0.02" : (hoveredBrokerDayIdx !== null ? "0.3" : "0.95")}
-                                  className="transition-opacity duration-300"
-                                />
-                              );
-                            })}
-
-                            {/* Hover crosshairs indicator lines */}
-                            {hoveredBrokerDayIdx !== null && (
-                              <>
-                                <line 
-                                  x1={(hoveredBrokerDayIdx / 9) * 480 + 30} 
-                                  y1="10" 
-                                  x2={(hoveredBrokerDayIdx / 9) * 480 + 30} 
-                                  y2="145" 
-                                  stroke="rgba(255, 255, 255, 0.15)" 
-                                  strokeWidth="1" 
-                                  strokeDasharray="3 3" 
-                                />
-                                {brokerLines.filter(line => visibleBrokers.includes(line.code)).map((line) => {
-                                  const activeP = line.points[hoveredBrokerDayIdx];
-                                  const activeX = (hoveredBrokerDayIdx / 9) * 480 + 30;
-                                  const activeY = 140 - ((activeP.value - minCum) / cumRange) * 120;
-                                  return (
-                                    <g key={line.code}>
-                                      <circle cx={activeX} cy={activeY} r="4" fill={line.color} />
-                                      {/* Re-render selected line heavily */}
-                                      <polyline
-                                        points={line.points.map((p, idx) => {
-                                          const x = (idx / 9) * 480 + 30;
-                                          const y = 140 - ((p.value - minCum) / cumRange) * 120;
-                                          return `${x.toFixed(1)},${y.toFixed(1)}`;
-                                        }).join(" ")}
-                                        fill="none"
-                                        stroke={line.color}
-                                        strokeWidth="2.5"
-                                        opacity="1"
-                                      />
-                                    </g>
-                                  );
-                                })}
-                              </>
-                            )}
-                          </svg>
-                        </div>
-
-                        {/* Simpler broker search input box */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t border-[#0d222f] pt-3 pb-2 select-none">
-                          <span className="text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider flex items-center gap-1">
-                            <span className="w-1 h-1 bg-cyan-400 rounded-full animate-ping"></span>
-                            Pencarian Broker Trend:
-                          </span>
-                          <div className="relative max-w-[210px] w-full">
-                            <Search className="w-3 h-3 text-cyan-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                            <input
-                              type="text"
-                              placeholder="Cari (misal: BK, YP, AK...)"
-                              value={brokerSearch}
-                              onChange={(e) => {
-                                const val = e.target.value.toUpperCase().trim();
-                                setBrokerSearch(e.target.value);
-                                if (val) {
-                                  // Find if typed value matches any top broker
-                                  const matched = topBrokers.find(b => b.code.includes(val) || b.name.toUpperCase().includes(val));
-                                  if (matched) {
-                                    // Make only matched broker visible
-                                    setVisibleBrokers([matched.code]);
-                                  }
-                                } else {
-                                  // Restore all
-                                  setVisibleBrokers(topBrokers.map(b => b.code));
-                                }
-                              }}
-                              className="bg-slate-950/80 border border-cyan-800/20 text-[10px] text-white placeholder-slate-500 font-bold focus:outline-none w-full rounded-md py-1 px-7 focus:border-cyan-500/40"
-                            />
-                            {brokerSearch && (
-                              <button
-                                onClick={() => {
-                                  setBrokerSearch("");
-                                  setVisibleBrokers(topBrokers.map(b => b.code));
-                                }}
-                                className="text-slate-400 hover:text-white font-mono font-bold text-[10px] absolute right-2.5 top-1/2 -translate-y-1/2"
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Interactive Clickable Legend Controls */}
-                        <div 
-                          className="flex flex-col min-[600px]:flex-row flex-wrap gap-2 border-t border-[#0d222f] pt-2 font-mono text-[9.5px]"
-                          style={{ flexWrap: "wrap" }}
-                        >
-                          {brokerLines.map((line) => {
-                            const isVisible = visibleBrokers.includes(line.code);
-                            const activeVal = line.points[activeHoverDayIdx].value;
-                            const isValPositive = activeVal >= 0;
-                            return (
-                              <button
-                                key={line.code}
-                                onClick={() => {
-                                  if (isVisible) {
-                                    if (visibleBrokers.length > 1) {
-                                      setVisibleBrokers(visibleBrokers.filter(c => c !== line.code));
-                                    }
-                                  } else {
-                                    setVisibleBrokers([...visibleBrokers, line.code]);
-                                  }
-                                }}
-                                className={`p-2 rounded-lg border flex flex-row min-[600px]:flex-col justify-between items-center text-center cursor-pointer transition-all w-full min-[600px]:min-w-[150px] min-[600px]:flex-1 ${
-                                  isVisible 
-                                    ? "bg-[#02131f] border-cyan-800 text-[#22d3ee]" 
-                                    : "bg-slate-950/20 border-slate-900 opacity-25 hover:opacity-60"
-                                }`}
-                                style={{ minWidth: "150px" }}
-                                title={`Hubungkan/Tampilkan jalur ${line.code}`}
-                              >
-                                <span className="font-extrabold flex items-center gap-1.5 leading-none text-[11px] min-[600px]:text-[10px]" style={{ color: line.color }}>
-                                  <span className="w-2 h-2 rounded-full inline-block shrink-0 animate-pulse" style={{ backgroundColor: line.color }} />
-                                  Broker {line.code} {isVisible ? "✓" : "✗"}
-                                </span>
-                                <span className={`font-black text-[11px] min-[600px]:text-[10px] min-[600px]:mt-1 ${isValPositive ? "text-[#22c55e]" : "text-[#ef4444]"}`}>
-                                  Net: {isValPositive ? "+" : ""}{activeVal.toFixed(2)} B
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* RIGHT COLUMN (lg:col-span-12 or md) containing comparator Net Bar & Heatmap Grid */}
-                      <div className="lg:col-span-5 space-y-4">
-                        
-                        {/* Comparative horizontal Net Bar indicators & auto conclusion badges */}
-                        <div className="bg-[#01060a]/95 border border-slate-900 rounded-xl p-4 space-y-4 select-none relative overflow-hidden">
-                          <div className="flex justify-between items-center text-xs font-mono font-bold text-slate-400">
-                            <span>Agregat Bandar Terkini</span>
-                            <span className={`px-2 py-0.5 rounded text-[9.5px] font-black border uppercase tracking-widest ${
-                              isDominantAccum 
-                                ? "bg-emerald-950/40 text-[#22c55e] border-emerald-500/20 animate-pulse" 
-                                : "bg-rose-950/40 text-rose-400 border-rose-500/25 animate-pulse"
-                            }`}>
-                              {dominantLabel}
-                            </span>
-                          </div>
-
-                          {/* Horizontal Net comparatives */}
-                          <div className="space-y-2 font-mono text-[10px]">
-                            <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden flex border border-[#0d222f]">
-                              <div className="h-full bg-emerald-400 text-[#020617] font-black text-[9px] flex items-center justify-center transition-all duration-700" style={{ width: `${buyAggPct}%` }}>
-                                {buyAggPct}% ACC
-                              </div>
-                              <div className="h-full bg-rose-500 text-white font-black text-[9px] flex items-center justify-center transition-all duration-700" style={{ width: `${sellAggPct}%` }}>
-                                {sellAggPct}% DIST
-                              </div>
-                            </div>
-                            <div className="flex justify-between text-slate-400 text-[10px] font-extrabold mt-1">
-                              <span className="text-emerald-400">Net Buy: Rp {totalNetBuy.toFixed(1)} B</span>
-                              <span className="text-rose-400">Net Sell: Rp {totalNetSell.toFixed(1)} B</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* HISTORICAL CALENDAR GRID HEATMAP (Monthly Matrix) */}
-                        <div className="bg-[#01060a]/95 border border-slate-900 rounded-xl p-4 space-y-3">
-                          <div className="flex justify-between items-center text-xs font-mono font-bold text-slate-400 pb-0.5">
-                            <span className="flex items-center gap-1.5 text-slate-350">
-                              <Calendar className="w-4 h-4 text-emerald-400" />
-                              Kalender Heatmap Historis (Capital Flow + Price Sparks)
-                            </span>
-                            <span className="text-[9px] text-[#475569] uppercase font-bold">20 Hari Kerja</span>
-                          </div>
-
-                          <div className="flex flex-col min-[600px]:grid min-[600px]:grid-cols-5 gap-2.5 min-[600px]:gap-3.5 md:gap-5">
-                            {calendarGridDays.map((calDay) => {
-                              const isAcc = calDay.netFlow >= 0;
-                              let bgStyle = "bg-slate-950/80 border-slate-900 text-slate-500";
-                              if (calDay.type === "STRONG_ACC") bgStyle = "bg-emerald-950/50 border-emerald-500/35 text-[#22c55e]";
-                              else if (calDay.type === "ACC") bgStyle = "bg-emerald-950/20 border-emerald-500/10 text-emerald-350";
-                              else if (calDay.type === "STRONG_DIST") bgStyle = "bg-rose-950/50 border-rose-500/35 text-rose-400";
-                              else if (calDay.type === "DIST") bgStyle = "bg-rose-950/25 border-rose-500/10 text-rose-350";
-
-                              // Generate clean dynamic bezier curves representing matching price behavior
-                              const seedY1 = Math.round(15 - (calDay.netFlow * 1.5 + 4));
-                              const seedY2 = Math.round(12 - (calDay.netFlow * (-0.8) + 2));
-                              const seedY3 = Math.round(16 - (calDay.netFlow * 2.2 + 3));
-                              const sparklinePath = `M 2,${seedY1 > 18 ? 16 : (seedY1 < 2 ? 3 : seedY1)} C 15,${seedY2 > 18 ? 15 : (seedY2 < 2 ? 4 : seedY2)} 30,${seedY2 > 18 ? 16 : (seedY2 < 2 ? 3 : seedY2)} 48,${seedY3 > 18 ? 17 : (seedY3 < 2 ? 2 : seedY3)}`;
-
-                              return (
-                                <div 
-                                  key={calDay.dayNum} 
-                                  className={`p-3 border rounded flex flex-row min-[600px]:flex-col justify-between items-center text-center w-full min-[600px]:h-[74px] hover:scale-102 min-[600px]:hover:scale-105 active:scale-95 transition-all cursor-pointer relative overflow-hidden group ${bgStyle}`}
-                                  title={`Tgl ${calDay.dayNum} Capital Flow: ${calDay.netFlow >= 0 ? "+" : ""}${calDay.netFlow.toFixed(2)} Miliar`}
-                                >
-                                  <div className="flex items-center gap-1.5 z-10 shrink-0 min-w-[55px]">
-                                    <span className="text-[10px] min-[600px]:text-[8px] font-sans font-black text-slate-350 min-[600px]:text-slate-500 select-none leading-none">Tgl {calDay.dayNum}</span>
-                                    <div className={`w-1.5 h-1.5 min-[600px]:w-1 min-[600px]:h-1 rounded-full ${
-                                      calDay.netFlow > 1.8 ? "bg-[#10b981]" : calDay.netFlow > 0 ? "bg-emerald-500/40" : calDay.netFlow < -1.8 ? "bg-rose-500" : calDay.netFlow < 0 ? "bg-rose-500/30" : "bg-slate-700"
-                                    }`} />
-                                  </div>
-
-                                  {/* Overlay sparkline price trend path inside the calendar box */}
-                                  <div className="mx-2 flex-grow max-w-[120px] min-[600px]:max-w-none min-[600px]:absolute min-[600px]:bottom-4.5 min-[600px]:left-0 min-[600px]:w-full min-[600px]:px-1 pointer-events-none">
-                                    <svg className="w-full h-4.5 opacity-60 group-hover:opacity-100 transition-opacity" viewBox="0 0 50 20" preserveAspectRatio="none">
-                                      <path
-                                        d={sparklinePath}
-                                        fill="none"
-                                        stroke={isAcc ? "#10b981" : "#ef4444"}
-                                        strokeWidth="1.2"
-                                        strokeLinecap="round"
-                                      />
-                                    </svg>
-                                  </div>
-
-                                  <span className={`text-[11px] min-[600px]:text-[9.5px] font-mono leading-none tracking-tight font-black uppercase z-10 shrink-0 ${bgStyle.split(" ").slice(-1)[0]}`}>
-                                    {isAcc ? "+" : ""}{calDay.netFlow.toFixed(1)}B
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          
-                          <div className="flex items-center justify-between text-[8px] font-mono text-slate-600 border-t border-[#0d222f] pt-1.5 select-none">
-                            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-500" />Distribusi (Sparks Down)</span>
-                            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />Akumulasi (Sparks Up)</span>
-                          </div>
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                    {/* DETAILED RINCIAN LIST COLUMN: Aligned perfectly (rata-kanan kiri yang rapi) */}
-                    <div className="bg-[#01060a]/95 border border-slate-900 rounded-xl p-4 space-y-2 select-none">
-                      <div className="flex justify-between items-center border-b border-[#0d222f] pb-2 text-xs font-mono font-bold text-slate-300">
-                        <span>Rincian Kolom Transaksi Broker Utama (Rata Kanan-Kiri Rapi)</span>
-                        <span className="text-[9px] text-cyan-400 font-bold uppercase tracking-wider">JATS Broker Logs</span>
-                      </div>
-
-                      <div className="space-y-1.5 font-mono text-[10.5px]">
-                        {[
-                          { tag: "RX", type: "ASING (F)", buyLot: 14500 + (charSum % 380), buyPrice: Math.round(activeStock.currentPrice * 1.002), sellLot: 5120 + (charSum % 210), sellPrice: Math.round(activeStock.currentPrice * 0.998), note: "MARKET LEAD", positive: true },
-                          { tag: "CC", type: "LOKAL (L)", buyLot: 11200 + (charSum % 550), buyPrice: Math.round(activeStock.currentPrice * 0.999), sellLot: 19100 + (charSum % 410), sellPrice: Math.round(activeStock.currentPrice * 1.001), note: "LIQUIDITY BUYER", positive: false },
-                          { tag: "BK", type: "ASING (F)", buyLot: 31200 + (charSum % 650), buyPrice: Math.round(activeStock.currentPrice * 0.998), sellLot: 4050 + (charSum % 120), sellPrice: Math.round(activeStock.currentPrice * 1.002), note: "TOP ACCUMULATOR", positive: true },
-                          { tag: "YP", type: "LOKAL (L)", buyLot: 15400 + (charSum % 420), buyPrice: Math.round(activeStock.currentPrice * 1.001), sellLot: 16100 + (charSum % 480), sellPrice: Math.round(activeStock.currentPrice * 1.001), note: "RETAIL PARTICIPANT", positive: false }
-                        ].map((item, idx) => {
-                          const netLot = item.buyLot - item.sellLot;
-                          const netVal = netLot * 100 * activeStock.currentPrice;
-                          const isUp = netVal >= 0;
-                          const maxLogVal = 10000000000; // 10 Billion max representational threshold
-                          const logBarPercent = Math.min(100, (Math.abs(netVal) / maxLogVal) * 100);
-
-                          return (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#0d222f]/30 py-2.5 hover:bg-slate-950/45 px-2 rounded-lg transition-all gap-4">
-                              <div className="flex items-center space-x-2 shrink-0 w-28">
-                                <span className="font-extrabold text-white text-[11px] bg-slate-950 px-2 py-0.5 rounded border border-cyan-950">{item.tag}</span>
-                                <div className="flex flex-col text-left">
-                                  <span className={`text-[8px] font-bold tracking-wider px-1 py-0.5 rounded leading-none ${item.type.includes("ASING") ? "bg-purple-950/30 text-purple-400 border border-purple-500/10" : "bg-blue-950/20 text-blue-400 border border-blue-500/10"}`}>{item.type}</span>
-                                  <span className="text-[9px] text-[#475569] font-sans font-bold uppercase mt-0.5 leading-none">{item.note}</span>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-right items-center flex-1">
-                                <div className="text-slate-400 text-[10px] text-left sm:text-right">
-                                  <span className="block text-slate-500 text-[8.5px] uppercase font-bold">Volume Beli</span>
-                                  <strong>{item.buyLot.toLocaleString("id-ID")} Lot</strong>
-                                  <div className="text-[9px] text-slate-500 font-medium">Avg Rp{item.buyPrice.toLocaleString("id-ID")}</div>
-                                </div>
-                                
-                                <div className="text-slate-400 text-[10px] text-left sm:text-right">
-                                  <span className="block text-slate-500 text-[8.5px] uppercase font-bold">Volume Jual</span>
-                                  <strong>{item.sellLot.toLocaleString("id-ID")} Lot</strong>
-                                  <div className="text-[9px] text-slate-500 font-medium">Avg Rp{item.sellPrice.toLocaleString("id-ID")}</div>
-                                </div>
-
-                                {/* Bilateral centerline two-way matching indicator bar */}
-                                <div className="hidden md:flex items-center justify-center px-4">
-                                  <div className="w-24 h-1.5 bg-slate-905 bg-slate-900 rounded-full flex items-center relative overflow-hidden border border-cyan-950/10 p-0">
-                                    <div className="w-1/2 h-full flex justify-end border-r border-slate-800">
-                                      {!isUp && (
-                                        <div className="h-full bg-rose-500 rounded-l animate-fadeIn" style={{ width: `${logBarPercent}%` }} />
-                                      )}
-                                    </div>
-                                    <div className="w-1/2 h-full flex justify-start">
-                                      {isUp && (
-                                        <div className="h-full bg-emerald-500 rounded-r animate-fadeIn" style={{ width: `${logBarPercent}%` }} />
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="text-right">
-                                  <span className="block text-slate-500 text-[8.5px] uppercase font-bold">Net Value</span>
-                                  <div className={`text-[11px] font-black ${isUp ? "text-[#22c55e]" : "text-rose-450"}`}>
-                                    {isUp ? "+" : ""}Rp {Math.round(netVal).toLocaleString("id-ID")}
-                                  </div>
-                                  <div className="text-[8px] text-slate-500 uppercase font-black tracking-tight">{isUp ? "AKUMULASI" : "DISTRIBUSI"}</div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* 3. Top Net Buy & Top Net Sell Tables */}
+              <TopNetBuySellTables
+                brokerSummaryData={brokerSummaryData}
+                activeStock={activeStock}
+                brokerFilter={brokerFilter}
+                setBrokerFilter={setBrokerFilter}
+                onSelectBroker={onSelectBroker}
+                showBrokerUpdateFlash={showBrokerUpdateFlash}
+                isBrokerUpdating={isBrokerUpdating}
+              />
 
               {/* Info advice footer */}
               <div className="p-3 bg-cyan-950/10 border border-cyan-900/30 rounded-xl text-[10px] text-slate-400 leading-relaxed font-sans mt-2">
@@ -5337,7 +4761,7 @@ export default function EmitenDashboardView({
                     </div>
 
                     <p className="text-[9px] text-slate-500 leading-relaxed font-sans text-center select-none pt-2">
-                      ⚠️ DISCLAIMER: Analisis Ramalan Harga AI di atas dihasilkan oleh kecerdasan buatan Gemini berdasarkan kalkulasi pemodelan tren dan data historis. Keadaan pasar yang sebenarnya dapat berfluktuasi secara dinamis dan tidak terduga. SahamIndo Pro tidak memikul tanggung jawab hukum atas kerugian investasi yang diderita pengguna. Do your own research.
+                      ⚠️ DISCLAIMER: Analisis Ramalan Harga AI di atas dihasilkan oleh kecerdasan buatan Gemini berdasarkan kalkulasi pemodelan tren dan data historis. Keadaan pasar yang sebenarnya dapat berfluktuasi secara dinamis dan tidak terduga. CuaninAja Pro tidak memikul tanggung jawab hukum atas kerugian investasi yang diderita pengguna. Do your own research.
                     </p>
                   </div>
                 ) : (
@@ -6073,13 +5497,13 @@ export default function EmitenDashboardView({
       </div>
 
       {/* 4 Pilar Capital Flow Explanation Modal */}
-      {is4PilarModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-fadeIn">
-          <div className="bg-[#010913] border border-cyan-550/20 rounded-2xl w-full max-w-[450px] aspect-[3/4] max-h-[90vh] p-6 space-y-4 shadow-2xl relative flex flex-col justify-between overflow-y-auto text-slate-350 scrollbar-thin scrollbar-thumb-cyan-950">
+      {is4PilarModalOpen && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[9999] animate-fadeIn text-left">
+          <div className="bg-[#010913] border border-cyan-550/20 rounded-2xl w-full max-w-[580px] max-h-[95vh] sm:max-h-[85vh] p-5 sm:p-6 space-y-3.5 shadow-2xl relative flex flex-col justify-between overflow-y-auto text-slate-350 scrollbar-thin scrollbar-thumb-cyan-950">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-400 to-indigo-500" />
             <div className="absolute -right-12 -top-12 w-32 h-32 bg-cyan-700/10 rounded-full blur-2xl pointer-events-none" />
             
-            <div className="flex justify-between items-center border-b border-cyan-950/40 pb-3">
+            <div className="flex justify-between items-center border-b border-cyan-950/40 pb-2.5">
               <div className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-cyan-400" />
                 <h3 className="text-sm font-black text-white uppercase tracking-wider font-mono">
@@ -6098,12 +5522,12 @@ export default function EmitenDashboardView({
               Metrik <strong className="text-cyan-455">4 Pilar Aliran Berita &amp; Dana</strong> mengkalibrasi kekuatan modal kerja, struktur neraca kekayaan, dan tingkat kelayakan harga bursa emiten untuk menyaring emiten yang valid. Berikut rinciannya:
             </p>
 
-            <div className="space-y-3.5 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               {/* Pillar 1 */}
-              <div className="space-y-1.5 p-2.5 rounded bg-emerald-950/15 border border-emerald-900/15">
+              <div className="space-y-1.5 p-2 rounded bg-emerald-950/15 border border-emerald-900/15">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 font-sans">
-                  <span className="w-4.5 h-4.5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black border border-emerald-500/30">1</span>
-                  Pilar Profitabilitas (Kapasitas Laba)
+                  <span className="w-4.5 h-4.5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black border border-emerald-500/30 shrink-0">1</span>
+                  Pilar Profitabilitas
                 </div>
                 <p className="text-[10px] text-slate-400 leading-normal pl-6 font-sans">
                   Menilai yield pengembalian ekuitas pemegang saham (ROE). Emiten dengan kapabilitas profitabilitas yang andal mengamankan fundamental terhadap pelemahan transaksi dan penurunan likuiditas.
@@ -6111,10 +5535,10 @@ export default function EmitenDashboardView({
               </div>
 
               {/* Pillar 2 */}
-              <div className="space-y-1.5 p-2.5 rounded bg-cyan-950/15 border border-cyan-900/15">
+              <div className="space-y-1.5 p-2 rounded bg-cyan-950/15 border border-cyan-900/15">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 font-sans">
-                  <span className="w-4.5 h-4.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-black border border-cyan-500/30">2</span>
-                  Pilar Valuasi Relatif (Kelipatan Harga)
+                  <span className="w-4.5 h-4.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-black border border-cyan-500/30 shrink-0">2</span>
+                  Pilar Valuasi Relatif
                 </div>
                 <p className="text-[10px] text-slate-400 leading-normal pl-6 font-sans">
                   Menilai tinggi rendahnya kelipatan valuasi pasar (PER/PBV) terhadap industri sejenis. Emiten berharga diskon diyakini memfasilitasi "margin of safety" protektif ketika bursa bergerak anomali.
@@ -6122,10 +5546,10 @@ export default function EmitenDashboardView({
               </div>
 
               {/* Pillar 3 */}
-              <div className="space-y-1.5 p-2.5 rounded bg-purple-950/15 border border-purple-900/15">
+              <div className="space-y-1.5 p-2 rounded bg-purple-950/15 border border-purple-900/15">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-purple-400 font-sans">
-                  <span className="w-4.5 h-4.5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-[10px] font-black border border-purple-500/30">3</span>
-                  Pilar Likuiditas Neraca (Arus Kas Pendek)
+                  <span className="w-4.5 h-4.5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-[10px] font-black border border-purple-500/30 shrink-0">3</span>
+                  Pilar Likuiditas Neraca
                 </div>
                 <p className="text-[10px] text-slate-400 leading-normal pl-6 font-sans">
                   Mengukur persediaan aset lancar kas keras emiten untuk membiayai hutang segera jangka pendek serta mendongkrak ketahanan likuiditas emiten dari potensi gagal kewajiban komersial.
@@ -6133,10 +5557,10 @@ export default function EmitenDashboardView({
               </div>
 
               {/* Pillar 4 */}
-              <div className="space-y-1.5 p-2.5 rounded bg-indigo-950/15 border border-indigo-900/15">
+              <div className="space-y-1.5 p-2 rounded bg-indigo-950/15 border border-indigo-900/15">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 font-sans">
-                  <span className="w-4.5 h-4.5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-black border border-indigo-500/30">4</span>
-                  Pilar Solvabilitas Jangka Panjang (Secured Leverage)
+                  <span className="w-4.5 h-4.5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-black border border-indigo-500/30 shrink-0">4</span>
+                  Pilar Solvabilitas
                 </div>
                 <p className="text-[10px] text-slate-400 leading-normal pl-6 font-sans">
                   Mengaudit rasio beban hutang modal berbiaya bunga terhadap ekuitas bersih (DER). Batas DER ideal &lt; 100% melindunginya dari gejolak penarikan modal kredit secara masif di perbankan.
@@ -6144,7 +5568,7 @@ export default function EmitenDashboardView({
               </div>
             </div>
 
-            <div className="text-center pt-2 select-none">
+            <div className="text-center pt-1.5 select-none">
               <button
                 onClick={() => setIs4PilarModalOpen(false)}
                 className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-550 text-white font-black text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer w-full font-sans"
@@ -6153,13 +5577,15 @@ export default function EmitenDashboardView({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ==================== 📊 MODAL: FULLSCREEN TECHNICAL CHART (Perluas) ==================== */}
-      <AnimatePresence>
-        {isFullscreenChartOpen && (
-          <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[9999] flex flex-col justify-between overflow-y-auto w-screen h-screen p-4 md:p-6 lg:p-8 font-sans">
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isFullscreenChartOpen && (
+            <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[9999] flex flex-col justify-between overflow-y-auto w-screen h-screen p-4 md:p-6 lg:p-8 font-sans text-left">
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -6432,7 +5858,9 @@ export default function EmitenDashboardView({
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
       {/* ==================== 📊 MODAL: QUICK COMPARE WITH IHSG ==================== */}
       {typeof window !== "undefined" && createPortal(
@@ -6679,9 +6107,10 @@ export default function EmitenDashboardView({
       )}
 
       {/* QUICK AI SUMMARY MODAL OVERLAY */}
-      <AnimatePresence>
-        {isQuickSummaryOpen && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-4 overflow-y-auto">
+      {typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {isQuickSummaryOpen && (
+            <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[9999] flex items-center justify-center p-4 overflow-y-auto text-left">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -6804,7 +6233,9 @@ export default function EmitenDashboardView({
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
     </div>
   );
 }

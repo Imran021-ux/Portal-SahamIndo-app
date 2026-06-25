@@ -113,7 +113,7 @@ export default function ProfileView({
                 <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <span className="text-[9px] text-slate-500 block uppercase font-bold leading-none">Email Terdaftar</span>
-                  <span className="text-slate-205 text-white text-[11px] truncate block">{session.email || "analyst@sahamindo.com"}</span>
+                  <span className="text-slate-205 text-white text-[11px] truncate block">{session.email || "analyst@cuaninaja.id"}</span>
                 </div>
               </div>
 
@@ -150,7 +150,7 @@ export default function ProfileView({
             <div className="bg-[#03131f] border border-cyan-500/20 p-3.5 rounded-xl space-y-2">
               <span className="text-[9px] font-black text-cyan-400 uppercase tracking-widest font-mono block">Status Domain Singgah</span>
               <p className="text-[10px] text-slate-455 text-slate-400 leading-normal font-sans">
-                Aplikasi ini terhubung aktif ke pemetaan domain kustom beralamat <strong className="text-white font-mono">SahamIndo.com</strong> aman terenkripsi (HTTPS).
+                Aplikasi ini terhubung aktif ke pemetaan domain kustom beralamat <strong className="text-white font-mono">CuaninAja.id</strong> aman terenkripsi (HTTPS).
               </p>
             </div>
           </div>

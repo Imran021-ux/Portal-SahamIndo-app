@@ -21,6 +21,10 @@ html, body {
   color: #f1f5f9;
 }
 
+html, body, button, a, [role="button"], input, select, textarea, .cursor-pointer {
+  touch-action: manipulation;
+}
+
 /* Reset Tap Highlight & Focus Outline globally for all charts and touch areas */
 * {
   -webkit-tap-highlight-color: transparent !important;

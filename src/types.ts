@@ -72,5 +72,6 @@ export interface PriceAlert {
   createdAt: string;
   triggeredAt?: string;
   dismissed?: boolean;
+  type?: "BUY" | "SELL" | "ALERT";
 }
 

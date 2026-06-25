@@ -1,6 +1,6 @@
 /**
  * src/lib/api.ts
- * High-performance, real-time stock price API for SahamIndo.com
+ * High-performance, real-time stock price API for CuaninAja.id
  * Powered by yahoo-finance2 with server-side proxy fallback & memory caching
  */
 

@@ -4,7 +4,7 @@
  */
 
 /**
- * Sentiment Analysis Engine for SahamIndo.com
+ * Sentiment Analysis Engine for CuaninAja.id
  * Computes a standardized sentiment score from 1 (Extreme Bearish) to 10 (Extreme Bullish)
  * based on Broker Transaction Flow (netValue & accumulation status) and Technical Price Volume forces.
  */

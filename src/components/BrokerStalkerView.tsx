@@ -38,12 +38,64 @@ export default function BrokerStalkerView({
 
   const selectedBrokerCode = propSelectedBrokerCode ?? internalSelectedBrokerCode;
   const setSelectedBrokerCode = propSetSelectedBrokerCode ?? setInternalSelectedBrokerCode;
+
+  // Validation layer for entered broker codes against the master list of valid IDX broker codes
+  const { validationError, suggestedCode } = useMemo(() => {
+    const q = dailyBrokerQuery.trim().toUpperCase();
+    if (!q) return { validationError: null, suggestedCode: null };
+
+    const validCodes = INDONESIAN_BROKERS.map(b => b.code.toUpperCase());
+
+    // If typing exactly 2 characters (broker code length)
+    if (q.length === 2) {
+      if (validCodes.includes(q)) {
+        return { validationError: null, suggestedCode: null };
+      }
+
+      // Check if it is a reversed version of a valid broker code
+      const reversed = q.split("").reverse().join("");
+      if (validCodes.includes(reversed)) {
+        return {
+          validationError: `Kode broker "${q}" tidak terdaftar di BEI.`,
+          suggestedCode: reversed
+        };
+      }
+
+      // Completely invalid
+      return {
+        validationError: `Kode broker "${q}" tidak terdaftar dalam daftar bursa resmi BEI/OJK.`,
+        suggestedCode: null
+      };
+    }
+
+    // If query is longer than 2, check if any broker name or code matches
+    if (q.length > 2) {
+      const hasAnyMatch = INDONESIAN_BROKERS.some(
+        b => b.code.toUpperCase().includes(q) || b.name.toUpperCase().includes(q)
+      );
+      if (!hasAnyMatch) {
+        return {
+          validationError: `Tidak ada broker terdaftar yang cocok dengan "${dailyBrokerQuery}".`,
+          suggestedCode: null
+        };
+      }
+    }
+
+    return { validationError: null, suggestedCode: null };
+  }, [dailyBrokerQuery]);
   
   // Custom stock state within selected broker details
   const [stockSearchQuery, setStockSearchQuery] = useState("");
   const [hoveredCumIdx, setHoveredCumIdx] = useState<number | null>(null);
   const [popupBroker, setPopupBroker] = useState<any | null>(null);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<any | null>(null);
+  const [expandedTickers, setExpandedTickers] = useState<Record<string, boolean>>({});
+  const toggleTickerExpand = (ticker: string) => {
+    setExpandedTickers(prev => ({
+      ...prev,
+      [ticker]: !prev[ticker]
+    }));
+  };
   const [filterStartDate, setFilterStartDate] = useState("2026-06-01");
   const [filterEndDate, setFilterEndDate] = useState("2026-06-30");
 
@@ -162,9 +214,9 @@ export default function BrokerStalkerView({
     const q = dailyBrokerQuery.trim().toUpperCase();
     let currentPool = [...brokersData];
     
-    // If user typed a custom 2-letter uppercase word representing a broker code that is not yet in the pool
-    if (q.length === 2 && !currentPool.some(b => b.code.toUpperCase() === q)) {
-      // Dynamic fallback broker generation to ensure all brokers exist in graphic searches
+    // Only add custom 2-letter fallback if it is a valid IDX code (not yet loaded in brokersData)
+    const validCodes = INDONESIAN_BROKERS.map(b => b.code.toUpperCase());
+    if (q.length === 2 && validCodes.includes(q) && !currentPool.some(b => b.code.toUpperCase() === q)) {
       currentPool.push({
         code: q,
         name: `Broker ${q} (Penjamin Efek Bursa Resmi)`,
@@ -179,6 +231,12 @@ export default function BrokerStalkerView({
     
     if (!dailyBrokerQuery.trim()) return currentPool;
     const searchLower = dailyBrokerQuery.toLowerCase();
+
+    // If there is a validation error for a 2-letter non-existent/reversed code, return empty array so select cannot choose it
+    if (q.length === 2 && !validCodes.includes(q)) {
+      return [];
+    }
+
     return currentPool.filter(b => 
       b.code.toLowerCase().includes(searchLower) || 
       b.name.toLowerCase().includes(searchLower) || 
@@ -558,13 +616,25 @@ export default function BrokerStalkerView({
                     className="flex items-center justify-between py-2 border-b border-white/[0.02] last:border-0 hover:bg-[#032014]/30 px-2 rounded-lg transition duration-150 cursor-pointer group"
                   >
                     <div className="flex flex-col gap-0.5 flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors">
+                       <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <span className="text-xs font-black text-white font-mono uppercase tracking-wide group-hover:text-emerald-300 transition-colors shrink-0">
                           {b.ticker}
                         </span>
-                        <span className="text-[9.5px] text-slate-400 truncate max-w-[120px] font-sans">
+                        <span className={`text-[9.5px] text-slate-400 font-sans ${expandedTickers[b.ticker] ? "" : "truncate max-w-[120px]"}`}>
                           {b.name}
                         </span>
+                        {b.name.length > 8 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleTickerExpand(b.ticker);
+                            }}
+                            className="text-[8px] text-cyan-400 font-black hover:text-white px-1.5 py-0.5 bg-cyan-950/40 rounded border border-cyan-800/30 cursor-pointer flex items-center justify-center shrink-0 scale-90"
+                            title={expandedTickers[b.ticker] ? "Sembunyikan" : "Tampilkan (+)"}
+                          >
+                            {expandedTickers[b.ticker] ? "-" : "+"}
+                          </button>
+                        )}
                       </div>
                       <span className="text-[9.5px] text-emerald-400/80 font-sans truncate block">
                         🔹 {b.momentumType}
@@ -789,8 +859,29 @@ export default function BrokerStalkerView({
                                 {flow.ticker}
                               </button>
                               {/* Display company name below code ticker with strict limits */}
-                              <span className="text-[9.5px] text-slate-300 block font-sans font-medium leading-tight mt-0.5 truncate max-w-[110px]" title={flow.name}>{flow.name}</span>
-                              <span className="text-[8px] text-slate-500 block font-mono mt-0.5 uppercase truncate max-w-[110px]" title={flow.sector}>{flow.sector}</span>
+                              <div className="flex items-center gap-1 mt-0.5 max-w-[150px]">
+                                <span 
+                                  className={`text-[9.5px] text-slate-300 block font-sans font-medium leading-tight ${expandedTickers[flow.ticker] ? "" : "truncate max-w-[110px]"}`} 
+                                  title={flow.name}
+                                >
+                                  {flow.name}
+                                </span>
+                                {flow.name.length > 8 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleTickerExpand(flow.ticker);
+                                    }}
+                                    className="text-[8px] text-cyan-400 font-black hover:text-white px-1 bg-cyan-950/40 rounded border border-cyan-800/30 cursor-pointer flex items-center justify-center shrink-0 scale-90"
+                                    title={expandedTickers[flow.ticker] ? "Sembunyikan" : "Tampilkan (+)"}
+                                  >
+                                    {expandedTickers[flow.ticker] ? "-" : "+"}
+                                  </button>
+                                )}
+                              </div>
+                              <span className={`text-[8px] text-slate-500 block font-mono mt-0.5 uppercase ${expandedTickers[flow.ticker] ? "" : "truncate max-w-[110px]"}`} title={flow.sector}>
+                                {flow.sector}
+                              </span>
                             </td>
                             <td className="px-3 py-2.5 text-center">
                               <span className={`px-2 py-0.5 rounded text-[8.5px] font-black border tracking-wider uppercase ${
@@ -832,8 +923,8 @@ export default function BrokerStalkerView({
           {/* RIGHT COLUMN: Interactive Multi-Line Net Cumulative line-graph */}
           <div className="bg-[#030e18]/40 border border-slate-900 rounded-2xl p-5 md:p-6 flex flex-col justify-between h-full relative group shadow-lg">
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2 border-b border-cyan-950/20 pb-2">
-                <span className="text-[11px] md:text-xs font-black uppercase text-cyan-400 font-mono tracking-widest flex items-center gap-1.5 shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 border-b border-cyan-950/20 pb-2">
+                <span className="text-[11px] md:text-xs font-black uppercase text-cyan-400 font-mono tracking-widest flex items-center gap-1.5 min-w-0">
                   📈 Grafik Trend Flow Broker [{activeBroker.code}]
                 </span>
                 <span className="text-[8px] font-mono text-cyan-400 font-extrabold uppercase shrink-0 bg-cyan-950/20 px-2 py-0.5 rounded border border-cyan-900/10">Rp Miliar (Y-Axis)</span>
@@ -856,10 +947,44 @@ export default function BrokerStalkerView({
                       placeholder="Cari kode (YP, CC, BK)..."
                       value={dailyBrokerQuery}
                       onChange={(e) => setDailyBrokerQuery(e.target.value)}
-                      className="bg-[#020b14] border border-cyan-900/40 hover:border-cyan-800/50 focus:border-cyan-500/80 text-[11px] text-white px-2.5 py-1.5 rounded-lg focus:outline-none w-full font-mono transition-all placeholder:text-slate-600 font-bold"
+                      className={`bg-[#020b14] border hover:border-cyan-800/50 focus:border-cyan-500/80 text-[11px] text-white px-2.5 py-1.5 rounded-lg focus:outline-none w-full font-mono transition-all placeholder:text-slate-600 font-bold ${
+                        validationError ? "border-rose-500/80 focus:border-rose-500/80 text-rose-300" : "border-cyan-900/40"
+                      }`}
                     />
                   </div>
                 </div>
+
+                {/* Validation Error Message Box */}
+                {validationError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10.5px] font-mono text-rose-400 flex flex-col gap-2 animate-fadeIn">
+                    <div className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse mt-1.5 shrink-0" />
+                      <div className="flex-1">
+                        <span className="font-extrabold text-rose-500 mr-1.5">KESALAHAN VALIDASI:</span>
+                        <span>{validationError}</span>
+                      </div>
+                    </div>
+                    {suggestedCode && (
+                      <div className="flex items-center gap-2 pl-3.5 border-t border-rose-500/10 pt-2 mt-1">
+                        <span className="text-slate-400">Apakah maksud Anda:</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDailyBrokerQuery(suggestedCode);
+                            setSelectedBrokerCode(suggestedCode);
+                            setStockSearchQuery("");
+                          }}
+                          className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/35 transition cursor-pointer text-[10px] font-black uppercase flex items-center gap-1.5"
+                        >
+                          <span>{suggestedCode}</span>
+                          <span className="text-[8px] text-emerald-400/80 font-normal">
+                            ({INDONESIAN_BROKERS.find(b => b.code === suggestedCode)?.name || ""})
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2.5 border-t border-cyan-950/20">
                   {/* List Select showing filtered result */}

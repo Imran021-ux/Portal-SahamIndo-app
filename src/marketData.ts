@@ -1,4 +1,4 @@
-// Official manual reference market data for SahamIndo.com
+// Official manual reference market data for CuaninAja.id
 export const marketData = {
   ihsg_close: 6120.05,
   prev_close: 6220.74,
